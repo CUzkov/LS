@@ -3,7 +3,8 @@ version: '3.3'
 services:
   redis:
     build: ./backend/redis
-    network_mode: host
+    ports:
+      - 6379:6379
     
   server:
     build: ./backend/server
