@@ -6,5 +6,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.5.0-rc.1"
+rocket = { version = "0.5.0-rc.1", features = ["secrets", "json"] }
 redis = "0.21.3"
+serde = "1.0.130"
+lazy_static = "1.4.0"
+diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
+r2d2 = "0.8"
+validator = { version = "0.12", features = ["derive"] }
+chrono = "0.4.19"

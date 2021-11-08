@@ -1,30 +1,36 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-extern crate redis;
-use redis::Commands;
+#[macro_use]
+extern crate diesel;
 
-fn get_param() -> Result<String, redis::RedisError> {
-    // connect to redis
-    let client = redis::Client::open("redis://127.0.0.1/")?;
-    let mut con = client.get_connection()?;
-    // throw away the result, just make sure it does not fail
-    let _ : () = con.set("my_key", 42)?;
-    // read back the key and return it.  Because the return value
-    // from the function is a result for integer this will automatically
-    // convert into one.
-    let result: String = con.get("my_key")?;
+mod api;
+mod db;
+mod errors;
+mod models;
+mod redis_utils;
+mod utils;
 
-    Result::Ok(result)
-}
+use crate::api::auth::handlers::{auth_login, auth_logout};
+use crate::api::user::handlers::create_user;
+use crate::models::users::models::User;
+
+use rocket::serde::json::{json, Value};
 
 #[get("/")]
-fn index() -> String {
-    let result: String = get_param().unwrap();
+fn index() -> Value {
+    let users = User::find_all().unwrap();
 
-    result
+    json!(users)
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    db::init();
+
+    rocket::build()
+        .mount("/", routes![index])
+        .mount("/", routes![auth_login])
+        .mount("/", routes![auth_logout])
+        .mount("/", routes![create_user])
 }
