@@ -1,79 +1,105 @@
 use crate::db;
 use crate::errors::error_handler::ServerError;
-use crate::models::schema::users;
-use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Queryable, Insertable)]
-#[table_name = "users"]
-pub struct NewUser {
-    pub username: String,
-    pub email: String,
-    pub u_password: String,
-    pub u_role: String,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub enum Roles {
-    Admin,
-    User,
-}
-
-#[derive(Serialize, Deserialize, Queryable, Insertable)]
-#[table_name = "users"]
+#[derive(Serialize, Deserialize)]
 pub struct User {
     pub id: i32,
     pub username: String,
     pub email: String,
     pub u_password: String,
-    u_role: String,
+    pub is_admin: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UserNoPassword {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub is_admin: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NewUser {
+    pub username: String,
+    pub email: String,
+    pub u_password: String,
+    pub is_admin: bool,
 }
 
 impl User {
     pub fn create(user: &NewUser) -> Result<Self, ServerError> {
-        let conn = db::connection()?;
-        let user = diesel::insert_into(users::table)
-            .values(user)
-            .get_result(&conn)?;
-        Ok(user)
-    }
+        let result = db::connection()?.query(
+            "SELECT * from create_user($1, $2, $3, $4)",
+            &[
+                &user.username,
+                &user.email,
+                &user.u_password,
+                &user.is_admin,
+            ],
+        )?;
 
-    pub fn find_all() -> Result<Vec<Self>, ServerError> {
-        let conn = db::connection()?;
-        let users = users::table.load::<User>(&conn)?;
-        Ok(users)
+        for row in result {
+            return Ok(User {
+                id: row.get(0),
+                username: user.username.clone(),
+                email: user.email.clone(),
+                u_password: user.u_password.clone(),
+                is_admin: user.is_admin,
+            });
+        }
+
+        Err(ServerError {
+            error_message: "".to_string(),
+            error_status_code: 500,
+        })
     }
 
     pub fn get_user_by_email(email: &str) -> Result<Self, ServerError> {
-        let conn = db::connection()?;
-        let user = users::table.filter(users::email.eq(email)).first(&conn)?;
-        Ok(user)
+        let result = db::connection()?.query("SELECT * from get_user_by_email($1)", &[&email])?;
+
+        for row in result {
+            return Ok(User {
+                id: row.get(0),
+                username: row.get(1),
+                email: row.get(2),
+                u_password: row.get(3),
+                is_admin: row.get(4),
+            });
+        }
+
+        Err(ServerError {
+            error_message: "User not found".to_string(),
+            error_status_code: 404,
+        })
     }
 
     pub fn get_user_by_username(username: &str) -> Result<Self, ServerError> {
-        let conn = db::connection()?;
-        let user = users::table
-            .filter(users::username.eq(username))
-            .first(&conn)?;
-        Ok(user)
+        let result =
+            db::connection()?.query("SELECT * from get_user_by_username($1)", &[&username])?;
+
+        for row in result {
+            return Ok(User {
+                id: row.get(0),
+                username: row.get(1),
+                email: row.get(2),
+                u_password: row.get(3),
+                is_admin: row.get(4),
+            });
+        }
+
+        Err(ServerError {
+            error_message: "User not found".to_string(),
+            error_status_code: 404,
+        })
     }
 
-    pub fn set_user_role(&mut self, role: Roles) -> () {
-        match role {
-            Roles::Admin => {
-                self.u_role = "admin".to_string();
-            }
-            Roles::User => {
-                self.u_role = "user".to_string();
-            }
-        };
-    }
-
-    pub fn get_user_role(&self) -> Roles {
-        match self.u_role.as_str() {
-            "admin" => Roles::Admin,
-            "user" => Roles::User,
-            _ => Roles::User,
+    pub fn get_user_without_password(&self) -> UserNoPassword {
+        UserNoPassword {
+            id: self.id.clone(),
+            username: self.username.clone(),
+            email: self.email.clone(),
+            is_admin: self.is_admin.clone(),
         }
     }
 }

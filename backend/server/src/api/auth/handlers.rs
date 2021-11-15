@@ -4,10 +4,11 @@ use chrono::prelude::*;
 use chrono::Duration;
 use rocket::http::{Cookie, CookieJar};
 use rocket::serde::json::serde_json::to_string;
-use rocket::serde::json::Json;
+use rocket::serde::json::{json, Json};
 
-use crate::api::typings::{Credentials, Response, UserInfo};
-use crate::api::utils::{get_response, Responses};
+use crate::api::guardians::UserInfo;
+use crate::api::typings::{Credentials, Response};
+use crate::api::utils::{get_response, get_response_with_data, Responses};
 use crate::errors::error_handler::ServerError;
 use crate::models::users::models::User;
 
@@ -27,12 +28,12 @@ pub fn auth_login(jar: &CookieJar<'_>, credentials: Json<Credentials>) -> Respon
 				return get_response(Responses::IncorrectPassword);
 			}
 
-			let role = user.get_user_role();
-
 			let user_info = UserInfo {
-				username: user.username,
-				expired_at: (Utc::now() + Duration::hours(1)).to_rfc2822().to_string(),
-				role,
+				username: user.username.clone(),
+				expired_at: (Utc::now() + Duration::hours(1)).to_rfc2822(),
+				is_admin: user.is_admin,
+				id: user.id,
+				email: user.email.clone(),
 			};
 
 			let cookie = Cookie::new("session", user.u_password.clone());
@@ -40,7 +41,7 @@ pub fn auth_login(jar: &CookieJar<'_>, credentials: Json<Credentials>) -> Respon
 			set(&user.u_password, &to_string(&user_info).unwrap()).unwrap();
 			jar.add_private(cookie);
 
-			get_response(Responses::Ok)
+			get_response_with_data(Responses::Ok, json!(&user.get_user_without_password()))
 		}
 		Err(e) => {
 			if e.error_status_code == 404 {

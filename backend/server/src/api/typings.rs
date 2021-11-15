@@ -1,8 +1,6 @@
 use rocket::serde::json::Value;
 use rocket::serde::{Deserialize, Serialize};
 
-use crate::models::users::models::Roles;
-
 #[derive(Deserialize)]
 pub struct Credentials {
 	pub username: String,
@@ -11,10 +9,11 @@ pub struct Credentials {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct UserInfo {
+pub struct AuthUserInfo {
 	pub username: String,
-	pub expired_at: String,
-	pub role: Roles,
+	pub user_id: i32,
+	pub is_admin: bool,
+	pub email: String,
 }
 
 #[derive(Responder)]

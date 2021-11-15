@@ -1,27 +1,23 @@
 #[macro_use]
 extern crate rocket;
 
-#[macro_use]
-extern crate diesel;
-
 mod api;
 mod db;
 mod errors;
+mod git_manager;
+mod middleware;
 mod models;
 mod redis_utils;
-mod utils;
 
 use crate::api::auth::handlers::{auth_login, auth_logout};
+use crate::api::map::handlers::create_map;
+use crate::api::repository::handlers::create_repository_for_map;
 use crate::api::user::handlers::create_user;
-use crate::models::users::models::User;
+use crate::api::utils::default_catcher;
 
-use rocket::serde::json::{json, Value};
-
-#[get("/")]
-fn index() -> Value {
-    let users = User::find_all().unwrap();
-
-    json!(users)
+#[options("/<_..>")]
+fn index() -> String {
+    "".to_string()
 }
 
 #[launch]
@@ -29,8 +25,17 @@ fn rocket() -> _ {
     db::init();
 
     rocket::build()
-        .mount("/", routes![index])
-        .mount("/", routes![auth_login])
-        .mount("/", routes![auth_logout])
-        .mount("/", routes![create_user])
+        .attach(middleware::cors::Cors)
+        .mount(
+            "/",
+            routes![
+                auth_login,
+                auth_logout,
+                create_user,
+                create_map,
+                create_repository_for_map,
+                index
+            ],
+        )
+        .register("/", catchers![default_catcher])
 }

@@ -1,15 +1,24 @@
 /** User handlers */
 use rocket::serde::json::{json, Json};
+use serde::{Deserialize, Serialize};
 
 use crate::api::typings::{AuthUserInfo, Response};
 use crate::api::utils::{get_response, get_response_with_data, Responses};
-use crate::models::users::models::{User, NewUser};
+use crate::models::maps::models::{Map, NewMap};
 
-#[post("/user/create", data = "<new_user>")]
-pub fn create_user(new_user: Json<NewUser>, _user: AuthUserInfo) -> Response {
-	let mut new_user = new_user;
+#[derive(Serialize, Deserialize)]
+pub struct ICreateMap {
+	pub title: String,
+}
 
-	match User::create(&mut new_user) {
+#[post("/maps/create", data = "<new_map>")]
+pub fn create_map(new_map: Json<ICreateMap>, user: AuthUserInfo) -> Response {
+	let map = NewMap {
+		title: new_map.title.clone(),
+		user_id: user.user_id,
+	};
+
+	match Map::create(map) {
 		Ok(user) => get_response_with_data(Responses::Created, json!(user)),
 		Err(e) => match e.error_status_code {
 			409 => get_response(Responses::Conflict),

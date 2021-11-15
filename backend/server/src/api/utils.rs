@@ -1,5 +1,7 @@
+use rocket::http::Status;
 use rocket::serde::json::{json, Value};
 use rocket::serde::Serialize;
+use rocket::Request;
 
 use crate::api::typings::{
 	Response, Response200, Response201, Response401, Response403, Response409, Response500,
@@ -85,6 +87,16 @@ pub fn get_response_with_data(response_type: Responses, data: Value) -> Response
 	get_response_general(response_type, data, "".to_string())
 }
 
-// pub fn get_response_error(response_type: Responses, error: String) -> Response {
-// 	get_response_general(response_type, json!(Empty {}), error)
-// }
+#[catch(default)]
+pub fn default_catcher(status: Status, _req: &Request<'_>) -> Value {
+	match status.code {
+		401 => json!(Error {
+			error: UNAUTHORIZED.to_string(),
+			description: "".to_string()
+		}),
+		500 | _ => json!(Error {
+			error: SERVER_ERROR.to_string(),
+			description: "".to_string()
+		}),
+	}
+}

@@ -1,17 +1,21 @@
-use diesel::pg::PgConnection;
-use diesel::r2d2::ConnectionManager;
 use lazy_static::lazy_static;
 use r2d2;
+use r2d2_postgres;
 
 use crate::errors::error_handler::ServerError;
 
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
-pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+type Pool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager<r2d2_postgres::postgres::NoTls>>;
+pub type DbConnection = r2d2::PooledConnection<
+    r2d2_postgres::PostgresConnectionManager<r2d2_postgres::postgres::NoTls>,
+>;
 
 lazy_static! {
     static ref POOL: Pool = {
-        let db_url = "postgres://admin:admin@localhost/ls";
-        let manager = ConnectionManager::<PgConnection>::new(db_url);
+        let db_url = "host=localhost user=ls password=ls";
+        let manager = r2d2_postgres::PostgresConnectionManager::new(
+            db_url.parse().unwrap(),
+            r2d2_postgres::postgres::NoTls,
+        );
         Pool::new(manager).expect("Failed to create db pool")
     };
 }

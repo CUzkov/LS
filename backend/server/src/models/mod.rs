@@ -1,2 +1,3 @@
 pub mod users;
-pub mod schema;
+pub mod maps;
+pub mod repositories;

@@ -1,4 +1,3 @@
-use diesel::result::Error as DieselError;
 use serde::Deserialize;
 use std::fmt;
 
@@ -23,18 +22,6 @@ impl fmt::Display for ServerError {
     }
 }
 
-impl From<DieselError> for ServerError {
-    fn from(error: DieselError) -> ServerError {
-        match error {
-            DieselError::DatabaseError(_, err) => ServerError::new(409, err.message().to_string()),
-            DieselError::NotFound => {
-                ServerError::new(404, "The employee record not found".to_string())
-            }
-            err => ServerError::new(500, format!("Unknown Diesel error: {}", err)),
-        }
-    }
-}
-
 impl From<redis::RedisError> for ServerError {
     fn from(error: redis::RedisError) -> ServerError {
         ServerError::new(500, error.category().to_string())
@@ -44,5 +31,17 @@ impl From<redis::RedisError> for ServerError {
 impl From<rocket::serde::json::serde_json::Error> for ServerError {
     fn from(error: rocket::serde::json::serde_json::Error) -> ServerError {
         ServerError::new(500, error.line().to_string())
+    }
+}
+
+impl From<r2d2_postgres::postgres::Error> for ServerError {
+    fn from(_error: r2d2_postgres::postgres::Error) -> ServerError {
+        ServerError::new(500, "".to_string())
+    }
+}
+
+impl From<git2::Error> for ServerError {
+    fn from(error: git2::Error) -> ServerError {
+        ServerError::new(500, error.message().to_string())
     }
 }

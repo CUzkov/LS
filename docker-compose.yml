@@ -10,8 +10,8 @@ services:
     build: ./backend/database
     network_mode: host
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=ls
+      - POSTGRES_PASSWORD=ls
       - POSTGRES_DB=ls
     
   # server:
