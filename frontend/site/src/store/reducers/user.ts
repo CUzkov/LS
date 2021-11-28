@@ -5,10 +5,13 @@ export interface IUserStoreD {
     username?: string;
     email?: string;
     isAdmin?: boolean;
-    fetchStatus?: FetchStatus;
 }
 
-export type UserEvents = { type: 'FAILED' } | { type: 'SUCCESS'; data: IUserStoreD } | { type: 'LOADING' };
+export type UserEvents =
+    | { type: 'user/failed' }
+    | { type: 'user/success'; data: IUserStoreD }
+    | { type: 'user/loading' }
+    | { type: 'user/none' };
 
 export type UserStore = {
     userId: number;
@@ -23,14 +26,36 @@ const initialState: UserStore = {
     username: '',
     email: '',
     isAdmin: false,
-    fetchStatus: FetchStatus.none,
+    fetchStatus: FetchStatus.loading,
 };
 
 export const userReducer = (state: UserStore = initialState, event: UserEvents): UserStore => {
-    if (event.type === 'FAILED') {
+    if (event.type === 'user/failed') {
         return {
             ...state,
             fetchStatus: FetchStatus.failed,
+        };
+    }
+
+    if (event.type === 'user/loading') {
+        return {
+            ...state,
+            fetchStatus: FetchStatus.loading,
+        };
+    }
+
+    if (event.type === 'user/none') {
+        return {
+            ...initialState,
+            fetchStatus: FetchStatus.none,
+        };
+    }
+
+    if (event.type === 'user/success') {
+        return {
+            ...state,
+            ...event.data,
+            fetchStatus: FetchStatus.successed,
         };
     }
 

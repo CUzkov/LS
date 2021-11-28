@@ -1,5 +1,80 @@
-.wrapper {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+body {
+    margin: 0;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100vh;
+
+    font-family: Verdana, Verdana, Geneva, sans-serif;
+
+    // dark theme
+
+    --primary-color: #3e4345;
+    --second-color: #303134;
+
+    // inputs
+    --input-background: #3e4345;
+    --input-border: #5e6366;
+    --input-icon: #77909b;
+
+    // buttons
+    --button-background: #0e6203;
+    --button-border: #0e6203;
+    --button-hover-disable: #107603;
+
+    // main
+    --page-color: var(--primary-color);
+    --menu-hover-color: #313537;
+    --menu-item-hover-color: #474b4e;
+    --breadcrumbs-hover-color: #313537;
+    --cards-color: #313537;
+
+    --default-text-color: #f1f3f4;
+    --default-text-error-color: #ee6868;
+    --default-text-succes-color: #83a300;
+    --default-icon-color: #77909b;
+    --default-border-color: #4e5254;
+    --default-dark-border: #242728;
+
+    // --border-color: rgba(140, 212, 124, 0.2);
+    --border-color: #4b4c51;
+}
+
+// inputs
+$input-background: var(--input-background);
+$input-border: var(--input-border);
+$input-icon: var(--input-icon);
+
+// buttons
+$button-background: var(--button-background);
+$button-border: var(--button-border);
+$button-hover-disable: var(--button-hover-disable);
+
+// main
+$page-color: var(--page-color);
+$menu-hover-color: var(--menu-hover-color);
+$menu-item-hover-color: var(--menu-item-hover-color);
+$breadcrumbs-hover-color: var(--breadcrumbs-hover-color);
+$cards-color: var(--cards-color);
+
+$default-text-color: var(--default-text-color);
+$default-text-error-color: var(--default-text-error-color);
+$default-text-succes-color: var(--default-text-succes-color);
+$default-icon-color: var(--default-icon-color);
+$default-border-color: var(--default-border-color);
+$default-dark-border: var(--default-dark-border);
+
+$border-color: var(--border-color);
+
+.page-wrapper {
+    background-color: $page-color;
+    color: $default-text-color;
+}
+
+a {
+    text-decoration: none;
+    color: $default-text-color;
 }

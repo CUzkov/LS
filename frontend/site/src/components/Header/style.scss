@@ -1,0 +1,25 @@
+@import '../../style.scss';
+
+.Header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    align-items: center;
+    border-bottom: 1px #060607 solid;
+
+    background-color: #303134;
+
+	@media (min-width: 768px) {
+		padding: 16px 24px;
+	}
+
+	@media (min-width: 1025px) {
+		padding: 16px 24px;
+	}
+
+    &-Left {
+        font-weight: 600;
+        font-size: 32px;
+    }
+}

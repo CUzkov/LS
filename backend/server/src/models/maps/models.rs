@@ -18,7 +18,7 @@ pub struct NewMap {
 impl Map {
     pub fn create(map: NewMap) -> Result<Self, ServerError> {
         let result = db::connection()?.query(
-            "SELECT create_repository($1, $2)",
+            "SELECT * from create_map($1, $2)",
             &[&map.user_id, &map.title],
         )?;
 
@@ -34,5 +34,26 @@ impl Map {
             error_message: "".to_string(),
             error_status_code: 500,
         })
+    }
+
+    pub fn get_by_user_id(id: i32) -> Result<Vec<Self>, ServerError> {
+        println!("awdawdawd");
+        let result = db::connection()?.query("SELECT * from get_by_user_id($1)", &[&id])?;
+
+        println!("awdawdawd");
+
+        let mut maps: Vec<Self> = vec![];
+
+        for row in result {
+            maps.push(Map {
+                id: row.get(0),
+                user_id: row.get(1),
+                title: row.get(2),
+            });
+        }
+
+        println!("awdawdawd");
+
+        Ok(maps)
     }
 }

@@ -4,7 +4,8 @@ use rocket::serde::Serialize;
 use rocket::Request;
 
 use crate::api::typings::{
-	Response, Response200, Response201, Response401, Response403, Response409, Response500,
+	Response, Response200, Response201, Response400, Response401, Response403, Response409,
+	Response500,
 };
 
 const SERVER_ERROR: &str = "Ошибка сервера";
@@ -13,6 +14,7 @@ const FORBIDDEN: &str = "Не достаточно полномочий";
 const INCORRECT_PASSWORD: &str = "Неверный пароль";
 const NO_SUCH_USER: &str = "Такого пользователя не существует";
 const CONFLICT: &str = "Невозможно создать";
+const BAD_REQUEST: &str = "Неправильный запрос";
 
 pub enum Responses {
 	Ok,
@@ -23,6 +25,7 @@ pub enum Responses {
 	ServerError,
 	Created,
 	Conflict,
+	BadRequest,
 }
 
 #[derive(Serialize)]
@@ -67,6 +70,12 @@ fn get_response_general(response_type: Responses, data: Value, error: String) ->
 		Responses::Conflict => Response::Response409(Response409 {
 			inner: json!(Error {
 				error: CONFLICT.to_string(),
+				description: error
+			}),
+		}),
+		Responses::BadRequest => Response::Response400(Response400 {
+			inner: json!(Error {
+				error: BAD_REQUEST.to_string(),
 				description: error
 			}),
 		}),

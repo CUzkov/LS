@@ -29,6 +29,12 @@ pub struct Response201 {
 }
 
 #[derive(Responder)]
+#[response(status = 400, content_type = "json")]
+pub struct Response400 {
+	pub inner: Value,
+}
+
+#[derive(Responder)]
 #[response(status = 401, content_type = "json")]
 pub struct Response401 {
 	pub inner: Value,
@@ -56,6 +62,7 @@ pub struct Response500 {
 pub enum Response {
 	Response200(Response200),
 	Response201(Response201),
+	Response400(Response400),
 	Response401(Response401),
 	Response403(Response403),
 	Response409(Response409),

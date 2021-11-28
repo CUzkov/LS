@@ -21,9 +21,18 @@ export const ajax = async <T, D>({ type, url, contentType, data }: AjaxProps<D>)
         headers['Content-Type'] = 'application/json;charset=utf-8';
     }
 
+    if (type === AjaxType.get) {
+        return fetch(url, {
+            headers,
+            method: 'GET',
+            credentials: 'include',
+        }).then((result) => result.json());
+    }
+
     return fetch(url, {
         headers,
-        method: type === AjaxType.get ? 'GET' : 'POST',
-        body: type === AjaxType.post ? JSON.stringify(data) : '',
+        method: 'POST',
+        body: JSON.stringify(data),
+        credentials: 'include',
     }).then((result) => result.json());
 };

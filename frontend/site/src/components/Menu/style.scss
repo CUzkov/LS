@@ -1,0 +1,12 @@
+@import '../../style.scss';
+
+$root: '.Menu';
+
+#{$root} {
+    #{$root}-Divider {
+        height: 1px;
+        margin: 5px 10px;
+        box-sizing: border-box;
+        background-color: $default-dark-border;
+    }
+}

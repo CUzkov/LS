@@ -1,0 +1,10 @@
+@import '../../style.scss';
+
+$root: '.LoginPage';
+
+#{$root} {
+	min-height: calc(100vh - 72px);
+	display: flex;
+	align-items: center;
+	padding: 0 0 0 10%;
+}

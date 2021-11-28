@@ -91,7 +91,7 @@ create table map_to_repository_links (
 );
 
 insert into users (username, email, u_password, is_admin)
-values ('cuzkov', 'users@gmail.com', 'awdawd', true);
+values ('cuzkov', 'users@gmail.com', 'Gurkina12', true);
 
 -----------------------------------------------------------------------
 -- Создание нового пользователя
@@ -218,6 +218,23 @@ $BODY$
 				repositories.map_id
 			from repositories
 			where title=title_v limit 1;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение пользователя по username
+-----------------------------------------------------------------------
+create function get_by_user_id(
+	user_id_v integer
+) returns table(id integer, user_id integer, title text) as
+$BODY$
+	declare
+	--------------------
+	begin
+		return query 
+			select maps.id, maps.user_id, maps.title from maps
+			where maps.user_id=user_id_v;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

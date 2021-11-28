@@ -1,0 +1,24 @@
+@import '../../style.scss';
+
+$root: '.PageWrapper';
+
+#{$root} {
+    display: flex;
+	flex-direction: column;
+    width: 100%;
+    min-height: calc(100% - 69px);
+    max-height: min-content;
+
+	#{$root}-Page {
+		display: flex;
+	}
+
+	#{$root}-Menu {
+		width: 325px;
+	}
+
+	#{$root}-Content {
+		width: calc(100vw - 325px);
+		box-sizing: border-box;
+	}
+}

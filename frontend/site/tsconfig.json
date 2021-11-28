@@ -13,7 +13,34 @@
 		"downlevelIteration": true,
 		"strictNullChecks": true,
 		"paths": {
-			"*": ["./src/*"]
+			"*": ["./src/*"],
+			"components/*": [
+				"components/*"
+			],
+			"small-components/*": [
+				"small-components/*"
+			],
+			"ajax/*": [
+				"ajax/*"
+			],
+			"actions/*": [
+				"actions/*"
+			],
+			"pages/*": [
+				"pages/*"
+			],
+			"constants/*": [
+				"constants/*"
+			],
+			"store/*": [
+				"store/*"
+			],
+			"utils/*": [
+				"utils/*"
+			],
+			"types/*": [
+				"types/*"
+			]
 		},
 		"lib": [
 			"esnext",
@@ -26,6 +53,7 @@
 	"exclude": ["node_modules", "build"],
 	"include": [
 		"./src",
-		"webpack.config.ts"
+		"webpack.config.ts",
+		"custom.d.ts"
 	]
 }

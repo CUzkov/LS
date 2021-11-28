@@ -26,3 +26,17 @@ pub fn create_map(new_map: Json<ICreateMap>, user: AuthUserInfo) -> Response {
 		},
 	}
 }
+
+#[get("/maps/all/my")]
+pub fn get_all_my_maps(user: AuthUserInfo) -> Response {
+	match Map::get_by_user_id(user.user_id) {
+		Ok(maps) => get_response_with_data(Responses::Ok, json!(maps)),
+		Err(e) => match e.error_status_code {
+			404 => get_response(Responses::BadRequest),
+			_ => {
+				println!("{}", e);
+				get_response(Responses::ServerError)
+			}
+		},
+	}
+}

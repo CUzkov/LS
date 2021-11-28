@@ -1,18 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { FC } from 'react';
 
-import { useLoginUser } from '../../actions';
-import { useDispatch } from '../../store';
+import { cnHeader, cnHeaderLeft, cnHeaderRigth } from './Header.constants';
 
-// interface IHeaderProps {}
+// import UserIcon from './Header.assets/user.svg';
+
+import './style.scss';
 
 export const Header: FC = () => {
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        useLoginUser(dispatch, { email: '', password: 'awdawd', username: 'cuzkov' });
-        console.log(123);
-    }, []);
-
-    return <div></div>;
+    return (
+        <div className={cnHeader}>
+            <div className={cnHeaderLeft}>DocsHub</div>
+            <div className={cnHeaderRigth}>{/* <UserIcon /> */}</div>
+        </div>
+    );
 };

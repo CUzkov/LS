@@ -35,8 +35,8 @@ impl From<rocket::serde::json::serde_json::Error> for ServerError {
 }
 
 impl From<r2d2_postgres::postgres::Error> for ServerError {
-    fn from(_error: r2d2_postgres::postgres::Error) -> ServerError {
-        ServerError::new(500, "".to_string())
+    fn from(error: r2d2_postgres::postgres::Error) -> ServerError {
+        ServerError::new(500, error.to_string())
     }
 }
 

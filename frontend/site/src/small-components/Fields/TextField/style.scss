@@ -1,0 +1,61 @@
+@import '../../../style.scss';
+
+.Field {
+    display: flex;
+    flex-direction: column;
+
+    .Field {
+        &-Input {
+            display: flex;
+            align-items: center;
+
+            input {
+                background-color: $input-background;
+                border-bottom: 1px solid $input-border;
+                caret-color: $default-text-color;
+                color: $default-text-color;
+
+                height: 28px;
+                width: 100%;
+                box-sizing: border-box;
+                transition: all 0.2s;
+                font-size: 17px;
+            }
+
+            &_disable {
+                input {
+                    pointer-events: none;
+                }
+            }
+        }
+
+        &-Label {
+            font-size: 17px;
+
+            svg {
+                margin-right: 5px;
+
+                path {
+                    stroke: $input-icon;
+                    fill: $input-icon;
+                }
+            }
+        }
+
+        &-ErrorText {
+            color: $default-text-error-color;
+
+            height: 22px;
+            width: 100%;
+            margin-top: 5px;
+            font-size: 10px;
+        }
+
+        &-PasswordIcon {
+            height: 20px;
+            width: 20px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    }
+}

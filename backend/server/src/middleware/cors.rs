@@ -13,7 +13,7 @@ impl Fairing for Cors {
 		}
 	}
 
-	async fn on_response<'r>(&self, request: &'r Request<'_>, response: &mut Response<'r>) {
+	async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
 		response.set_header(Header::new(
 			"access-control-allow-origin",
 			"http://localhost:3000",
@@ -22,6 +22,8 @@ impl Fairing for Cors {
 			"access-control-allow-methods",
 			"GET, PATCH, OPTIONS",
 		));
+		response.set_header(Header::new("access-control-allow-credentials", "true"));
 		response.set_header(Header::new("access-control-allow-headers", "content-type"));
+		response.set_header(Header::new("access-control-allow-headers", "Content-Type"));
 	}
 }

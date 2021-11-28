@@ -1,0 +1,61 @@
+@import '../../../style.scss';
+
+$root: '.MenuItem';
+
+#{$root} {
+    transition: all 0.3s;
+    border-radius: 0 10px 10px 0;
+    padding: 20px 10px 10px 10px;
+	cursor: pointer;
+
+    #{$root}-List {
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s;
+
+        #{$root}-Link {
+            padding: 10px 55px 10px 45px;
+            cursor: pointer;
+            border-radius: 5px;
+
+            &:hover {
+                transition: all 0.3s;
+                background-color: $menu-item-hover-color;
+            }
+        }
+    }
+
+    #{$root}-Title {
+        cursor: pointer;
+        margin: 0 0 10px 0;
+		display: flex;
+		align-items: center;
+
+		#{$root}-TitleIcon {
+			width: 45px;
+			display: flex;
+			align-items: flex-end;
+			flex-direction: column;
+
+			svg {
+				margin-right: 10px;
+	
+				path {
+					fill: $default-icon-color;
+				}
+			}
+		}
+    }
+
+	&:hover {
+        background-color: $menu-hover-color;
+	}
+
+    &_expand {
+        background-color: $menu-hover-color;
+
+        #{$root}-List {
+            max-height: 300px;
+        }
+    }
+}

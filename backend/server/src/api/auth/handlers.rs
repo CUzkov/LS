@@ -7,7 +7,7 @@ use rocket::serde::json::serde_json::to_string;
 use rocket::serde::json::{json, Json};
 
 use crate::api::guardians::UserInfo;
-use crate::api::typings::{Credentials, Response};
+use crate::api::typings::{AuthUserInfo, Credentials, Response};
 use crate::api::utils::{get_response, get_response_with_data, Responses};
 use crate::errors::error_handler::ServerError;
 use crate::models::users::models::User;
@@ -65,4 +65,9 @@ pub fn auth_logout(jar: &CookieJar<'_>) -> Response {
 	}
 
 	get_response(Responses::Unauthorized)
+}
+
+#[get("/auth/check")]
+pub fn auth_check(_user: AuthUserInfo) -> Response {
+	get_response(Responses::Ok)
 }

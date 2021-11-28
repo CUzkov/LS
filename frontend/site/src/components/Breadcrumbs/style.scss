@@ -1,0 +1,56 @@
+@import '../../style.scss';
+
+$root: '.Breadcrumbs';
+
+#{$root} {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    position: relative;
+
+    #{$root}-Item {
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        position: relative;
+        border: 1px solid $default-border-color;
+        border-right: none;
+        transition: all 0.3s;
+        font-size: 12px;
+
+        &::after {
+            transition: all 0.3s;
+            position: absolute;
+            content: '';
+            width: 28px;
+            height: 28px;
+            transform: rotate(45deg);
+            left: calc(100% - 18px);
+            top: 9%;
+            border: 1px solid $default-border-color;
+            border-left: none;
+            border-bottom: none;
+            border-radius: 5px;
+            background-color: $page-color;
+        }
+
+        span {
+            position: relative;
+            z-index: 1;
+        }
+
+        &:hover {
+            background-color: $breadcrumbs-hover-color;
+
+            &::after {
+                background-color: $breadcrumbs-hover-color;
+            }
+        }
+
+        &:not(:first-child) {
+            border-left: none;
+            padding-left: 34px;
+        }
+    }
+}

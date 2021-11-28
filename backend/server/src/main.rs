@@ -9,8 +9,8 @@ mod middleware;
 mod models;
 mod redis_utils;
 
-use crate::api::auth::handlers::{auth_login, auth_logout};
-use crate::api::map::handlers::create_map;
+use crate::api::auth::handlers::{auth_check, auth_login, auth_logout};
+use crate::api::map::handlers::{create_map, get_all_my_maps};
 use crate::api::repository::handlers::create_repository_for_map;
 use crate::api::user::handlers::create_user;
 use crate::api::utils::default_catcher;
@@ -27,13 +27,20 @@ fn rocket() -> _ {
     rocket::build()
         .attach(middleware::cors::Cors)
         .mount(
-            "/",
+            "/api",
             routes![
+                // auths
                 auth_login,
                 auth_logout,
+                auth_check,
+                // users
                 create_user,
+                // maps
                 create_map,
+                get_all_my_maps,
+                // repositories
                 create_repository_for_map,
+                // option for cors
                 index
             ],
         )
