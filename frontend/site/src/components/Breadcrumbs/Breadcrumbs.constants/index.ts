@@ -1,4 +1,5 @@
 import { cn } from '../../../utils';
 
-export const cnBreadcrumbs = cn('Breadcrumbs')();
-export const cnBreadcrumbsItem = cn('Breadcrumbs-Item')();
+export const cnBreadcrumbs = cn('breadcrumbs')();
+export const cnBreadcrumbsItem = cn('breadcrumbs', 'item')();
+export const cnBreadcrumbsItemBox = cn('breadcrumbs', 'item-box')();

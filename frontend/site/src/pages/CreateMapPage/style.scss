@@ -1,0 +1,25 @@
+@import '../../style.scss';
+
+.create-map-page {
+    width: calc(100% - 65px);
+    box-sizing: border-box;
+    margin: 5px 10px 0 55px;
+    padding-top: 20px;
+
+    border-top: 1px solid $default-dark-border;
+
+	&__title {
+		font-size: 24px;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+	}
+
+    &__form {
+        box-sizing: border-box;
+        padding: 15px;
+        border-radius: 10px;
+
+        background-color: $cards-color;
+        border: 1px solid $default-border-color;
+    }
+}

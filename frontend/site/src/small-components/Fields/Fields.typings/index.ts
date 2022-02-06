@@ -4,7 +4,9 @@ interface FieldMetaState<T> extends _FieldMetaState<T> {
     error?: string | undefined;
 }
 
-export interface FieldProps<T> {
-    meta: Pick<FieldMetaState<T>, 'touched' | 'active' | 'dirty' | 'error' | 'submitSucceeded'>;
+export type FieldMeta<T> = Pick<FieldMetaState<T>, 'touched' | 'active' | 'dirty' | 'error' | 'submitSucceeded'>;
+
+export type FieldProps<T> = {
+    meta: FieldMeta<T>;
     input: FieldInputProps<T, HTMLElement>;
-}
+};

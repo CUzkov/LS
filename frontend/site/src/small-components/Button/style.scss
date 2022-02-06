@@ -10,9 +10,7 @@ button {
     outline: none;
 }
 
-$root: '.Button';
-
-#{$root} {
+.button {
     background-color: $button-background;
     border: 1px solid $button-border;
     color: $default-text-color;
@@ -28,21 +26,21 @@ $root: '.Button';
         background-color: $button-hover-disable;
     }
 
-    &_disable {
+    &--disable {
         background-color: $button-hover-disable;
         cursor: default;
     }
 
-    &_size {
-        &_s {
+    &--size {
+        &--s {
             height: 20px;
         }
 
-        &_m {
+        &--m {
             height: 30px;
         }
 
-        &_l {
+        &--l {
             height: 45px;
         }
     }

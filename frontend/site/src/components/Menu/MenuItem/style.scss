@@ -1,60 +1,58 @@
 @import '../../../style.scss';
 
-$root: '.MenuItem';
-
-#{$root} {
+.menu-item {
     transition: all 0.3s;
     border-radius: 0 10px 10px 0;
     padding: 20px 10px 10px 10px;
 	cursor: pointer;
 
-    #{$root}-List {
+    &__list {
         max-height: 0;
         overflow: hidden;
         transition: all 0.3s;
+    }
 
-        #{$root}-Link {
-            padding: 10px 55px 10px 45px;
-            cursor: pointer;
-            border-radius: 5px;
+    &__link {
+        padding: 10px 55px 10px 45px;
+        cursor: pointer;
+        border-radius: 5px;
 
-            &:hover {
-                transition: all 0.3s;
-                background-color: $menu-item-hover-color;
-            }
+        &:hover {
+            transition: all 0.3s;
+            background-color: $menu-item-hover-color;
         }
     }
 
-    #{$root}-Title {
+    &__title {
         cursor: pointer;
         margin: 0 0 10px 0;
 		display: flex;
 		align-items: center;
+    }
 
-		#{$root}-TitleIcon {
-			width: 45px;
-			display: flex;
-			align-items: flex-end;
-			flex-direction: column;
+    &__title-icon {
+        width: 45px;
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
 
-			svg {
-				margin-right: 10px;
-	
-				path {
-					fill: $default-icon-color;
-				}
-			}
-		}
+        svg {
+            margin-right: 10px;
+
+            path {
+                fill: $default-icon-color;
+            }
+        }
     }
 
 	&:hover {
         background-color: $menu-hover-color;
 	}
 
-    &_expand {
+    &--expand {
         background-color: $menu-hover-color;
 
-        #{$root}-List {
+        .menu-item__list {
             max-height: 300px;
         }
     }

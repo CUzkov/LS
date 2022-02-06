@@ -45,3 +45,12 @@ impl From<git2::Error> for ServerError {
         ServerError::new(500, error.message().to_string())
     }
 }
+
+impl From<std::io::Error> for ServerError {
+    fn from(error: std::io::Error) -> ServerError {
+        match error.raw_os_error() {
+            Some(error) => ServerError::new(500, error.to_string()),
+            None => ServerError::new(500, "Ошибка вывода ошибки".to_string())
+        }
+    }
+}

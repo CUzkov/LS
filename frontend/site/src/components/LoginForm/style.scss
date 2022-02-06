@@ -1,6 +1,6 @@
 @import '../../style.scss';
 
-.LoginFrom {
+.login-from {
     form {
         width: 300px;
 
@@ -9,27 +9,25 @@
         }
     }
 
-    .Button {
+    .button {
         margin-top: 10px;
     }
 
-    .LoginFrom {
-        &-Fields {
-            position: relative;
-        }
+    &__fields {
+        position: relative;
+    }
 
-        &-Spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.2s;
+    &__spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
 
-            &_loading {
-                opacity: 1;
-            }
+        &--loading {
+            opacity: 1;
         }
     }
 }

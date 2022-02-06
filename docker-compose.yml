@@ -8,7 +8,9 @@ services:
   
   database:
     build: ./backend/database
-    network_mode: host
+    # network_mode: host
+    ports:
+      - 5432:5432
     environment:
       - POSTGRES_USER=ls
       - POSTGRES_PASSWORD=ls

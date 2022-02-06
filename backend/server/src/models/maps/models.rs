@@ -37,10 +37,7 @@ impl Map {
     }
 
     pub fn get_by_user_id(id: i32) -> Result<Vec<Self>, ServerError> {
-        println!("awdawdawd");
         let result = db::connection()?.query("SELECT * from get_by_user_id($1)", &[&id])?;
-
-        println!("awdawdawd");
 
         let mut maps: Vec<Self> = vec![];
 
@@ -51,8 +48,6 @@ impl Map {
                 title: row.get(2),
             });
         }
-
-        println!("awdawdawd");
 
         Ok(maps)
     }

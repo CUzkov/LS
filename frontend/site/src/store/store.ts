@@ -4,24 +4,44 @@ import thunk from 'redux-thunk';
 import { useSelector as _useSelector, useDispatch as _useDispatch } from 'react-redux';
 
 import { userReducer, UserStore, UserEvents } from './reducers/user';
-import { loginFormReducer, LoginFormStore, LoginFormEvents } from './reducers/loginForm';
-import { mainPageReducer, MainPageStore, MainPageEvents } from './reducers/mainPage';
-import { mapsListPageReducer, MapsListPageStore, MapsListPageEvents } from './reducers/mapsListPage';
+import { loginFormReducer, LoginFormStore, LoginFormEvents } from './reducers/login-form';
+import { mainPageReducer, MainPageStore, MainPageEvents } from './reducers/main-page';
+import { mapsListPageReducer, MapsListPageStore, MapsListPageEvents } from './reducers/maps-list-page';
+import { createMapFormReducer, CreateMapFormStore, CreateMapFormEvents } from './reducers/create-map-form';
+import { loggerReducer, LoggerStore, LoggerEvents } from './reducers/logger';
+import {
+    createRepositoryFormReducer,
+    CreateRepositoryFormStore,
+    CreateRepositoryFormEvents,
+} from './reducers/create-repository-form';
 
 const rootReducer = combineReducers({
     user: userReducer,
     loginForm: loginFormReducer,
     mainPage: mainPageReducer,
     mapsListPage: mapsListPageReducer,
+    createMapForm: createMapFormReducer,
+    logger: loggerReducer,
+    createRepositoryForm: createRepositoryFormReducer,
 });
 export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
 
-export type StoreEvents = UserEvents | LoginFormEvents | MainPageEvents | MapsListPageEvents;
+export type StoreEvents =
+    | UserEvents
+    | LoginFormEvents
+    | MainPageEvents
+    | MapsListPageEvents
+    | CreateMapFormEvents
+    | LoggerEvents
+    | CreateRepositoryFormEvents;
 export interface Store {
     user: UserStore;
     loginForm: LoginFormStore;
     mainPage: MainPageStore;
     mapsListPage: MapsListPageStore;
+    createMapForm: CreateMapFormStore;
+    logger: LoggerStore;
+    createRepositoryForm: CreateRepositoryFormStore;
 }
 export type Dispatch = (event: StoreEvents) => void;
 

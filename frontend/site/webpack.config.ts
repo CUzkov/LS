@@ -1,6 +1,5 @@
 import path from 'path';
 import { Configuration, DefinePlugin } from 'webpack';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const srcPath = (subdir: string) => {
@@ -62,12 +61,6 @@ const webpackConfig = (): Configuration => ({
         // DefinePlugin allows you to create global constants which can be configured at compile time
         new DefinePlugin({
             'process.env': process.env.production || !process.env.development,
-        }),
-        new ForkTsCheckerWebpackPlugin({
-            // Speeds up TypeScript type checking and ESLint linting (by moving each to a separate process)
-            eslint: {
-                files: './src/**/*.{ts,tsx,js,jsx}',
-            },
         }),
     ],
 });

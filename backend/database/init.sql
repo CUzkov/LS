@@ -25,7 +25,7 @@ create table repositories (
 	user_id					integer REFERENCES users (id) ON DELETE CASCADE,
 
 	path_to_repository		text not null,
-	is_privite				boolean not null,
+	is_private				boolean not null,
 	title 					text not null unique
 );
 
@@ -91,7 +91,25 @@ create table map_to_repository_links (
 );
 
 insert into users (username, email, u_password, is_admin)
-values ('cuzkov', 'users@gmail.com', 'Gurkina12', true);
+values ('cuzkov', 'users@gmail.com', 'Gurkina12', true),
+('cuzkov1', 'users1@gmail.com', 'Gurkina12', false),
+('cuzkov2', 'users2@gmail.com', 'Gurkina12', false),
+('cuzkov3', 'users3@gmail.com', 'Gurkina12', false),
+('cuzkov4', 'users4@gmail.com', 'Gurkina12', false);
+
+insert into repositories (user_id, path_to_repository, title, is_private)
+values (1, 'users@gmail.com', 'Gurkina12', false),
+(1, 'users1@gmail.com', 'Gurkina123', false),
+(1, 'users2@gmail.com', 'Gurkina1234', false),
+(2, 'users3@gmail.com', 'Gurkina12456', false),
+(2, 'users4@gmail.com', 'Gurkina123456', false);
+
+insert into users_repositories_relationship (user_id, repository_id, relationship)
+values (1, 1, B'111'),
+(1, 2, B'111'),
+(1, 3, B'111'),
+(2, 4, B'111'),
+(2, 5, B'111');
 
 -----------------------------------------------------------------------
 -- Создание нового пользователя
@@ -180,14 +198,12 @@ $BODY$
 create function create_repository(
 	path_to_repository_v text,
 	title_v text,
-	is_privite_v boolean,
-	entity_id_v integer,
-	user_id_v integer,
-	is_map boolean
+	is_private_v boolean,
+	user_id_v integer
 ) returns table(
 	id integer,
 	path_to_repository text,
-	is_privite boolean,
+	is_private boolean,
 	user_id integer,
 	title text,
 	rubric_id integer,
@@ -197,33 +213,30 @@ $BODY$
 	declare
 		repository_id_v integer;
 	begin
-		if is_map then
-			insert into repositories (path_to_repository, title, is_privite, user_id, map_id)
-			values (path_to_repository_v, title_v, is_privite_v, user_id_v, entity_id_v)
-			returning id into repository_id_v;
-		else
-			insert into repositories (path_to_repository, is_privite, title, user_id, rubric_id)
-			values (path_to_repository_v, title_v, is_privite_v, user_id_v, entity_id_v)
-			returning id into repository_id_v;
-		end if;
+		insert into repositories (path_to_repository, title, is_private, user_id)
+		values (path_to_repository_v, title_v, is_private_v, user_id_v)
+		returning repositories.id into repository_id_v;
+
+		insert into users_repositories_relationship (user_id, repository_id, relationship)
+		values (user_id_v, repository_id_v, B'111');
 
 		return query 
 			select
 				repositories.id,
-				repositories.path_to_repository_v,
-				repositories.is_privite,
+				repositories.path_to_repository,
+				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
 				repositories.rubric_id,
 				repositories.map_id
 			from repositories
-			where title=title_v limit 1;
+			where repositories.id=repository_id_v limit 1;
 	end;
 $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Получение пользователя по username
+-- Получение карт по user_id
 -----------------------------------------------------------------------
 create function get_by_user_id(
 	user_id_v integer
@@ -235,6 +248,190 @@ $BODY$
 		return query 
 			select maps.id, maps.user_id, maps.title from maps
 			where maps.user_id=user_id_v;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Проверка на существование репозитория по пути к нему
+-----------------------------------------------------------------------
+create function check_is_repository_name_free(
+	path_to_repository_v text
+) returns table(id integer) as
+$BODY$
+	declare
+	--------------------
+	begin
+		return query 
+			select repositories.id from repositories
+			where repositories.path_to_repository=path_to_repository_v;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Создание массива битовых маскок из флагов (для фильтрации)
+-----------------------------------------------------------------------
+create function get_array_of_bit_mask_by_flags(
+	is_can_r_v boolean = false,
+	is_can_rw_v boolean = false,
+	is_can_rwa_v boolean = false
+) returns bit(3)[3] as
+$BODY$
+	declare
+	--------------------
+	begin
+		if is_can_rwa_v then
+			return (B'111', B'111', B'111');
+		end if;
+
+		if is_can_rw_v then
+			return (B'110', B'111', B'111');
+		end if;
+
+		if is_can_r_v then
+			return (B'100', B'110', B'111');
+		end if;
+
+		return B'000';
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Создание битовой маски из флагов
+-----------------------------------------------------------------------
+create function get_bit_mask_by_flags(
+	is_can_r_v boolean,
+	is_can_rw_v boolean,
+	is_can_rwa_v boolean
+) returns bit(3) as
+$BODY$
+	declare
+	--------------------
+	begin
+		if is_can_rwa_v then
+			return B'111';
+		end if;
+
+		if is_can_rw_v then
+			return B'110';
+		end if;
+
+		if is_can_r_v then
+			return B'100';
+		end if;
+
+		return B'000';
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Выборка репозиториев по фильрам
+-----------------------------------------------------------------------
+create function get_repositories_by_filter(
+	user_id_v integer,
+	by_user_v integer = -1,
+	title_v text = '',
+	is_can_r_v boolean = false,
+	is_can_rw_v boolean = false,
+	is_can_rwa_v boolean = false
+) returns table(
+	id integer,
+	path_to_repository text,
+	is_private boolean,
+	user_id integer,
+	title text,
+	rubric_id integer,
+	map_id integer
+) as
+$BODY$
+	declare
+		relationship bit(3)[3];
+	begin
+		relationship = get_array_of_bit_mask_by_flags(is_can_r_v, is_can_rw_v, is_can_rwa_v);
+
+		return query
+			select
+				repositories.id,
+				repositories.path_to_repository,
+				repositories.is_private,
+				repositories.user_id,
+				repositories.title,
+				repositories.rubric_id,
+				repositories.map_id
+			from repositories
+			inner join users_permitions
+			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			where
+				(by_user = -1 or repositories.user_id = by_user_v) and
+				(title = '' or repositories.title = title_v) and
+				(
+					users_repositories_relationship.relationship = relationship[0] or
+					users_repositories_relationship.relationship = relationship[1] or
+					users_repositories_relationship.relationship = relationship[2]
+				);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Может ли пользователь изменять доступ к репозиторию (есть ли rwa доступ)
+-----------------------------------------------------------------------
+create function check_is_user_can_rwa_to_repository(
+	repository_id_v integer,
+	user_id_v integer
+) returns table(id integer) as
+$BODY$
+	declare
+	--------------------
+	begin
+		return query 
+			select users_repositories_relationship.id from users_repositories_relationship
+			where
+				users_repositories_relationship.repository_id = repository_id_v and
+				users_repositories_relationship.relationship = B'111' and
+				users_repositories_relationship.user_id = user_id_v;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+
+-----------------------------------------------------------------------
+-- Изменение прав доступа для репозитория
+-----------------------------------------------------------------------
+create function change_repository_permitions(
+	repository_id_v integer,
+	user_id_v integer,
+	is_can_r_v boolean,
+	is_can_rw_v boolean,
+	is_can_rwa_v boolean
+) returns table(id integer) as
+$BODY$
+	declare
+		users_repositories_relationship_row_id integer;
+		bit_mask bit(3);
+	begin
+		bit_mask = get_bit_mask_by_flags(is_can_r_v, is_can_rw_v, is_can_rwa_v);
+
+		select users_repositories_relationship.id into users_repositories_relationship_row_id from users_repositories_relationship
+		where
+			users_repositories_relationship.user_id = user_id_v and
+			users_repositories_relationship.repository_id = repository_id_v
+		limit 1;
+
+		if users_repositories_relationship_row_id is null then
+			insert into users_repositories_relationship (user_id, repository_id, relationship)
+			values (user_id_v, repository_id_v, bit_mask);
+		else
+			update users_repositories_relationship set relationship = bit_mask
+			where users_repositories_relationship.id = users_repositories_relationship_row_id;
+		end if;
+
+		return query
+			select users_repositories_relationship.id from users_repositories_relationship
+			where users_repositories_relationship.id = users_repositories_relationship_row_id;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

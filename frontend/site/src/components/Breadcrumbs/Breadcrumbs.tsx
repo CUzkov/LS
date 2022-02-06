@@ -2,7 +2,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { Link } from 'react-router-dom';
 
-import { cnBreadcrumbs, cnBreadcrumbsItem } from './Breadcrumbs.constants';
+import { cnBreadcrumbs, cnBreadcrumbsItem, cnBreadcrumbsItemBox } from './Breadcrumbs.constants';
 
 import './style.scss';
 
@@ -24,6 +24,7 @@ export const Breadcrumbs: FC<IBreadcrumbsProps> = ({ paths }) => {
                     to={breadcrumb.url}
                 >
                     <span>{breadcrumb.title}</span>
+                    <div className={cnBreadcrumbsItemBox} />
                 </Link>
             ))}
         </div>

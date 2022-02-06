@@ -19,7 +19,7 @@ pub fn create_map(new_map: Json<ICreateMap>, user: AuthUserInfo) -> Response {
 	};
 
 	match Map::create(map) {
-		Ok(user) => get_response_with_data(Responses::Created, json!(user)),
+		Ok(map) => get_response_with_data(Responses::Created, json!(map)),
 		Err(e) => match e.error_status_code {
 			409 => get_response(Responses::Conflict),
 			_ => get_response(Responses::ServerError),

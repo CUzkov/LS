@@ -1,0 +1,57 @@
+@import '../../style.scss';
+
+.create-repository-from {
+    form {
+        position: relative;
+    }
+
+    &__field {
+        width: 335px;
+
+        &:first-child {
+            display: flex;
+            align-items: flex-end;
+        }
+    }
+
+    &__repository-name-spinner {
+        width: 35px;
+        height: 35px;
+        margin-bottom: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
+
+        svg {
+            height: 35px;
+            width: 35px;
+        }
+
+        &--loading {
+            opacity: 1;
+        }
+    }
+
+    &__spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
+
+        &--loading {
+            opacity: 1;
+        }
+    }
+
+    &__button {
+        display: flex;
+        justify-content: flex-end;
+
+        .button {
+            width: 300px;
+        }
+    }
+}

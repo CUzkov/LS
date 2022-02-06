@@ -26,9 +26,11 @@ export const MenuItem: FC<IMenuItemProps> = ({ title, icon, links, isExpand, onC
             </div>
             <div className={cnMenuItemList}>
                 {links.map((link, index) => (
-                    <div key={index} className={cnMenuItemLink}>
-                        <Link to={link.url}>{link.title}</Link>
-                    </div>
+                    <Link to={link.url} key={index}>
+                        <div key={index} className={cnMenuItemLink}>
+                            {link.title}
+                        </div>
+                    </Link>
                 ))}
             </div>
         </div>

@@ -4,13 +4,13 @@ import FileIcon from './assets/file.svg';
 import MapIcon from './assets/map.svg';
 import SettingsIcon from './assets/settings.svg';
 
-import { getUserMaps } from 'constants/routers';
+import { getUserMaps, getUserMapCreate, getUserRepositoryCreate } from 'constants/routers';
 
 import { cn } from '../../../utils';
 
-export const cnMenu = cn('Menu')();
-export const cnMenuItem = cn('Menu-Item')();
-export const cnMenuDivider = cn('Menu-Divider')();
+export const cnMenu = cn('menu')();
+export const cnMenuItem = cn('menu', 'item')();
+export const cnMenuDivider = cn('menu', 'divider')();
 
 export const getMenu = (username: string) => [
     {
@@ -19,7 +19,7 @@ export const getMenu = (username: string) => [
         links: [
             {
                 title: 'Создать',
-                url: '',
+                url: getUserMapCreate(username),
             },
             {
                 title: 'Мои карты',
@@ -37,7 +37,7 @@ export const getMenu = (username: string) => [
         links: [
             {
                 title: 'Создать',
-                url: '',
+                url: getUserRepositoryCreate(username),
             },
             {
                 title: 'Мои репозитории',

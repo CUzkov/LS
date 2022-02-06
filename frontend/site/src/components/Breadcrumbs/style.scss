@@ -1,26 +1,43 @@
 @import '../../style.scss';
 
-$root: '.Breadcrumbs';
-
-#{$root} {
+.breadcrumbs {
     display: flex;
     align-items: center;
     padding: 10px;
     position: relative;
 
-    #{$root}-Item {
-        cursor: pointer;
-        padding: 10px;
-        border-radius: 5px;
-        display: flex;
-        position: relative;
-        border: 1px solid $default-border-color;
-        border-right: none;
-        transition: all 0.3s;
-        font-size: 12px;
+    .breadcrumbs {
+        &__item {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            position: relative;
+            border: 1px solid $default-border-color;
+            border-right: none;
+            font-size: 12px;
+            transition: background-color 0.3s;
+    
+            span {
+                position: relative;
+                z-index: 1;
+            }
+    
+            &:hover {
+                background-color: $breadcrumbs-hover-color;
+    
+                .breadcrumbs__item-box {
+                    background-color: $breadcrumbs-hover-color;
+                }
+            }
+    
+            &:not(:first-child) {
+                border-left: none;
+                padding-left: 34px;
+            }
+        }
 
-        &::after {
-            transition: all 0.3s;
+        &__item-box {
             position: absolute;
             content: '';
             width: 28px;
@@ -33,24 +50,7 @@ $root: '.Breadcrumbs';
             border-bottom: none;
             border-radius: 5px;
             background-color: $page-color;
-        }
-
-        span {
-            position: relative;
-            z-index: 1;
-        }
-
-        &:hover {
-            background-color: $breadcrumbs-hover-color;
-
-            &::after {
-                background-color: $breadcrumbs-hover-color;
-            }
-        }
-
-        &:not(:first-child) {
-            border-left: none;
-            padding-left: 34px;
+            transition: background-color .3s;
         }
     }
 }

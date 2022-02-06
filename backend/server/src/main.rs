@@ -11,7 +11,7 @@ mod redis_utils;
 
 use crate::api::auth::handlers::{auth_check, auth_login, auth_logout};
 use crate::api::map::handlers::{create_map, get_all_my_maps};
-use crate::api::repository::handlers::create_repository_for_map;
+use crate::api::repository::handlers::{create_repository, check_is_repository_name_free, get_repositories_by_filter, change_repository_permitions};
 use crate::api::user::handlers::create_user;
 use crate::api::utils::default_catcher;
 
@@ -39,7 +39,10 @@ fn rocket() -> _ {
                 create_map,
                 get_all_my_maps,
                 // repositories
-                create_repository_for_map,
+                create_repository,
+                check_is_repository_name_free,
+                get_repositories_by_filter,
+                change_repository_permitions,
                 // option for cors
                 index
             ],

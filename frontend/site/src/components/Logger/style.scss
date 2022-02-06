@@ -1,0 +1,17 @@
+@import '../../style.scss';
+
+.logger {
+    max-height: 450px;
+    overflow: hidden;
+    position: relative;
+
+    .logger {
+        &__hint {
+            width: calc(100% - 2px);
+            height: 100px;
+            position: absolute;
+            top: 200px;
+            left: 1px;
+        }
+    }
+}

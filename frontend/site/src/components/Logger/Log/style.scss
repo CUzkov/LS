@@ -1,0 +1,67 @@
+@import '../../../style.scss';
+
+.log {
+    width: 300px;
+    background-color: $cards-color;
+    border-radius: 5px;
+    border: 1px solid $default-border-color;
+    padding: 15px;
+    box-sizing: border-box;
+    max-height: 400px;
+    transition: all .3s;
+
+    &--type {
+        &--success {
+            svg {
+                path {
+                    stroke: $default-icon-succes-color;
+                }
+            }
+        }
+
+        &--error {
+            svg {
+                path {
+                    stroke: $default-icon-error-color;
+                }
+            }
+        }
+    }
+
+    &__title {
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        svg {
+            cursor: pointer;
+            
+            path {
+                stroke: $default-icon-color;
+            }
+        }
+    }
+
+    &__description {
+        display: flex;
+        align-items: flex-start;
+        font-size: 14px;
+        margin-top: 5px;
+
+        svg {
+            margin-right: 7px;
+            margin-top: 2px;
+            min-width: 15px;
+        }
+    }
+
+    &--close {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+}

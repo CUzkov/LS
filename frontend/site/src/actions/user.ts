@@ -1,7 +1,7 @@
 import { ajax, ContentType, AjaxType } from '../ajax';
 import type { IServerError, Empty } from '../types';
 import type { Dispatch } from '../store';
-import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/loginForm';
+import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
 
 const LOGIN_URL = '/api/auth/login';
 const CHECK_AUTH_URL = '/api/auth/check';

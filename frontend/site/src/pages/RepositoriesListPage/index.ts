@@ -1,0 +1,1 @@
+export { RepositoriesListPage } from './RepositoriesListPage';

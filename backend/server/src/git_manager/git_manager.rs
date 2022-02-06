@@ -1,4 +1,5 @@
 use git2::{IndexAddOption, Oid, Repository, Signature};
+use std::fs;
 
 use crate::errors::error_handler::ServerError;
 
@@ -19,17 +20,22 @@ impl GitManager {
 		}
 	}
 
-	pub fn init_repository(&mut self, path: &str, author: &Signature) -> Result<(), ServerError> {
-		let repository = Repository::init("/home/cuzkov".to_string() + path)?;
+	pub fn init_repository(&mut self, repository_name: &String, author: &Signature) -> Result<(), ServerError> {
+		let paths = GitManager::get_repository_path(repository_name, author)?;
+
+		fs::create_dir_all(paths.0)?;
+
+		let repository = Repository::init(paths.1.clone())?;
 
 		self.repository = Some(repository);
+		self.path_to_repository = Some(paths.1);
 
 		let repository = match &self.repository {
 			Some(repository) => repository,
 			None => {
 				return Err(ServerError {
 					error_status_code: 500,
-					error_message: "".to_string(),
+					error_message: "No such repository".to_string(),
 				});
 			}
 		};
@@ -42,6 +48,23 @@ impl GitManager {
 		repository.commit(Some("HEAD"), author, author, "initial commit", &tree, &[])?;
 
 		Ok(())
+	}
+
+	pub fn get_repository_path(repository_name: &String, author: &Signature) -> Result<(String, String), ServerError> {
+		let author_name = match author.name() {
+			Some(name) => String::from(name),
+			None => {
+				return Err(ServerError {
+					error_status_code: 500,
+					error_message: "No username in signature".to_string(),
+				});
+			}
+		};
+
+		let path_to_user_folder = "C:\\Users\\Daniil\\".to_string() + &author_name.to_lowercase() + "\\";
+		let path_to_repository = path_to_user_folder.clone() + repository_name;
+
+		return Ok((path_to_user_folder, path_to_repository));
 	}
 
 	pub fn open_repository(&mut self, path: &str) -> Result<(), ServerError> {

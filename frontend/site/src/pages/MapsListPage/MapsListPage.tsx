@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { cnMapsListPage, getPaths, cnMapsListPageTitle, cnMapsListPageItems } from './MapsListPage.constants';
 import { PageWrapper } from 'pages/PageWrapper';
 import { useDispatch, useSelector } from 'store/store';
-import { getMapsListPageAllMaps } from 'actions/mapsListPage';
+import { getMapsListPageAllMaps } from 'actions/maps-list-page';
 import { ItemCard } from 'components/ItemCard';
 
 import './style.scss';

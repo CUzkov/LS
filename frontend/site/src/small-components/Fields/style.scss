@@ -2,7 +2,9 @@ select,
 textarea,
 input,
 input:focus,
-input:focus-visible {
+input:focus-visible,
+input:hover,
+input:active {
     border: none;
     background-image: none;
     background-color: transparent;
@@ -10,4 +12,5 @@ input:focus-visible {
     -moz-box-shadow: none;
     box-shadow: none;
     outline: none;
+    margin: 0;
 }

@@ -1,4 +1,4 @@
-FROM rust:1.54
+FROM rust:buster
 
 WORKDIR /usr/src/server
 COPY ./src ./src
@@ -7,6 +7,5 @@ COPY ./Cargo.lock .
 COPY ./Rocket.toml .
 
 RUN cargo install --path .
-RUN cargo install diesel_cli --no-default-features --features postgres
 
 CMD ["./target/release/server"]

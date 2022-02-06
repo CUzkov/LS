@@ -40,9 +40,7 @@ pub struct Empty {}
 fn get_response_general(response_type: Responses, data: Value, error: String) -> Response {
 	match response_type {
 		Responses::Ok => Response::Response200(Response200 { inner: data }),
-		Responses::Created => Response::Response201(Response201 {
-			inner: json!(Empty {}),
-		}),
+		Responses::Created => Response::Response201(Response201 { inner: data }),
 		Responses::Unauthorized => Response::Response401(Response401 {
 			inner: json!(Error {
 				error: UNAUTHORIZED.to_string(),
