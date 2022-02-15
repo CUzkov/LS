@@ -21,14 +21,16 @@ button {
     display: block;
     box-sizing: border-box;
     transition: all 0.2s;
+    user-select: none;
 
     &:hover {
-        background-color: $button-hover-disable;
+        background-color: $button-hover;
     }
 
     &--disable {
-        background-color: $button-hover-disable;
+        background-color: $button-disable;
         cursor: default;
+        pointer-events: none;
     }
 
     &--size {

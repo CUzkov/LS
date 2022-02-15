@@ -1,6 +1,6 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/index';
 
-export const cnItemCard = cn('ItemCard')();
-export const cnItemCardLeft = cn('ItemCard-Left')();
-export const cnItemCardRight = cn('ItemCard-Right')();
-export const cnItemCardTitle = cn('ItemCard-Title')();
+export const cnItemCard = cn('item-card')();
+export const cnItemCardLeft = cn('item-card', 'left')();
+export const cnItemCardRight = cn('item-card', 'right')();
+export const cnItemCardTitle = cn('item-card', 'title')();

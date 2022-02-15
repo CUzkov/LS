@@ -10,31 +10,37 @@ import {
     cnTextFieldInput,
     cnTextFieldLabel,
     cnTextFieldPasswordIcon,
+    cnTextFieldSearchIcon,
 } from '../Fields.constants';
 
 import ViewedIcon from '../Fields.assets/viewed.svg';
 import NotViewedIcon from '../Fields.assets/not-viewed.svg';
 import UserIcon from '../Fields.assets/user.svg';
 import LockIcon from '../Fields.assets/lock.svg';
+import SearchIcon from '../Fields.assets/search.svg';
 
 import './style.scss';
 
 interface TextFieldProps {
     name: string;
-    type: 'email-username' | 'password' | 'text';
-    title: string;
+    type: 'email-username' | 'password' | 'text' | 'search';
+    defaultValue?: string;
+    title?: string;
     validators?: ((value) => undefined | string)[];
     isDisable?: boolean;
     onBlur?: (event: React.FocusEvent<HTMLInputElement, Element>, meta: FieldMeta<string>) => void;
+    isNoNeedErrors?: boolean;
 }
 
 export const TextField: FC<TextFieldProps> = ({
     name,
     type,
     title,
+    onBlur,
+    defaultValue = '',
     validators = [],
     isDisable = false,
-    onBlur,
+    isNoNeedErrors = false,
 }: TextFieldProps): ReactElement => {
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -52,7 +58,7 @@ export const TextField: FC<TextFieldProps> = ({
     );
 
     return (
-        <Field name={name} validate={composeValidators(...validators)}>
+        <Field name={name} validate={composeValidators(...validators)} defaultValue={defaultValue}>
             {({ input, meta }: FieldProps<string>): ReactElement => (
                 <div
                     className={cnTextField({
@@ -60,11 +66,13 @@ export const TextField: FC<TextFieldProps> = ({
                         'not-valid': IsNoneEmptyStr(meta.error) && ((meta.touched ?? false) || meta.submitSucceeded),
                     })}
                 >
-                    <label htmlFor={name} className={cnTextFieldLabel}>
-                        {type === 'email-username' && <UserIcon />}
-                        {type === 'password' && <LockIcon />}
-                        {title}
-                    </label>
+                    {title && (
+                        <label htmlFor={name} className={cnTextFieldLabel}>
+                            {type === 'email-username' && <UserIcon />}
+                            {type === 'password' && <LockIcon />}
+                            {title}
+                        </label>
+                    )}
 
                     <div className={cnTextFieldInput({ disable: isDisable })}>
                         <input
@@ -78,11 +86,18 @@ export const TextField: FC<TextFieldProps> = ({
                                 {isVisible ? <ViewedIcon /> : <NotViewedIcon />}
                             </div>
                         )}
+                        {type === 'search' && (
+                            <div className={cnTextFieldSearchIcon}>
+                                <SearchIcon />
+                            </div>
+                        )}
                     </div>
 
-                    <div className={cnTextFieldErrorText}>
-                        {(meta.touched ?? false) || (meta.submitSucceeded ?? false) ? meta.error : ''}
-                    </div>
+                    {!isNoNeedErrors && (
+                        <div className={cnTextFieldErrorText}>
+                            {(meta.touched ?? false) || (meta.submitSucceeded ?? false) ? meta.error : ''}
+                        </div>
+                    )}
                 </div>
             )}
         </Field>

@@ -30,9 +30,9 @@ pub fn check_is_repository_name_free(repository_name: Json<RepositoryName>, user
 	}
 }
 
-#[get("/repository/filter", data = "<filters>")]
-pub fn get_repositories_by_filter(filters: Json<RepositoriesFilter>, user: AuthUserInfo) -> Response {
-	match Repository::get_repositories_by_filter(&filters, &user) {
+#[get("/repository/filter?<is_rw>&<is_rwa>&<title>&<by_user>")]
+pub fn get_repositories_by_filter(is_rw: bool, is_rwa: bool, title: String, by_user: i32, user: AuthUserInfo) -> Response {
+	match Repository::get_repositories_by_filter(&RepositoriesFilter { is_rw, is_rwa, title, by_user }, &user) {
 		Ok(repositories) => get_response_with_data(Responses::Ok, json!(repositories)),
 		Err(e) => match e.error_status_code {
 			404 => get_response(Responses::BadRequest),

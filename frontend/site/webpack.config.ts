@@ -21,6 +21,7 @@ const webpackConfig = (): Configuration => ({
             store: srcPath('store'),
             types: srcPath('types'),
             utils: srcPath('utils'),
+            hooks: srcPath('hooks'),
             assets: srcPath('assets'),
         },
     },

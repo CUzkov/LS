@@ -1,8 +1,6 @@
 @import '../../style.scss';
 
-$root: '.ItemCard';
-
-#{$root} {
+.item-card {
 	width: 100%;
 	background-color: $cards-color;
 	margin-bottom: 10px;
@@ -10,4 +8,13 @@ $root: '.ItemCard';
 	border: 1px solid $default-border-color;
 	padding: 10px;
 	box-sizing: border-box;
+
+	&__title {
+		cursor: pointer;
+		transition: .3s color;
+
+		&:hover {
+			color: $default-text-hover-color;
+		}
+	}
 }

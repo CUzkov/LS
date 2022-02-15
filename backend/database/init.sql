@@ -273,27 +273,22 @@ $BODY$
 -- Создание массива битовых маскок из флагов (для фильтрации)
 -----------------------------------------------------------------------
 create function get_array_of_bit_mask_by_flags(
-	is_can_r_v boolean = false,
-	is_can_rw_v boolean = false,
-	is_can_rwa_v boolean = false
+	is_can_rw_v boolean,
+	is_can_rwa_v boolean
 ) returns bit(3)[3] as
 $BODY$
 	declare
 	--------------------
 	begin
 		if is_can_rwa_v then
-			return (B'111', B'111', B'111');
+			return array[B'111', B'111', B'111'];
 		end if;
 
 		if is_can_rw_v then
-			return (B'110', B'111', B'111');
+			return array[B'110', B'111', B'111'];
 		end if;
 
-		if is_can_r_v then
-			return (B'100', B'110', B'111');
-		end if;
-
-		return B'000';
+		return array[B'100', B'110', B'111'];
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -332,11 +327,10 @@ $BODY$
 -----------------------------------------------------------------------
 create function get_repositories_by_filter(
 	user_id_v integer,
-	by_user_v integer = -1,
-	title_v text = '',
-	is_can_r_v boolean = false,
-	is_can_rw_v boolean = false,
-	is_can_rwa_v boolean = false
+	by_user_v integer,
+	title_v text,
+	is_can_rw_v boolean,
+	is_can_rwa_v boolean
 ) returns table(
 	id integer,
 	path_to_repository text,
@@ -348,9 +342,9 @@ create function get_repositories_by_filter(
 ) as
 $BODY$
 	declare
-		relationship bit(3)[3];
+		relationships_v bit(3)[3];
 	begin
-		relationship = get_array_of_bit_mask_by_flags(is_can_r_v, is_can_rw_v, is_can_rwa_v);
+		relationships_v = get_array_of_bit_mask_by_flags(is_can_rw_v, is_can_rwa_v);
 
 		return query
 			select
@@ -362,15 +356,15 @@ $BODY$
 				repositories.rubric_id,
 				repositories.map_id
 			from repositories
-			inner join users_permitions
+			inner join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
 			where
-				(by_user = -1 or repositories.user_id = by_user_v) and
-				(title = '' or repositories.title = title_v) and
+				(by_user_v = -1 or repositories.user_id = by_user_v) and
+				(title_v = '' or repositories.title like title_v) and
 				(
-					users_repositories_relationship.relationship = relationship[0] or
-					users_repositories_relationship.relationship = relationship[1] or
-					users_repositories_relationship.relationship = relationship[2]
+					users_repositories_relationship.relationship = relationships_v[1] or
+					users_repositories_relationship.relationship = relationships_v[2] or
+					users_repositories_relationship.relationship = relationships_v[3]
 				);
 	end;
 $BODY$

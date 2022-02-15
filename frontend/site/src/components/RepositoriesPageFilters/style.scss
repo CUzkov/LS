@@ -1,0 +1,30 @@
+@import '../../style.scss';
+
+.repositories-page-filters {
+	display: flex;
+	align-items: center;
+
+	&__search-field {
+		width: 250px;
+		margin-right: 15px;
+	}
+
+	&__rwa-field {
+		width: 300px;
+		margin-right: 25px;
+	}
+
+	&__find-button {
+		width: 75px;
+		margin-right: 10px;
+	}
+
+	&__reset-button {
+		width: 75px;
+	}
+
+	&__search-form {
+		display: flex;
+		align-items: center;
+	}
+}

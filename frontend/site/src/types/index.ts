@@ -18,3 +18,14 @@ export type Map = {
     userId: number;
     id: number;
 };
+
+export type Repository = {
+    title: string;
+    id: string;
+};
+
+export const enum RWA {
+    r = 'r',
+    rw = 'rw',
+    rwa = 'rwa',
+}

@@ -37,7 +37,6 @@ pub struct RepositoryNameCheck {
 
 #[derive(Serialize, Deserialize)]
 pub struct RepositoriesFilter {
-    pub is_r: bool,
     pub is_rw: bool,
     pub is_rwa: bool,
     pub title: String,
@@ -123,12 +122,11 @@ impl Repository {
 
     pub fn get_repositories_by_filter(filters: &RepositoriesFilter, user: &AuthUserInfo) -> Result<Vec<Self>, ServerError> {
         let result = db::connection()?.query(
-            "SELECT * from get_repositories_by_filter($1, $2, $3, $4, $5, $6)",
+            "SELECT * from get_repositories_by_filter($1, $2, $3, $4, $5)",
             &[
                 &user.user_id,
                 &filters.by_user,
-                &filters.title,
-                &filters.is_r,
+                &(filters.title.clone() + "%"),
                 &filters.is_rw,
                 &filters.is_rwa
             ],

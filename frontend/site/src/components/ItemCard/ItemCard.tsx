@@ -7,6 +7,7 @@ import './style.scss';
 
 interface IItemCardProps {
     title: string;
+    
 }
 
 export const ItemCard: FC<IItemCardProps> = ({ title }) => {

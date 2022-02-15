@@ -1,58 +1,59 @@
-import { FetchStatus, Map } from '../../types';
+import { FetchStatus, Repository } from '../../types';
 
-export interface IMapsListPageD {
-    maps?: {
-        data: Map[];
+export interface IRepositoriesListPageD {
+    repositories?: {
+        data: Repository[];
     };
 }
 
-export type MapsListPageEvents =
-    | { type: 'repositories-list-page/maps-list/success'; data: IMapsListPageD }
-    | { type: 'repositories-list-page/maps-list/loading' }
-    | { type: 'repositories-list-page/maps-list/error' }
-    | { type: 'repositories-list-page/maps-list/clear' };
+export type RepositoriesListPageEvents =
+    | { type: 'repositories-list-page/repositories-list/success'; data: IRepositoriesListPageD }
+    | { type: 'repositories-list-page/repositories-list/loading' }
+    | { type: 'repositories-list-page/repositories-list/error' }
+    | { type: 'repositories-list-page/repositories-list/failed' }
+    | { type: 'repositories-list-page/repositories-list/clear' };
 
-export type MapsListPageStore = {
-    maps: {
-        data: Map[];
+export type RepositoriesListPageStore = {
+    repositories: {
+        data: Repository[];
         fetchStatus: FetchStatus;
     };
 };
 
-const initialState: MapsListPageStore = {
-    maps: {
+const initialState: RepositoriesListPageStore = {
+    repositories: {
         data: [],
         fetchStatus: FetchStatus.loading,
     },
 };
 
-export const mapsListPageReducer = (
-    state: MapsListPageStore = initialState,
-    event: MapsListPageEvents,
-): MapsListPageStore => {
-    if (event.type === 'repositories-list-page/maps-list/success') {
+export const repositoriesListPageReducer = (
+    state: RepositoriesListPageStore = initialState,
+    event: RepositoriesListPageEvents,
+): RepositoriesListPageStore => {
+    if (event.type === 'repositories-list-page/repositories-list/success') {
         const result = { ...state };
 
-        result.maps = {
-            data: event.data.maps?.data ?? [],
+        result.repositories = {
+            data: event.data.repositories?.data ?? [],
             fetchStatus: FetchStatus.successed,
         };
 
         return result;
     }
 
-    if (event.type === 'repositories-list-page/maps-list/loading') {
+    if (event.type === 'repositories-list-page/repositories-list/loading') {
         const result = { ...state };
 
-        result.maps.fetchStatus = FetchStatus.loading;
+        result.repositories.fetchStatus = FetchStatus.loading;
 
         return result;
     }
 
-    if (event.type === 'repositories-list-page/maps-list/error') {
+    if (event.type === 'repositories-list-page/repositories-list/error') {
         const result = { ...state };
 
-        result.maps.fetchStatus = FetchStatus.error;
+        result.repositories.fetchStatus = FetchStatus.error;
 
         return result;
     }

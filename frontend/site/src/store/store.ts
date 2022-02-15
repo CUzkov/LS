@@ -10,6 +10,11 @@ import { mapsListPageReducer, MapsListPageStore, MapsListPageEvents } from './re
 import { createMapFormReducer, CreateMapFormStore, CreateMapFormEvents } from './reducers/create-map-form';
 import { loggerReducer, LoggerStore, LoggerEvents } from './reducers/logger';
 import {
+    repositoriesListPageReducer,
+    RepositoriesListPageStore,
+    RepositoriesListPageEvents,
+} from './reducers/repositories-list-page';
+import {
     createRepositoryFormReducer,
     CreateRepositoryFormStore,
     CreateRepositoryFormEvents,
@@ -23,6 +28,7 @@ const rootReducer = combineReducers({
     createMapForm: createMapFormReducer,
     logger: loggerReducer,
     createRepositoryForm: createRepositoryFormReducer,
+    repositoriesListPage: repositoriesListPageReducer,
 });
 export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
 
@@ -33,7 +39,9 @@ export type StoreEvents =
     | MapsListPageEvents
     | CreateMapFormEvents
     | LoggerEvents
-    | CreateRepositoryFormEvents;
+    | CreateRepositoryFormEvents
+    | RepositoriesListPageEvents;
+
 export interface Store {
     user: UserStore;
     loginForm: LoginFormStore;
@@ -42,7 +50,9 @@ export interface Store {
     createMapForm: CreateMapFormStore;
     logger: LoggerStore;
     createRepositoryForm: CreateRepositoryFormStore;
+    repositoriesListPage: RepositoriesListPageStore;
 }
+
 export type Dispatch = (event: StoreEvents) => void;
 
 export const useDispatch = () => {

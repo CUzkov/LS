@@ -4,7 +4,7 @@ import FileIcon from './assets/file.svg';
 import MapIcon from './assets/map.svg';
 import SettingsIcon from './assets/settings.svg';
 
-import { getUserMaps, getUserMapCreate, getUserRepositoryCreate } from 'constants/routers';
+import { getUserMaps, getUserMapCreate, getUserRepositoryCreate, getUserRepositories } from 'constants/routers';
 
 import { cn } from '../../../utils';
 
@@ -22,12 +22,8 @@ export const getMenu = (username: string) => [
                 url: getUserMapCreate(username),
             },
             {
-                title: 'Мои карты',
-                url: getUserMaps(username),
-            },
-            {
                 title: 'Все карты',
-                url: '',
+                url: getUserMaps(username),
             },
         ],
     },
@@ -40,12 +36,8 @@ export const getMenu = (username: string) => [
                 url: getUserRepositoryCreate(username),
             },
             {
-                title: 'Мои репозитории',
-                url: '',
-            },
-            {
                 title: 'Все репозитории',
-                url: '',
+                url: getUserRepositories(username),
             },
         ],
     },

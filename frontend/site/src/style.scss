@@ -24,7 +24,8 @@ body {
     // buttons
     --button-background: #0e6203;
     --button-border: #0e6203;
-    --button-hover-disable: #107603;
+    --button-hover: #107603;
+    --button-disable: #004524;
 
     // main
     --page-color: #3e4345;
@@ -35,6 +36,7 @@ body {
 
     // texts
     --default-text-color: #f1f3f4;
+    --default-text-hover-color: #d0d0d0;
     --default-text-error-color: #ee6868;
     --default-text-succes-color: #83a300;
 
@@ -44,6 +46,8 @@ body {
 
     --default-border-color: #4e5254;
     --default-dark-border: #242728;
+    --default-shadow-color: rgba(241, 243, 244, 0.2);
+    --default-hover-color: rgba(241, 243, 244, 0.2);
 }
 
 // inputs
@@ -53,7 +57,8 @@ $input-icon: var(--input-icon);
 // buttons
 $button-background: var(--button-background);
 $button-border: var(--button-border);
-$button-hover-disable: var(--button-hover-disable);
+$button-hover: var(--button-hover);
+$button-disable: var(--button-disable);
 
 // main
 $page-color: var(--page-color);
@@ -64,6 +69,7 @@ $cards-color: var(--cards-color);
 
 // texts
 $default-text-color: var(--default-text-color);
+$default-text-hover-color: var(--default-text-hover-color);
 $default-text-error-color: var(--default-text-error-color);
 $default-text-succes-color: var(--default-text-succes-color);
 
@@ -73,7 +79,8 @@ $default-icon-succes-color: var(--default-icon-succes-color);
 
 $default-border-color: var(--default-border-color);
 $default-dark-border: var(--default-dark-border);
-
+$default-shadow-color: var(--default-shadow-color);
+$default-hover-color: var(--default-hover-color);
 
 .page-wrapper {
     background-color: $page-color;

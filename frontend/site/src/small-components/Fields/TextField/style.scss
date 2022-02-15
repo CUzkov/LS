@@ -56,5 +56,17 @@
             cursor: pointer;
             margin-left: 5px;
         }
+
+        &__search-icon {
+            padding-left: 5px;
+            border-bottom: 1px solid $input-border;
+            margin-bottom: 1px;
+
+            svg {
+                path {
+                    stroke: $input-icon;
+                }
+            }
+        }
     }
 }

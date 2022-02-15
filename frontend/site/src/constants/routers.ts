@@ -4,6 +4,8 @@ export const getUserPage = (username: string) => `/user/${username}`;
 
 export const getUserMaps = (username: string) => `/user/${username}/maps`;
 
+export const getUserRepositories = (username: string) => `/user/${username}/repositories`;
+
 export const getUserMapCreate = (username: string) => `/user/${username}/create/map`;
 
 export const getUserRepositoryCreate = (username: string) => `/user/${username}/create/repository`;
