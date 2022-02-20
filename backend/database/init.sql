@@ -104,6 +104,13 @@ values (1, 'users@gmail.com', 'Gurkina12', false),
 (2, 'users3@gmail.com', 'Gurkina12456', false),
 (2, 'users4@gmail.com', 'Gurkina123456', false);
 
+insert into maps (user_id, title)
+values (1, 'Gurkina12'),
+(1, 'Gurkina123'),
+(1, 'Gurkina1234'),
+(2, 'Gurkina12456'),
+(2, 'Gurkina123456');
+
 insert into users_repositories_relationship (user_id, repository_id, relationship)
 values (1, 1, B'111'),
 (1, 2, B'111'),
@@ -236,23 +243,6 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Получение карт по user_id
------------------------------------------------------------------------
-create function get_by_user_id(
-	user_id_v integer
-) returns table(id integer, user_id integer, title text) as
-$BODY$
-	declare
-	--------------------
-	begin
-		return query 
-			select maps.id, maps.user_id, maps.title from maps
-			where maps.user_id=user_id_v;
-	end;
-$BODY$
-	language 'plpgsql' volatile;
-
------------------------------------------------------------------------
 -- Проверка на существование репозитория по пути к нему
 -----------------------------------------------------------------------
 create function check_is_repository_name_free(
@@ -365,6 +355,46 @@ $BODY$
 					users_repositories_relationship.relationship = relationships_v[1] or
 					users_repositories_relationship.relationship = relationships_v[2] or
 					users_repositories_relationship.relationship = relationships_v[3]
+				);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Выборка карт по фильрам
+-----------------------------------------------------------------------
+create function get_maps_by_filter(
+	user_id_v integer,
+	by_user_v integer,
+	title_v text,
+	is_can_rw_v boolean,
+	is_can_rwa_v boolean
+) returns table(
+	id integer,
+	user_id integer,
+	title text
+) as
+$BODY$
+	declare
+		relationships_v bit(3)[3];
+	begin
+		relationships_v = get_array_of_bit_mask_by_flags(is_can_rw_v, is_can_rwa_v);
+
+		return query
+			select
+				maps.id,
+				maps.user_id,
+				maps.title
+			from maps
+			inner join users_maps_relationship
+			on map.id = users_maps_relationship.repository_id and users_maps_relationship.user_id = user_id_v
+			where
+				(by_user_v = -1 or repositories.user_id = by_user_v) and
+				(title_v = '' or repositories.title like title_v) and
+				(
+					users_maps_relationship.relationship = relationships_v[1] or
+					users_maps_relationship.relationship = relationships_v[2] or
+					users_maps_relationship.relationship = relationships_v[3]
 				);
 	end;
 $BODY$
