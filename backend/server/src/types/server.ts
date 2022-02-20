@@ -1,12 +1,12 @@
-import {IncomingMessage, ServerResponse as ServerResponseHttp} from 'http'
-import Cookies from "cookies";
+import { IncomingMessage, ServerResponse as ServerResponseHttp } from 'http';
+import Cookies from 'cookies';
 
 export enum Code {
     ok = 200,
     created = 201,
     unauthorized = 401,
     badRequest = 404,
-    internalServerError = 500
+    internalServerError = 500,
 }
 
 export type ServerError = {
@@ -18,14 +18,19 @@ export type ServerResponse<T> = {
     data?: T;
 };
 
-export type RequestPaylod<T> = {userId?: number, data?: T, cookies?: Cookies, response: ServerResponseHttp};
+export type RequestPaylod<T> = {
+    userId?: number;
+    data?: T;
+    cookies?: Cookies;
+    response: ServerResponseHttp;
+};
 
 export type ResponseCallback<T> = (payload: RequestPaylod<T>) => Promise<void>;
 
 export enum Method {
     get = 'GET',
-    post = 'POST'
-};
+    post = 'POST',
+}
 
 export type Route = {
     name: string;
@@ -42,4 +47,4 @@ export type MiddlewareRequest = {
     userId?: number;
     isAuth?: boolean;
     body?: string;
-}
+};

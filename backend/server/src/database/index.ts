@@ -1,2 +1,2 @@
-export {redis} from './redis';
-export {pg} from './pg'
+export { redis } from './redis';
+export { pg } from './pg';

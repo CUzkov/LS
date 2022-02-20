@@ -1,6 +1,6 @@
-import {Pool} from 'pg';
+import { Pool } from 'pg';
 
 export const pg = new Pool({
     user: 'ls',
-    password: 'ls'
+    password: 'ls',
 });

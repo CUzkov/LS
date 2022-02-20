@@ -1,12 +1,12 @@
-import {pg} from '../database';
+import { pg } from '../database';
 
 export type User = {
     id: string;
     username: string;
-    email:string;
+    email: string;
     u_password: string;
     is_admin: boolean;
-}
+};
 
 export const UserFns = {
     getUserByUsername: async (username: string): Promise<User | void> => {
@@ -25,8 +25,6 @@ export const UserFns = {
                 is_admin: result.rows[0].is_admin,
             };
         }
-
-        return;
     },
     getUserByEmail: async (email: string): Promise<User | void> => {
         const client = await pg.connect();
@@ -44,7 +42,5 @@ export const UserFns = {
                 is_admin: result.rows[0].is_admin,
             };
         }
-
-        return;
     },
-}
+};

@@ -1,1 +1,1 @@
-export {User, UserFns} from './user'
+export { User, UserFns } from './user';
