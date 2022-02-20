@@ -8,7 +8,7 @@ export enum Code {
     badRequest = 404,
     internalServerError = 500,
 }
-   
+
 export type ServerError = {
     error: string;
     description: string;
