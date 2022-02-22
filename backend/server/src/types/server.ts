@@ -18,14 +18,15 @@ export type ServerResponse<T> = {
     data?: T;
 };
 
-export type RequestPaylod<T> = {
+export type RequestPaylod<T, P> = {
     userId?: number;
     data?: T;
     cookies?: Cookies;
+    queryParams?: P;
     response: ServerResponseHttp;
 };
 
-export type ResponseCallback<T> = (payload: RequestPaylod<T>) => Promise<void>;
+export type ResponseCallback<T, P> = (payload: RequestPaylod<T, P>) => Promise<void>;
 
 export enum Method {
     get = 'GET',
@@ -34,7 +35,7 @@ export enum Method {
 
 export type Route = {
     name: string;
-    callback: ResponseCallback<any>;
+    callback: ResponseCallback<any, any>;
     method: Method;
     isNeedAuth: boolean;
 };
@@ -47,4 +48,7 @@ export type MiddlewareRequest = {
     userId?: number;
     isAuth?: boolean;
     body?: string;
+    queryParams?: Record<string, string | string[] | undefined>;
 };
+
+export type Empty = Record<string, never>;

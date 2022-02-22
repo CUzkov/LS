@@ -1,28 +1,14 @@
+import {CreateRepositoryD, CheckIsRepositoryNameFreeD, CheckIsRepositoryNameFreeRD, CreateRepositoryRD} from '@api-types/repository'
+
 import { ajax, ContentType, AjaxType } from '../ajax';
-
-import type { IServerError, Empty } from '../types';
+import { IServerError } from '../types';
 import { Dispatch } from '../store';
+import {CREATE_REPOSITORY_URL, CHECK_IS_REPOSIROTY_NAME_FREE_URL} from './urls'
 
-const CREATE_REPOSITORY_URL = '/api/user/create/repository';
-const CHECK_IS_REPOSIROTY_NAME_FREE_URL = '/api/user/repository/free';
-
-export interface INewRepositoryProps {
-    title: string;
-    is_private: boolean;
-}
-
-export interface ICheckIsRepositoryNameFreeProps {
-    title: string;
-}
-
-interface ICheckIsRepositoryNameFreeResponseProps {
-    is_free: boolean;
-}
-
-export const createRepository = async (dispath: Dispatch, props: INewRepositoryProps) => {
+export const createRepository = async (dispath: Dispatch, props: CreateRepositoryD) => {
     dispath({ type: 'create-repository-form/loading' });
 
-    const response = await ajax<Empty | IServerError, INewRepositoryProps>({
+    const response = await ajax<CreateRepositoryRD | IServerError, CreateRepositoryD>({
         type: AjaxType.post,
         contentType: ContentType.JSON,
         url: CREATE_REPOSITORY_URL,
@@ -55,8 +41,8 @@ export const checkIsRepositoryNameFree = async (dispath: Dispatch, props: { titl
     dispath({ type: 'create-repository-form/is-repository-name-free/loading' });
 
     const response = await ajax<
-        ICheckIsRepositoryNameFreeResponseProps | IServerError,
-        ICheckIsRepositoryNameFreeProps
+        CheckIsRepositoryNameFreeRD | IServerError,
+        CheckIsRepositoryNameFreeD
     >({
         type: AjaxType.post,
         contentType: ContentType.JSON,
@@ -72,8 +58,8 @@ export const checkIsRepositoryNameFree = async (dispath: Dispatch, props: { titl
         return;
     }
 
-    if ('is_free' in response) {
-        dispath({ type: 'create-repository-form/is-repository-name-free/status', data: { isFree: response.is_free } });
+    if ('isFree' in response) {
+        dispath({ type: 'create-repository-form/is-repository-name-free/status', data: { isFree: response.isFree } });
     } else {
         dispath({
             type: 'logger/add-log',

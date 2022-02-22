@@ -51,7 +51,7 @@ export const authMiddleware = async (
     const timeNow = new Date().getTime();
     const timeExpired = (await redis.get(userId)) || '1';
 
-    if (timeNow > Number(timeExpired)) {
+    if (Number(timeExpired) > timeNow) {
         request.userId = Number(userId);
         request.isAuth = true;
         resolve();
@@ -60,7 +60,7 @@ export const authMiddleware = async (
     reject(MiddlewareCode.noCookies);
 };
 
-const MIDDLEWARES = [dataMiddleware, cookiesMiddleware, authMiddleware];
+const MIDDLEWARES = [cookiesMiddleware, authMiddleware, dataMiddleware];
 
 export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
     let isError = false;
@@ -92,5 +92,6 @@ export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
         data: middlewareRequest.body,
         userId: middlewareRequest.userId,
         response: middlewareRequest.response,
+        queryParams: middlewareRequest.queryParams,
     });
 };

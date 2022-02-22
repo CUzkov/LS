@@ -34,12 +34,6 @@ export const App: FC = () => {
     const { pathname } = useLocation();
 
     useEffect(() => {
-        const user = localStorage.getItem('user');
-
-        if (user !== null) {
-            dispatch({ type: 'user/success', data: JSON.parse(user) });
-        }
-
         checkAuth(dispatch);
     }, []);
 

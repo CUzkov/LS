@@ -1,4 +1,5 @@
 {
+    "references": [{ "path": "../../api-types" }],
 	"compilerOptions": {
 		"module": "commonjs",
 		"moduleResolution": "node",
@@ -7,7 +8,7 @@
 		"allowSyntheticDefaultImports": true,
 		"jsx": "react",
 		"allowJs": true,
-		"baseUrl": "src",
+		"baseUrl": "./",
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"downlevelIteration": true,
@@ -15,35 +16,36 @@
 		"paths": {
 			"*": ["./src/*"],
 			"components/*": [
-				"components/*"
+				"src/components/*"
 			],
 			"small-components/*": [
-				"small-components/*"
+				"src/small-components/*"
 			],
 			"ajax/*": [
-				"ajax/*"
+				"src/ajax/*"
 			],
 			"actions/*": [
-				"actions/*"
+				"src/actions/*"
 			],
 			"pages/*": [
-				"pages/*"
+				"src/pages/*"
 			],
 			"hooks/*": [
-				"hooks/*"
+				"src/hooks/*"
 			],
 			"constants/*": [
-				"constants/*"
+				"src/constants/*"
 			],
 			"store/*": [
-				"store/*"
+				"src/store/*"
 			],
 			"utils/*": [
-				"utils/*"
+				"src/utils/*"
 			],
 			"types/*": [
-				"types/*"
-			]
+				"src/types/*"
+			],
+			"@api-types/*": ["../../api-types/*"]
 		},
 		"lib": [
 			"esnext",

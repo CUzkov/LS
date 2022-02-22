@@ -1,25 +1,14 @@
-import { ResponseCallback } from '../types';
-import { getOkResponse, getBadRequestResponse } from '../utils/server_utils';
+import { LoginUserD, LoginUserReturnD, CheckAuthReturnD } from '@api-types/auth';
+
+import { ResponseCallback, Empty } from '../types';
+import { getOkResponse, getBadRequestResponse, getInternalServerErrorResponse } from '../utils/server_utils';
 import { UserFns } from '../models';
 import { redis } from '../database';
 
-interface ILoginUserProps {
-    username: string;
-    password: string;
-    email: string;
-}
+const UNIX_MOUNTH = 60 * 60 * 24 * 30;
 
-interface ILoginUserReturn {
-    id: string;
-    username: string;
-    email: string;
-    u_password: string;
-    is_admin: boolean;
-}
-
-export const loginUser: ResponseCallback<ILoginUserProps> = async ({ response, data, cookies }) => {
+export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response, data, cookies }) => {
     if ((!data?.email && !data?.username) || !data?.password) {
-        console.log(data);
         return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
     }
 
@@ -35,13 +24,36 @@ export const loginUser: ResponseCallback<ILoginUserProps> = async ({ response, d
         return getBadRequestResponse(response, 'Ошибка', 'Неверный пароль');
     }
 
-    redis.set('user_id', String(user.id));
-    cookies?.set('user_id', String(user.id));
-    cookies?.set('expired', String(new Date().getTime()));
+    const newTime = String(new Date().getTime() + UNIX_MOUNTH);
+    const userId = user.id;
 
-    getOkResponse<ILoginUserReturn>(response, user);
+    redis.set(userId, newTime);
+    cookies?.set('user_id', userId);
+    cookies?.set('expired', newTime);
+
+    getOkResponse<LoginUserReturnD>(response, {
+        email: user.email,
+        id: Number(user.id),
+        is_admin: user.is_admin,
+        username: user.username,
+    });
 };
 
-export const checkAuth: ResponseCallback<Record<string, never>> = async ({ response }) => {
-    getOkResponse(response);
+export const checkAuth: ResponseCallback<Empty, Empty> = async ({ response, userId }) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    const user = await UserFns.getUserById(userId);
+
+    if (!user) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'user не найден');
+    }
+
+    return getOkResponse<CheckAuthReturnD>(response, {
+        email: user.email,
+        id: user.id,
+        is_admin: user.is_admin,
+        username: user.username,
+    });
 };

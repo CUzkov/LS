@@ -4,7 +4,6 @@ import { Code } from '../types';
 
 export const getBadRequestResponse = (response: ServerResponse, error: string, description: string) => {
     const body = JSON.stringify({
-        code: Code.badRequest,
         error,
         description,
     });
@@ -37,6 +36,20 @@ export const getOkResponse = <T>(response: ServerResponse, data?: T) => {
 
     response
         .writeHead(Code.ok, {
+            'Content-Length': Buffer.byteLength(body),
+            'Content-Type': 'application/json;charset=utf-8',
+        })
+        .end(body);
+};
+
+export const getInternalServerErrorResponse = (response: ServerResponse, error: string, description: string) => {
+    const body = JSON.stringify({
+        error,
+        description,
+    });
+
+    response
+        .writeHead(Code.internalServerError, {
             'Content-Length': Buffer.byteLength(body),
             'Content-Type': 'application/json;charset=utf-8',
         })

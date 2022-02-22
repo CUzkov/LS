@@ -177,6 +177,24 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
+-- Получение пользователя по username
+-----------------------------------------------------------------------
+create function get_user_by_id(
+	id_v integer
+) returns table(id integer, username text, email text, u_password text, is_admin boolean) as
+$BODY$
+	declare
+	--------------------
+	begin
+		return query 
+			select users.id, users.username, users.email, users.u_password, users.is_admin from users
+			where users.id=id_v
+			limit 1;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
 -- Создание новой карты знаний
 -----------------------------------------------------------------------
 create function create_map(

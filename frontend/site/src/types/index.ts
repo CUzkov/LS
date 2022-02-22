@@ -21,7 +21,7 @@ export type Map = {
 
 export type Repository = {
     title: string;
-    id: string;
+    id: number;
 };
 
 export const enum RWA {

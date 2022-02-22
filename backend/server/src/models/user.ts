@@ -43,4 +43,21 @@ export const UserFns = {
             };
         }
     },
+    getUserById: async (id: number): Promise<User | void> => {
+        const client = await pg.connect();
+
+        const result = await client.query('SELECT * from get_user_by_id($1)', [id]);
+
+        client.release();
+
+        if (result.rows.length) {
+            return {
+                id: result.rows[0].id,
+                username: result.rows[0].username,
+                email: result.rows[0].email,
+                u_password: result.rows[0].u_password,
+                is_admin: result.rows[0].is_admin,
+            };
+        }
+    },
 };

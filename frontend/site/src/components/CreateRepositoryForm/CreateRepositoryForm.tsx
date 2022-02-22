@@ -3,7 +3,7 @@ import { Form, FormSpy } from 'react-final-form';
 
 import { FetchStatus } from 'types/index';
 import { IFormSpy } from './CreateRepositoryForm.typings';
-import { checkIsRepositoryNameFree, createRepository, INewRepositoryProps } from 'actions/repositories';
+import { checkIsRepositoryNameFree, createRepository } from 'actions/repositories';
 import { useDispatch, useSelector } from 'store/store';
 import {
     cnCreateRepositoryForm,
@@ -26,12 +26,12 @@ export const CreateRepositoryForm: FC = () => {
     const store = useSelector((root) => root.createRepositoryForm);
     const [lastRepositoryName, setLastRepositoryName] = useState<string>('');
 
-    const handleSubmit = useCallback((userForm: INewRepositoryProps) => {
+    const handleSubmit = useCallback((userForm: {title: string, isPrivate: boolean}) => {
         createRepository(dispatch, userForm);
     }, []);
 
     const formValidate = useCallback(
-        (values: INewRepositoryProps) => {
+        (values: {title: string, isPrivate: boolean}) => {
             const errors = {};
 
             if (
@@ -91,7 +91,7 @@ export const CreateRepositoryForm: FC = () => {
                             </div>
                             <div className={cnField}>
                                 <CheckboxField
-                                    name="is_private"
+                                    name="isPrivate"
                                     title="сделать приватным"
                                     isDisable={store.fetchStatus === FetchStatus.loading}
                                 />
