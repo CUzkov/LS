@@ -1,4 +1,4 @@
-import { cn } from '../../../utils/index';
+import { cn } from 'utils/classname';
 
 export const cnTextField = cn('text-field');
 export const cnTextFieldInput = cn('text-field', 'input');

@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnCreateMapForm = cn('create-map-from')();
 export const cnCreateMapFormFields = cn('create-map-from', 'fields')();

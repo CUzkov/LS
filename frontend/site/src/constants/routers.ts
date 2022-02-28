@@ -1,11 +1,14 @@
 export const getMainPage = '/';
 
-export const getUserPage = (username: string) => `/user/${username}`;
+export const getUserPage = (username: string) => `/${username}`;
 
-export const getUserMaps = (username: string) => `/user/${username}/maps`;
+export const getAllMaps = (username: string) => `/${username}/maps`;
 
-export const getUserRepositories = (username: string) => `/user/${username}/repositories`;
+export const getAllRepositories = (username: string) => `/${username}/repositories`;
 
-export const getUserMapCreate = (username: string) => `/user/${username}/create/map`;
+export const getRepository = (username: string, name: string) => `/${username}/repositories/${name}`;
+export const getRepositoryTemplate = (username: string) => `/${username}/repositories/:id`;
 
-export const getUserRepositoryCreate = (username: string) => `/user/${username}/create/repository`;
+export const getMapCreate = (username: string) => `/${username}/maps/create`;
+
+export const getRepositoryCreate = (username: string) => `/${username}/repositories/create`;

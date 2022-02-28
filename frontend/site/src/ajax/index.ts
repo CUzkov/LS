@@ -1,6 +1,7 @@
 export enum AjaxType {
     get,
     post,
+    download,
 }
 
 export enum ContentType {
@@ -42,6 +43,14 @@ export const ajax = async <T, D>({ type, url, contentType, data, queryParams }: 
             method: 'GET',
             credentials: 'include',
         }).then((result) => result.json());
+    }
+
+    if (type === AjaxType.download) {
+        return fetch(urlWithQueryParams, {
+            headers,
+            method: 'GET',
+            credentials: 'include',
+        }).then((result) => result.blob() as Promise<any>);
     }
 
     return fetch(urlWithQueryParams, {

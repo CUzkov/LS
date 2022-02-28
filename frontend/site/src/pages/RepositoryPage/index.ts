@@ -1,1 +1,1 @@
-export { RepositoriesListPage } from './RepositoriesListPage';
+export { RepositoryPage } from './RepositoryPage';

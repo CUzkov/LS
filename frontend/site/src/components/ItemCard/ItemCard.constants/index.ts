@@ -1,4 +1,4 @@
-import { cn } from 'utils/index';
+import { cn } from 'utils/classname';
 
 export const cnItemCard = cn('item-card')();
 export const cnItemCardLeft = cn('item-card', 'left')();

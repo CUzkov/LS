@@ -7,7 +7,13 @@ export type RepositoriesByFilterQP = {
     by_user?: number;
 }
 
-export type RepositoriesByFilterReturnD = {
+export type RepositoriesByFilterRD = {
     title: string;
     id: number;
+    rootFiles: {
+        name: string;
+        isDir: boolean;
+        hasSubFiles: boolean;
+        pathToFile: string;
+    }[];
 }[];

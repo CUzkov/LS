@@ -1,3 +1,3 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnMainPage = cn('MainPage')();

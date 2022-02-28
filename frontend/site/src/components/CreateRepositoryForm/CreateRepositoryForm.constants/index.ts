@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnCreateRepositoryForm = cn('create-repository-from')();
 export const cnFields = cn('create-repository-from', 'fields')();

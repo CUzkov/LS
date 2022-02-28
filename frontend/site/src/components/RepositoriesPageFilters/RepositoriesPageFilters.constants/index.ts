@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnRepositoriesPageFilters = cn('repositories-page-filters')();
 export const cnSearchField = cn('repositories-page-filters', 'search-field')();

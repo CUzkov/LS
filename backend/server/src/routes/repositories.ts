@@ -1,6 +1,18 @@
-import { getRepositoriesByFilter, createRepository, checkIsRepositoryNameFree } from '../handlers';
+import {
+    getRepositoriesByFilter,
+    createRepository,
+    checkIsRepositoryNameFree,
+    getRepositoryById,
+    downloadFile,
+} from '../handlers/repositories';
 import { Route, Method } from '../types';
-import { REPOSITORIES_BY_FILTERS_URL, CREATE_REPOSITORY_URL, CHECK_IS_REPOSIROTY_NAME_FREE_URL } from './constants';
+import {
+    REPOSITORIES_BY_FILTERS_URL,
+    CREATE_REPOSITORY_URL,
+    CHECK_IS_REPOSIROTY_NAME_FREE_URL,
+    REPOSITORY_BY_ID_URL,
+    DOWNLOAD_FILE_URL,
+} from './constants';
 
 export const REPOSITORIES_ROUTES: Record<string, Route> = {
     [REPOSITORIES_BY_FILTERS_URL]: {
@@ -19,6 +31,18 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
         name: 'checkIsRepositoryNameFree',
         callback: checkIsRepositoryNameFree,
         method: Method.post,
+        isNeedAuth: true,
+    },
+    [REPOSITORY_BY_ID_URL]: {
+        name: 'getRepositoryById',
+        callback: getRepositoryById,
+        method: Method.get,
+        isNeedAuth: true,
+    },
+    [DOWNLOAD_FILE_URL]: {
+        name: 'downloadFile',
+        callback: downloadFile,
+        method: Method.get,
         isNeedAuth: true,
     },
 };

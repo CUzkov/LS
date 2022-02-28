@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 import { getMainPage, getUserPage } from 'constants/routers';
 
 export const cnUserPage = cn('user-page')();

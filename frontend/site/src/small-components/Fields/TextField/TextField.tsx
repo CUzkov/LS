@@ -2,7 +2,7 @@ import React, { FC, ReactElement, useCallback, useState } from 'react';
 import { Field } from 'react-final-form';
 
 import { composeValidators } from 'utils/final-forms';
-import { IsNoneEmptyStr } from '../../../utils';
+import { IsNoneEmptyStr } from 'utils/classname';
 import { FieldProps, FieldMeta } from '../Fields.typings';
 import {
     cnTextField,

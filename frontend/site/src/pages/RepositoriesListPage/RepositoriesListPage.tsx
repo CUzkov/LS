@@ -1,12 +1,15 @@
-import React, { useEffect, useMemo, FC, useCallback } from 'react';
+import React, { useEffect, useMemo, FC } from 'react';
 import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
 
-import { getPaths, cnItems, cnRepositoriesListPage, cnTitle } from './RepositoriesListPage.constants';
 import { PageWrapper } from 'pages/PageWrapper';
 import { useDispatch, useSelector } from 'store/store';
 import { ItemCard } from 'components/ItemCard';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { RepositoriesPageFilters } from 'components/RepositoriesPageFilters';
+import { getRepository } from 'constants/routers';
+import { PageTitle } from 'components/PageTitle';
+
+import { getPaths, cnItems, cnRepositoriesListPage } from './RepositoriesListPage.constants';
 
 import './style.scss';
 
@@ -35,13 +38,14 @@ export const RepositoriesListPage: FC = () => {
     const content = useMemo(
         () => (
             <div className={cnRepositoriesListPage}>
-                <div className={cnTitle}>
-                    Репозитории
-                    <RepositoriesPageFilters />
-                </div>
+                <PageTitle title={'Репозитории'} rightChild={<RepositoriesPageFilters />} />
                 <div className={cnItems}>
-                    {repositories.data.map((map, index) => (
-                        <ItemCard title={map.title} key={index} />
+                    {repositories.data.map((repository, index) => (
+                        <ItemCard
+                            title={repository.title}
+                            key={index}
+                            link={getRepository(username, String(repository.id))}
+                        />
                     ))}
                 </div>
             </div>

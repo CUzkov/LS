@@ -1,4 +1,6 @@
+import { UserFns } from './';
 import { pg } from '../database';
+import { Git, File } from '../git';
 
 export type Repository = {
     id: number;
@@ -8,6 +10,12 @@ export type Repository = {
     title: string;
     rubric_id?: number;
     map_id?: number;
+    rootFiles: {
+        name: string;
+        isDir: boolean;
+        hasSubFiles: boolean;
+        pathToFile: string;
+    }[];
 };
 
 type RepositoryFilters = {
@@ -24,10 +32,24 @@ type NewRepository = {
 
 export const RepositoryFns = {
     createRepository: async (newRepository: NewRepository, userId: number): Promise<Repository | void> => {
+        const user = await UserFns.getUserById(userId);
+
+        if (!user) {
+            return;
+        }
+
+        const git = new Git(
+            {
+                email: user.email,
+                username: user.username,
+            },
+            newRepository.title,
+        );
+
         const client = await pg.connect();
 
         const result = await client.query('SELECT * from create_repository($1, $2, $3, $4)', [
-            '',
+            git.path,
             newRepository.title,
             newRepository.isPrivate,
             userId,
@@ -44,6 +66,7 @@ export const RepositoryFns = {
                 title: result.rows[0].title,
                 rubric_id: result.rows[0].rubric_id,
                 map_id: result.rows[0].map_id,
+                rootFiles: [],
             };
         }
     },
@@ -85,7 +108,65 @@ export const RepositoryFns = {
                 title: row.title,
                 rubric_id: row.rubric_id,
                 map_id: row.map_id,
+                rootFiles: [],
             }));
         }
+    },
+    getRepositoryById: async (id: number, userId: number): Promise<({ rootFiles: File[] } & Repository) | void> => {
+        const user = await UserFns.getUserById(userId);
+
+        if (!user) {
+            return;
+        }
+
+        const client = await pg.connect();
+
+        const result = await client.query('SELECT * from get_repository_by_id($1, $2)', [userId, id]);
+
+        client.release();
+
+        if (!result.rows.length) {
+            return;
+        }
+
+        const git = new Git(
+            {
+                email: user.email,
+                username: user.username,
+            },
+            result.rows[0].title,
+        );
+
+        const rootFiles = (await git.getFolderFiles()) ?? [];
+
+        return {
+            id: result.rows[0].id,
+            path_to_repository: result.rows[0].path_to_repository,
+            is_private: result.rows[0].is_private,
+            user_id: result.rows[0].user_id,
+            title: result.rows[0].title,
+            rubric_id: result.rows[0].rubric_id,
+            map_id: result.rows[0].map_id,
+            rootFiles,
+        };
+    },
+    getFilePath: async (id: number, userId: number, pathToFile: string): Promise<string | void> => {
+        const user = await UserFns.getUserById(userId);
+
+        if (!user) {
+            return;
+        }
+
+        const client = await pg.connect();
+
+        const result = await client.query('SELECT * from get_repository_by_id($1, $2)', [userId, id]);
+
+        client.release();
+
+        if (!result.rows.length) {
+            return;
+        }
+
+        return pathToFile;
     },
 };

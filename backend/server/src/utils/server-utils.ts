@@ -1,11 +1,24 @@
 import { ServerResponse } from 'http';
+import fs from 'fs';
+import path from 'path';
+import mime from 'mime';
+import archive from 'archiver';
 
 import { Code } from '../types';
+import {baseGitPath} from '../env';
 
-export const getBadRequestResponse = (response: ServerResponse, error: string, description: string) => {
+const fsAsync = fs.promises;
+
+export const getBadRequestResponse = (
+    response: ServerResponse,
+    error: string,
+    description: string,
+    isForField?: boolean,
+) => {
     const body = JSON.stringify({
         error,
         description,
+        isForField,
     });
 
     response
@@ -54,4 +67,34 @@ export const getInternalServerErrorResponse = (response: ServerResponse, error: 
             'Content-Type': 'application/json;charset=utf-8',
         })
         .end(body);
+};
+
+export const getFileResponse = async (response: ServerResponse, pathToFile: string) => {
+    const mimetype = mime.lookup(pathToFile);
+
+    response.setHeader('Content-type', mimetype);
+
+    const isDir = await fsAsync.stat(pathToFile).then((stat) => stat.isDirectory());
+
+    if (isDir) {
+        const filename = path.basename(pathToFile);
+        const pathToZipFile = `${baseGitPath}/temp/${filename}.zip`;
+        const output = fs.createWriteStream(pathToZipFile);
+        const archiver = archive('zip');
+        
+        archiver.pipe(output);
+        archiver.directory(pathToFile, false);
+
+        await archiver.finalize();
+
+        const filestream = fs.createReadStream(pathToZipFile);
+        filestream.pipe(response);
+
+        response.on('close', () => fs.unlink(pathToZipFile, () => {}))
+
+        return;
+    }
+
+    const filestream = fs.createReadStream(pathToFile);
+    filestream.pipe(response);
 };

@@ -1,7 +1,7 @@
 import { LoginUserD, LoginUserReturnD, CheckAuthReturnD } from '@api-types/auth';
 
 import { ResponseCallback, Empty } from '../types';
-import { getOkResponse, getBadRequestResponse, getInternalServerErrorResponse } from '../utils/server_utils';
+import { getOkResponse, getBadRequestResponse, getInternalServerErrorResponse } from '../utils/server-utils';
 import { UserFns } from '../models';
 import { redis } from '../database';
 

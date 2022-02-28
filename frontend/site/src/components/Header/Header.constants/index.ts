@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnHeader = cn('Header')();
 export const cnHeaderLeft = cn('Header-Left')();

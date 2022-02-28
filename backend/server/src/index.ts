@@ -2,10 +2,9 @@ import { createServer, ServerResponse, IncomingMessage } from 'http';
 import Url from 'url';
 
 import { AUTH_ROUTES, REPOSITORIES_ROUTES } from './routes';
-import { getBadRequestResponse, middlewares } from './utils';
-
-const host = 'localhost';
-const port = 8000;
+import { middlewares } from './utils/middlewares';
+import { getBadRequestResponse } from './utils/server-utils';
+import { host, port } from './env';
 
 const ROUTES = {
     ...AUTH_ROUTES,
@@ -25,6 +24,13 @@ const requestListener = async (request: IncomingMessage, response: ServerRespons
 };
 
 const server = createServer(requestListener);
+
 server.listen(port, host, () => {
-    console.log(`Server is running on http://${host}:${port}`);
+    console.log(`Server is running`);
 });
+
+// import {Git} from './git';
+
+// const git = new Git({username: 'cuzkov', email: ''}, 'git1');
+
+// git.getFolderFiles()

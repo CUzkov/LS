@@ -1,10 +1,10 @@
-import {LoginUserData, LoginUserReturnData, CheckAuthReturnData} from '@api-types/auth';
+import { LoginUserData, LoginUserReturnData, CheckAuthReturnData } from '@api-types/auth';
 
 import { ajax, ContentType, AjaxType } from '../ajax';
 import type { IServerError, Empty } from '../types';
 import type { Dispatch } from '../store';
 import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
-import {CHECK_AUTH_URL, LOGIN_USER_URL} from './urls';
+import { CHECK_AUTH_URL, LOGIN_USER_URL } from './urls';
 
 export const loginUser = async (dispath: Dispatch, props: LoginUserData) => {
     dispath({ type: 'login-form/loading' });

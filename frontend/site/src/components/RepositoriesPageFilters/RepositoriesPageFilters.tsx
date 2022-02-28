@@ -119,7 +119,7 @@ export const RepositoriesPageFilters: FC = () => {
             />
             <Form
                 onSubmit={handleSubmitTitleForm}
-                render={({ handleSubmit, modified, dirtySinceLastSubmit, values, form, modifiedSinceLastSubmit }) => (
+                render={({ handleSubmit, modified, dirtySinceLastSubmit, values, form }) => (
                     <form onSubmit={handleSubmit} className={cnSearchForm}>
                         <div className={cnSearchField}>
                             <TextField name="title" type="search" isNoNeedErrors defaultValue={query.title || ''} />

@@ -1,9 +1,8 @@
-import { cn } from '../../../utils';
-import { getMainPage, getUserMaps, getUserPage } from 'constants/routers';
+import { cn } from 'utils/classname';
+import { getMainPage, getAllRepositories, getUserPage } from 'constants/routers';
 
 export const cnRepositoriesListPage = cn('repositories-list-page')();
-export const cnTitle = cn('repositories-list-page')('title');
-export const cnItems = cn('repositories-list-page')('items');
+export const cnItems = cn('repositories-list-page', 'items')();
 
 export const getPaths = (username: string) => [
     {
@@ -16,6 +15,6 @@ export const getPaths = (username: string) => [
     },
     {
         title: 'Все репозитории',
-        url: getUserMaps(username),
+        url: getAllRepositories(username),
     },
 ];

@@ -1,3 +1,3 @@
-import { cn } from '../../../utils/index';
+import { cn } from 'utils/classname';
 
 export const cnButton = cn('button');

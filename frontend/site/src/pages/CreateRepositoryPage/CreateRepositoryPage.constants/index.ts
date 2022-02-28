@@ -1,8 +1,7 @@
-import { cn } from '../../../utils';
-import { getMainPage, getUserPage, getUserRepositoryCreate } from 'constants/routers';
+import { cn } from 'utils/classname';
+import { getMainPage, getUserPage, getRepositoryCreate } from 'constants/routers';
 
 export const cnCreateRepositoryPage = cn('create-repository-page')();
-export const cnCreateRepositoryPageTitle = cn('create-repository-page', 'title')();
 export const cnCreateRepositoryPageForm = cn('create-repository-page', 'form')();
 
 export const getPaths = (username: string) => [
@@ -16,6 +15,6 @@ export const getPaths = (username: string) => [
     },
     {
         title: 'Создание нового репозитория',
-        url: getUserRepositoryCreate(username),
+        url: getRepositoryCreate(username),
     },
 ];

@@ -1,4 +1,4 @@
-import { loginUser, checkAuth } from '../handlers';
+import { loginUser, checkAuth } from '../handlers/auth';
 import { Route, Method } from '../types';
 import { CHECK_AUTH_URL, LOGIN_USER_URL } from './constants';
 

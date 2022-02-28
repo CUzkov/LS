@@ -1,4 +1,4 @@
-import { FetchStatus } from '../../types';
+import { FetchStatus } from 'types';
 
 export type CreateRepositoryFormErrors = '';
 

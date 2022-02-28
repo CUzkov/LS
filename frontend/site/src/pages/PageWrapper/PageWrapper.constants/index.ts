@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnPageWrapper = cn('PageWrapper')();
 export const cnPageWrapperMenu = cn('PageWrapper-Menu')();

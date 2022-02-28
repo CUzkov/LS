@@ -4,9 +4,9 @@ import FileIcon from './assets/file.svg';
 import MapIcon from './assets/map.svg';
 import SettingsIcon from './assets/settings.svg';
 
-import { getUserMaps, getUserMapCreate, getUserRepositoryCreate, getUserRepositories } from 'constants/routers';
+import { getAllMaps, getMapCreate, getRepositoryCreate, getAllRepositories } from 'constants/routers';
 
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnMenu = cn('menu')();
 export const cnMenuItem = cn('menu', 'item')();
@@ -19,11 +19,11 @@ export const getMenu = (username: string) => [
         links: [
             {
                 title: 'Создать',
-                url: getUserMapCreate(username),
+                url: getMapCreate(username),
             },
             {
                 title: 'Все карты',
-                url: getUserMaps(username),
+                url: getAllMaps(username),
             },
         ],
     },
@@ -33,11 +33,11 @@ export const getMenu = (username: string) => [
         links: [
             {
                 title: 'Создать',
-                url: getUserRepositoryCreate(username),
+                url: getRepositoryCreate(username),
             },
             {
                 title: 'Все репозитории',
-                url: getUserRepositories(username),
+                url: getAllRepositories(username),
             },
         ],
     },

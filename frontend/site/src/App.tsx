@@ -6,11 +6,12 @@ import { useDispatch, useSelector } from 'store/store';
 import { Header } from 'components/Header';
 import {
     getMainPage,
-    getUserMaps,
+    getAllMaps,
     getUserPage,
-    getUserMapCreate,
-    getUserRepositoryCreate,
-    getUserRepositories,
+    getMapCreate,
+    getRepositoryCreate,
+    getAllRepositories,
+    getRepositoryTemplate,
 } from 'constants/routers';
 import { Logger } from 'components/Logger';
 
@@ -22,6 +23,7 @@ import {
     CreateMapPage,
     CreateRepositoryPage,
     RepositoriesListPage,
+    RepositoryPage,
 } from './pages';
 import { FetchStatus } from './types';
 
@@ -60,11 +62,12 @@ export const App: FC = () => {
             <Routes>
                 <Route path={getMainPage} element={<MainPage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path={getUserMaps(userStore.username)} element={<MapsListPage />} />
+                <Route path={getAllMaps(userStore.username)} element={<MapsListPage />} />
                 <Route path={getUserPage(userStore.username)} element={<UserPage />} />
-                <Route path={getUserMapCreate(userStore.username)} element={<CreateMapPage />} />
-                <Route path={getUserRepositoryCreate(userStore.username)} element={<CreateRepositoryPage />} />
-                <Route path={getUserRepositories(userStore.username)} element={<RepositoriesListPage />} />
+                <Route path={getMapCreate(userStore.username)} element={<CreateMapPage />} />
+                <Route path={getRepositoryCreate(userStore.username)} element={<CreateRepositoryPage />} />
+                <Route path={getAllRepositories(userStore.username)} element={<RepositoriesListPage />} />
+                <Route path={getRepositoryTemplate(userStore.username)} element={<RepositoryPage />} />
             </Routes>
             <div className="logger-wrapper">
                 <Logger />

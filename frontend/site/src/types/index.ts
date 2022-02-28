@@ -19,9 +19,17 @@ export type Map = {
     id: number;
 };
 
+export type File = {
+    name: string;
+    isDir: boolean;
+    hasSubFiles: boolean;
+    pathToFile: string;
+};
+
 export type Repository = {
     title: string;
     id: number;
+    rootFiles: File[];
 };
 
 export const enum RWA {

@@ -1,4 +1,4 @@
-import { cn } from '../../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnMenuItem = cn('menu-item');
 export const cnMenuItemTitle = cn('menu-item')('title');

@@ -1,10 +1,16 @@
 import React, { useCallback, FC, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Form, FormSpy } from 'react-final-form';
 
 import { FetchStatus } from 'types/index';
-import { IFormSpy } from './CreateRepositoryForm.typings';
+import { getRepository } from 'constants/routers';
 import { checkIsRepositoryNameFree, createRepository } from 'actions/repositories';
 import { useDispatch, useSelector } from 'store/store';
+import { TextField, Button, CheckboxField } from 'small-components/index';
+import { reuqiredValidate } from 'utils/final-forms';
+import { RepositoryNameStatuses } from 'store/reducers/create-repository-form';
+
+import { IFormSpy } from './CreateRepositoryForm.typings';
 import {
     cnCreateRepositoryForm,
     cnButton,
@@ -13,9 +19,6 @@ import {
     cnSpinner,
     cnRepositoryNameSpinner,
 } from './CreateRepositoryForm.constants';
-import { TextField, Button, CheckboxField } from 'small-components/index';
-import { reuqiredValidate } from 'utils/final-forms';
-import { RepositoryNameStatuses } from 'store/reducers/create-repository-form';
 
 import Spinner from 'assets/spinner.svg';
 
@@ -24,14 +27,23 @@ import './style.scss';
 export const CreateRepositoryForm: FC = () => {
     const dispatch = useDispatch();
     const store = useSelector((root) => root.createRepositoryForm);
+    const { username } = useSelector((root) => root.user);
     const [lastRepositoryName, setLastRepositoryName] = useState<string>('');
+    const navigate = useNavigate();
 
-    const handleSubmit = useCallback((userForm: {title: string, isPrivate: boolean}) => {
-        createRepository(dispatch, userForm);
-    }, []);
+    const handleSubmit = useCallback(
+        (userForm: { title: string; isPrivate: boolean }) => {
+            createRepository(dispatch, userForm).then((repository) => {
+                if (repository) {
+                    navigate(getRepository(username, String(repository.id)));
+                }
+            });
+        },
+        [navigate, username],
+    );
 
     const formValidate = useCallback(
-        (values: {title: string, isPrivate: boolean}) => {
+        (values: { title: string; isPrivate: boolean }) => {
             const errors = {};
 
             if (

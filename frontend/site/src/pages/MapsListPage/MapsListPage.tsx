@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 
-import { cnMapsListPage, getPaths, cnMapsListPageTitle, cnMapsListPageItems } from './MapsListPage.constants';
+import { cnMapsListPage, getPaths, cnMapsListPageItems } from './MapsListPage.constants';
 import { PageWrapper } from 'pages/PageWrapper';
 import { useDispatch, useSelector } from 'store/store';
 import { getMapsListPageAllMaps } from 'actions/maps-list-page';
 import { ItemCard } from 'components/ItemCard';
+import { PageTitle } from 'components/PageTitle';
 
 import './style.scss';
 
@@ -22,10 +23,10 @@ export const MapsListPage: FC = () => {
     const content = useMemo(
         () => (
             <div className={cnMapsListPage}>
-                <div className={cnMapsListPageTitle}>Ваши карты</div>
+                <PageTitle title={'Ваши карты'} />
                 <div className={cnMapsListPageItems}>
                     {maps.data.map((map, index) => (
-                        <ItemCard title={map.title} key={index} />
+                        <ItemCard title={map.title} key={index} link={''} />
                     ))}
                 </div>
             </div>

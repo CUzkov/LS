@@ -1,4 +1,4 @@
-import { cn } from '../../../utils';
+import { cn } from 'utils/classname';
 
 export const cnLoginFrom = cn('login-from')();
 export const cnLoginFromFields = cn('login-from', 'fields')();

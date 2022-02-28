@@ -177,7 +177,7 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Получение пользователя по username
+-- Получение пользователя по id
 -----------------------------------------------------------------------
 create function get_user_by_id(
 	id_v integer
@@ -374,6 +374,51 @@ $BODY$
 					users_repositories_relationship.relationship = relationships_v[2] or
 					users_repositories_relationship.relationship = relationships_v[3]
 				);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение репозитория по id
+-----------------------------------------------------------------------
+create function get_repository_by_id(
+	user_id_v integer,
+	id_v integer
+) returns table(
+	id integer,
+	path_to_repository text,
+	is_private boolean,
+	user_id integer,
+	title text,
+	rubric_id integer,
+	map_id integer
+) as
+$BODY$
+	declare
+		relationships_v bit(3)[3];
+	begin
+		relationships_v = get_array_of_bit_mask_by_flags(true, true);
+
+		return query 
+			select	
+				repositories.id,
+				repositories.path_to_repository,
+				repositories.is_private,
+				repositories.user_id,
+				repositories.title,
+				repositories.rubric_id,
+				repositories.map_id
+			from repositories
+			inner join users_repositories_relationship
+			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			where
+				repositories.id=id_v and
+				(
+					users_repositories_relationship.relationship = relationships_v[1] or
+					users_repositories_relationship.relationship = relationships_v[2] or
+					users_repositories_relationship.relationship = relationships_v[3]
+				)
+			limit 1;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

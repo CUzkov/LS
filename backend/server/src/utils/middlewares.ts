@@ -2,7 +2,7 @@ import Cookies from 'cookies';
 import { ServerResponse } from 'http';
 
 import { MiddlewareRequest } from '../types';
-import { getBadRequestResponse } from './server_utils';
+import { getBadRequestResponse } from './server-utils';
 import { redis } from '../database';
 
 enum MiddlewareCode {

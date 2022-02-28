@@ -1,14 +1,14 @@
-import {RepositoriesByFilterQP, RepositoriesByFilterReturnData} from '@api-types/repository';
+import { RepositoriesByFilterQP, RepositoriesByFilterRD } from '@api-types/repository';
 
 import { ajax, ContentType, AjaxType } from '../ajax';
 import { IServerError } from '../types';
 import { Dispatch } from '../store';
-import {REPOSITORIES_BY_FILTERS_URL} from './urls';
+import { REPOSITORIES_BY_FILTERS_URL } from './urls';
 
 export const getPageRepositoriesByFilters = async (dispath: Dispatch, filters: RepositoriesByFilterQP) => {
     dispath({ type: 'repositories-list-page/repositories-list/loading' });
 
-    const response = await ajax<RepositoriesByFilterReturnData | IServerError, RepositoriesByFilterQP>({
+    const response = await ajax<RepositoriesByFilterRD | IServerError, RepositoriesByFilterQP>({
         type: AjaxType.get,
         contentType: ContentType.JSON,
         url: REPOSITORIES_BY_FILTERS_URL,
@@ -25,7 +25,10 @@ export const getPageRepositoriesByFilters = async (dispath: Dispatch, filters: R
 
     if ('error' in response) {
         dispath({ type: 'repositories-list-page/repositories-list/error' });
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: response.error, description: response.description } });
+        dispath({
+            type: 'logger/add-log',
+            data: { type: 'error', title: response.error, description: response.description },
+        });
     } else {
         dispath({
             type: 'repositories-list-page/repositories-list/success',
