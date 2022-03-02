@@ -1,7 +1,18 @@
+import { QueryResult } from 'pg';
+
+import { errors } from '../constants/errors';
 import { pg } from '../database';
 
+import { getUserByIdQ, GetUserByIdQP, GetUserByIdR } from '../database/pg-typings/get-user-by-id';
+import { getUserByEmailQ, GetUserByEmailQP, GetUserByEmailR } from '../database/pg-typings/get-user-by-email';
+import {
+    getUserByUsernameQ,
+    GetUserByUsernameQP,
+    GetUserByUsernameR,
+} from '../database/pg-typings/get-user-by-username';
+
 export type User = {
-    id: string;
+    id: number;
     username: string;
     email: string;
     u_password: string;
@@ -9,55 +20,58 @@ export type User = {
 };
 
 export const UserFns = {
-    getUserByUsername: async (username: string): Promise<User | void> => {
-        const client = await pg.connect();
+    getUserByUsername: async (username: string): Promise<User> => {
+        let result: QueryResult<GetUserByEmailR>;
 
-        const result = await client.query('SELECT * from get_user_by_username($1)', [username]);
-
-        client.release();
-
-        if (result.rows.length) {
-            return {
-                id: result.rows[0].id,
-                username: result.rows[0].username,
-                email: result.rows[0].email,
-                u_password: result.rows[0].u_password,
-                is_admin: result.rows[0].is_admin,
-            };
+        try {
+            const client = await pg.connect();
+            result = await client.query<GetUserByUsernameR, GetUserByUsernameQP>(getUserByUsernameQ, [username]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw errors.dbError(e.message);
         }
+
+        if (!result.rowCount) {
+            throw errors.noSuchUser404('');
+        }
+
+        return result.rows[0];
     },
-    getUserByEmail: async (email: string): Promise<User | void> => {
-        const client = await pg.connect();
+    getUserByEmail: async (email: string): Promise<User> => {
+        let result: QueryResult<GetUserByEmailR>;
 
-        const result = await client.query('SELECT * from get_user_by_email($1)', [email]);
-
-        client.release();
-
-        if (result.rows.length) {
-            return {
-                id: result.rows[0].id,
-                username: result.rows[0].username,
-                email: result.rows[0].email,
-                u_password: result.rows[0].u_password,
-                is_admin: result.rows[0].is_admin,
-            };
+        try {
+            const client = await pg.connect();
+            result = await client.query<GetUserByEmailR, GetUserByEmailQP>(getUserByEmailQ, [email]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw errors.dbError(e.message);
         }
+
+        if (!result.rowCount) {
+            throw errors.noSuchUser404('');
+        }
+
+        return result.rows[0];
     },
-    getUserById: async (id: number): Promise<User | void> => {
-        const client = await pg.connect();
+    getUserById: async (id: number): Promise<User> => {
+        let result: QueryResult<GetUserByIdR>;
 
-        const result = await client.query('SELECT * from get_user_by_id($1)', [id]);
-
-        client.release();
-
-        if (result.rows.length) {
-            return {
-                id: result.rows[0].id,
-                username: result.rows[0].username,
-                email: result.rows[0].email,
-                u_password: result.rows[0].u_password,
-                is_admin: result.rows[0].is_admin,
-            };
+        try {
+            const client = await pg.connect();
+            result = await client.query<GetUserByIdR, GetUserByIdQP>(getUserByIdQ, [id]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw errors.dbError(e.message);
         }
+
+        if (!result.rowCount) {
+            throw errors.noSuchUser404('Такой пользователь не найден!');
+        }
+
+        return result.rows[0];
     },
 };

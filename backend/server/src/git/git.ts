@@ -5,6 +5,7 @@ import simpleGit, { SimpleGit } from 'simple-git';
 const fsAsync = fsSync.promises;
 
 import { baseGitPath } from '../env';
+import { errors } from '../constants/errors';
 
 export type File = {
     name: string;
@@ -46,7 +47,7 @@ export class Git {
         this.gitCore.init();
     }
 
-    async getFolderFiles(pathToDir = ''): Promise<File[] | void> {
+    async getFolderFiles(pathToDir = ''): Promise<File[]> {
         const files: Array<File & { index?: number }> = [];
 
         const fullPathToDir = path.join(this.path, pathToDir);
@@ -55,7 +56,8 @@ export class Git {
         try {
             dir = await fsAsync.readdir(fullPathToDir);
         } catch (error) {
-            return;
+            const e = error as { message: string };
+            throw errors.readFileError(e.message);
         }
 
         const dirPromises = dir.map(async (file, index) => {
@@ -67,11 +69,17 @@ export class Git {
 
             const dirStat = await fsAsync.stat(pathToFile);
             const isDir = dirStat.isDirectory();
+
             let hasSubFiles = false;
 
             if (isDir) {
-                const dir = await fsAsync.readdir(pathToFile);
-                hasSubFiles = Boolean(dir.length);
+                try {
+                    const dir = await fsAsync.readdir(pathToFile);
+                    hasSubFiles = Boolean(dir.length);
+                } catch (error) {
+                    const e = error as Error;
+                    throw errors.readFileError(e.message);
+                }
             }
 
             files.push({

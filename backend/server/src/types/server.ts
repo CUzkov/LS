@@ -5,13 +5,15 @@ export enum Code {
     ok = 200,
     created = 201,
     unauthorized = 401,
+    permissionDenied = 403,
     badRequest = 404,
     internalServerError = 500,
 }
 
 export type ServerError = {
-    error: string;
-    description: string;
+    code?: Code;
+    name: string;
+    message: string;
 };
 
 export type ServerResponse<T> = {

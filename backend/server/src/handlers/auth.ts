@@ -1,8 +1,13 @@
 import { LoginUserD, LoginUserReturnD, CheckAuthReturnD } from '@api-types/auth';
 
-import { ResponseCallback, Empty } from '../types';
-import { getOkResponse, getBadRequestResponse, getInternalServerErrorResponse } from '../utils/server-utils';
-import { UserFns } from '../models';
+import { ResponseCallback, Empty, ServerError, Code } from '../types';
+import {
+    getOkResponse,
+    getBadRequestResponse,
+    getInternalServerErrorResponse,
+    getServerErrorResponse,
+} from '../utils/server-utils';
+import { User, UserFns } from '../models';
 import { redis } from '../database';
 
 const UNIX_MOUNTH = 60 * 60 * 24 * 30;
@@ -12,23 +17,24 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
         return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
     }
 
-    const user = data?.email
-        ? await UserFns.getUserByEmail(data.email)
-        : await UserFns.getUserByUsername(data.username);
+    let user: User;
 
-    if (!user) {
-        return getBadRequestResponse(response, 'Ошибка', 'Такого пользователя не существует!');
+    try {
+        user = data?.email ? await UserFns.getUserByEmail(data.email) : await UserFns.getUserByUsername(data.username);
+    } catch (error) {
+        const e = error as ServerError;
+        return getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
 
     if (data.password !== user.u_password) {
-        return getBadRequestResponse(response, 'Ошибка', 'Неверный пароль');
+        return getBadRequestResponse(response, 'Ошибка', 'Неверный пароль', true);
     }
 
     const newTime = String(new Date().getTime() + UNIX_MOUNTH);
     const userId = user.id;
 
-    redis.set(userId, newTime);
-    cookies?.set('user_id', userId);
+    redis.set(String(userId), newTime);
+    cookies?.set('user_id', String(userId));
     cookies?.set('expired', newTime);
 
     getOkResponse<LoginUserReturnD>(response, {
@@ -44,16 +50,11 @@ export const checkAuth: ResponseCallback<Empty, Empty> = async ({ response, user
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
 
-    const user = await UserFns.getUserById(userId);
-
-    if (!user) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'user не найден');
+    try {
+        const user = await UserFns.getUserById(userId);
+        getOkResponse<CheckAuthReturnD>(response, user);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
-
-    return getOkResponse<CheckAuthReturnD>(response, {
-        email: user.email,
-        id: user.id,
-        is_admin: user.is_admin,
-        username: user.username,
-    });
 };

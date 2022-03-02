@@ -5,7 +5,7 @@ import mime from 'mime';
 import archive from 'archiver';
 
 import { Code } from '../types';
-import {baseGitPath} from '../env';
+import { baseGitPath } from '../env';
 
 const fsAsync = fs.promises;
 
@@ -69,6 +69,20 @@ export const getInternalServerErrorResponse = (response: ServerResponse, error: 
         .end(body);
 };
 
+export const getServerErrorResponse = (response: ServerResponse, error: string, description: string, code: Code) => {
+    const body = JSON.stringify({
+        error,
+        description,
+    });
+
+    response
+        .writeHead(code, {
+            'Content-Length': Buffer.byteLength(body),
+            'Content-Type': 'application/json;charset=utf-8',
+        })
+        .end(body);
+};
+
 export const getFileResponse = async (response: ServerResponse, pathToFile: string) => {
     const mimetype = mime.lookup(pathToFile);
 
@@ -81,7 +95,7 @@ export const getFileResponse = async (response: ServerResponse, pathToFile: stri
         const pathToZipFile = `${baseGitPath}/temp/${filename}.zip`;
         const output = fs.createWriteStream(pathToZipFile);
         const archiver = archive('zip');
-        
+
         archiver.pipe(output);
         archiver.directory(pathToFile, false);
 
@@ -90,7 +104,7 @@ export const getFileResponse = async (response: ServerResponse, pathToFile: stri
         const filestream = fs.createReadStream(pathToZipFile);
         filestream.pipe(response);
 
-        response.on('close', () => fs.unlink(pathToZipFile, () => {}))
+        response.on('close', () => fs.unlink(pathToZipFile, () => {}));
 
         return;
     }

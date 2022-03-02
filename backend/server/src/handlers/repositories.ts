@@ -7,10 +7,16 @@ import {
     CheckIsRepositoryNameFreeRD,
 } from '@api-types/repository/check-is-repository-name-free';
 
-import { ResponseCallback, Empty } from '../types';
-import { getOkResponse, getInternalServerErrorResponse, getBadRequestResponse, getFileResponse } from '../utils/server-utils';
+import { ResponseCallback, Empty, ServerError, Code } from '../types';
+import {
+    getOkResponse,
+    getInternalServerErrorResponse,
+    getBadRequestResponse,
+    getServerErrorResponse,
+    getFileResponse,
+} from '../utils/server-utils';
 import { RepositoryFns } from '../models';
-import { formatStrForPath, isCorrectPath } from '../utils/paths';
+import { formatTitleToPath, isCorrectPath } from '../utils/paths';
 
 export const getRepositoriesByFilter: ResponseCallback<Empty, RepositoriesByFilterQP> = async ({
     response,
@@ -25,9 +31,13 @@ export const getRepositoriesByFilter: ResponseCallback<Empty, RepositoriesByFilt
         queryParams = {};
     }
 
-    const repositories = await RepositoryFns.getRepositoryByFilters(queryParams, userId);
-
-    getOkResponse<RepositoriesByFilterRD>(response, repositories || []);
+    try {
+        const repositories = await RepositoryFns.getRepositoryByFilters(queryParams, userId);
+        getOkResponse<RepositoriesByFilterRD>(response, repositories);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+    }
 };
 
 export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = async ({ response, userId, data }) => {
@@ -39,13 +49,13 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
         return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
     }
 
-    const repository = await RepositoryFns.createRepository(data, userId);
-
-    if (!repository) {
-        return getInternalServerErrorResponse(response, 'Ошибка создания', '');
+    try {
+        const repository = await RepositoryFns.createRepository(data, userId);
+        getOkResponse<CreateRepositoryRD>(response, repository);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
-
-    getOkResponse<CreateRepositoryRD>(response, repository);
 };
 
 export const checkIsRepositoryNameFree: ResponseCallback<CheckIsRepositoryNameFreeD, Empty> = async ({
@@ -61,15 +71,19 @@ export const checkIsRepositoryNameFree: ResponseCallback<CheckIsRepositoryNameFr
         return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
     }
 
-    const title = formatStrForPath(data.title);
+    const title = formatTitleToPath(data.title);
 
     if (!isCorrectPath(title)) {
         return getBadRequestResponse(response, 'Ошибка данных', 'Недопустимые символы в названии репозитория!', true);
     }
 
-    const isFree = await RepositoryFns.checkIsRepositoryNameFree({ title });
-
-    getOkResponse<CheckIsRepositoryNameFreeRD>(response, isFree ?? { isFree: false });
+    try {
+        const isFree = await RepositoryFns.checkIsRepositoryNameFree(title, userId);
+        getOkResponse<CheckIsRepositoryNameFreeRD>(response, isFree);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+    }
 };
 
 export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = async ({
@@ -85,20 +99,16 @@ export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = asyn
         return getBadRequestResponse(response, 'Ошибка параметров', 'Id является обязательным параметром!');
     }
 
-    const repository = await RepositoryFns.getRepositoryById(queryParams.id, userId);
-
-    if (!repository) {
-        return getBadRequestResponse(response, 'Ошибка доступа', 'Нет прав на просмотр этого репозитория!');
+    try {
+        const repository = await RepositoryFns.getRepositoryById(queryParams.id, userId);
+        getOkResponse<RepositoryByIdRD>(response, repository);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
-
-    getOkResponse<RepositoryByIdRD>(response, repository);
 };
 
-export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({
-    response,
-    userId,
-    queryParams,
-}) => {
+export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ response, userId, queryParams }) => {
     if (!userId) {
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
@@ -107,11 +117,11 @@ export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({
         return getBadRequestResponse(response, 'Ошибка параметров', 'Id является обязательным параметром!');
     }
 
-    const pathToFile = await RepositoryFns.getFilePath(queryParams.repositoryId, userId, queryParams.pathToFile);
-
-    if (!pathToFile) {
-        return getBadRequestResponse(response, 'Ошибка доступа', 'Нет прав на просмотр этого репозитория!');
+    try {
+        const pathToFile = await RepositoryFns.getFilePath(queryParams.repositoryId, userId, queryParams.pathToFile);
+        getFileResponse(response, pathToFile);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
-
-    getFileResponse(response, pathToFile);
 };

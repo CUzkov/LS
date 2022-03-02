@@ -4,5 +4,5 @@ export {
     CREATE_REPOSITORY_URL,
     CHECK_IS_REPOSIROTY_NAME_FREE_URL,
     REPOSITORY_BY_ID_URL,
-    DOWNLOAD_FILE_URL
+    DOWNLOAD_FILE_URL,
 } from '../../../../api-types/repository';
