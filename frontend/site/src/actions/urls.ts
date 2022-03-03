@@ -5,4 +5,5 @@ export {
     REPOSITORIES_BY_FILTERS_URL,
     REPOSITORY_BY_ID_URL,
     DOWNLOAD_FILE_URL,
+    GET_FILES_BY_DIR_PATH_URL,
 } from '../../../../api-types/repository';

@@ -1,56 +1,77 @@
 import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-repository-by-id';
+import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
 
 import { ajax, ContentType, AjaxType } from '../ajax';
-import { IServerError } from '../types';
+import { Empty, IServerError } from '../types';
 import { Dispatch } from '../store';
-import { REPOSITORY_BY_ID_URL } from './urls';
+import { REPOSITORY_BY_ID_URL, GET_FILES_BY_DIR_PATH_URL } from './urls';
 
 export const getPageRepositoriesById = async (dispath: Dispatch, queryParams: RepositoryByIdQP) => {
-    let isExit = false;
-
     dispath({ type: 'repository-page/repository/loading' });
-    dispath({ type: 'repository-page/files/loading' });
 
-    const error = () => {
+    let response: RepositoryByIdRD | IServerError;
+
+    try {
+        response = await ajax<RepositoryByIdRD | IServerError, RepositoryByIdQP>({
+            type: AjaxType.get,
+            contentType: ContentType.JSON,
+            url: REPOSITORY_BY_ID_URL,
+            queryParams,
+        });
+    } catch (error) {
         dispath({ type: 'repository-page/repository/error' });
-        dispath({ type: 'repository-page/files/error' });
         dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
-        isExit = true;
-    };
-
-    const response = await ajax<RepositoryByIdRD | IServerError, RepositoryByIdQP>({
-        type: AjaxType.get,
-        contentType: ContentType.JSON,
-        url: REPOSITORY_BY_ID_URL,
-        queryParams,
-    }).catch(() => error());
-
-    if (isExit) return;
-    if (!response) return error();
+        return;
+    }
 
     if ('error' in response) {
         dispath({ type: 'repository-page/repository/error' });
-        dispath({ type: 'repository-page/files/error' });
         dispath({
             type: 'logger/add-log',
             data: { type: 'error', title: response.error, description: response.description },
         });
-    } else {
-        dispath({
-            type: 'repository-page/repository/success',
-            data: {
-                repository: {
-                    data: response,
-                },
-            },
-        });
-        dispath({
-            type: 'repository-page/files/success',
-            data: {
-                files: {
-                    data: response.rootFiles,
-                },
-            },
-        });
+        return;
     }
+
+    dispath({
+        type: 'repository-page/repository/success',
+        data: {
+            repository: {
+                data: response,
+            },
+        },
+    });
+};
+
+export const getFilesByDirPath = async (dispath: Dispatch, queryParams: FilesByDirPathQP) => {
+    dispath({ type: 'repository-page/files/loading' });
+
+    let response: FilesByDirPathRD | IServerError;
+
+    try {
+        response = await ajax<FilesByDirPathRD | IServerError, Empty>({
+            type: AjaxType.get,
+            contentType: ContentType.JSON,
+            url: GET_FILES_BY_DIR_PATH_URL,
+            queryParams,
+        });
+    } catch (error) {
+        dispath({ type: 'repository-page/files/error' });
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        return;
+    }
+
+    if ('error' in response) {
+        dispath({
+            type: 'logger/add-log',
+            data: { title: response.error, description: response.description, type: 'error' },
+        });
+        return;
+    }
+
+    dispath({ type: 'repository-page/files/success', data: { files: { data: response } } });
+};
+
+export const changeFilesDirPath = (dispath: Dispatch, path: string[]) => {
+    dispath({ type: 'repository-page/files/path', data: path });
 };

@@ -10,7 +10,6 @@ export interface ILoginFormD {
 }
 
 export type LoginFormEvents =
-    | { type: 'login-form/failed' }
     | { type: 'login-form/success' }
     | { type: 'login-form/loading' }
     | { type: 'login-form/error'; data: ILoginFormD };
@@ -26,13 +25,6 @@ const initialState: LoginFormStore = {
 };
 
 export const loginFormReducer = (state: LoginFormStore = initialState, event: LoginFormEvents): LoginFormStore => {
-    if (event.type === 'login-form/failed') {
-        return {
-            ...state,
-            fetchStatus: FetchStatus.failed,
-        };
-    }
-
     if (event.type === 'login-form/loading') {
         return {
             ...state,

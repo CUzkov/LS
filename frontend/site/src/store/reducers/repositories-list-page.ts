@@ -9,9 +9,7 @@ export interface IRepositoriesListPageD {
 export type RepositoriesListPageEvents =
     | { type: 'repositories-list-page/repositories-list/success'; data: IRepositoriesListPageD }
     | { type: 'repositories-list-page/repositories-list/loading' }
-    | { type: 'repositories-list-page/repositories-list/error' }
-    | { type: 'repositories-list-page/repositories-list/failed' }
-    | { type: 'repositories-list-page/repositories-list/clear' };
+    | { type: 'repositories-list-page/repositories-list/error' };
 
 export type RepositoriesListPageStore = {
     repositories: {

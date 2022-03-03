@@ -4,6 +4,7 @@ import {
     checkIsRepositoryNameFree,
     getRepositoryById,
     downloadFile,
+    getFilesByDirPath
 } from '../handlers/repositories';
 import { Route, Method } from '../types';
 import {
@@ -12,6 +13,7 @@ import {
     CHECK_IS_REPOSIROTY_NAME_FREE_URL,
     REPOSITORY_BY_ID_URL,
     DOWNLOAD_FILE_URL,
+    GET_FILES_BY_DIR_PATH_URL,
 } from './constants';
 
 export const REPOSITORIES_ROUTES: Record<string, Route> = {
@@ -42,6 +44,12 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
     [DOWNLOAD_FILE_URL]: {
         name: 'downloadFile',
         callback: downloadFile,
+        method: Method.get,
+        isNeedAuth: true,
+    },
+    [GET_FILES_BY_DIR_PATH_URL]: {
+        name: 'getFilesByDirPath',
+        callback: getFilesByDirPath,
         method: Method.get,
         isNeedAuth: true,
     },

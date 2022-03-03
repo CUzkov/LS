@@ -264,7 +264,8 @@ $BODY$
 -- Проверка на существование репозитория по пути к нему
 -----------------------------------------------------------------------
 create function check_is_repository_name_free(
-	path_to_repository_v text
+	repository_title_v text,
+	user_id_V integer
 ) returns table(id integer) as
 $BODY$
 	declare
@@ -272,7 +273,7 @@ $BODY$
 	begin
 		return query 
 			select repositories.id from repositories
-			where repositories.path_to_repository=path_to_repository_v;
+			where repositories.title=repository_title_v and repositories.user_id=user_id_V;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

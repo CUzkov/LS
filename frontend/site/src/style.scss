@@ -49,6 +49,9 @@ body {
     --default-shadow-color: rgba(241, 243, 244, 0.2);
     --default-hover-color: rgba(241, 243, 244, 0.2);
     --second-hover-color: #3e4345;
+
+    --scrollbar-color-thumb: #666;
+    --scrollbar-color-thumb-hover: #999;
 }
 
 // inputs
@@ -84,6 +87,9 @@ $default-shadow-color: var(--default-shadow-color);
 $default-hover-color: var(--default-hover-color);
 $second-hover-color: var(--second-hover-color);
 
+$scrollbar-color-thumb: var(--scrollbar-color-thumb);
+$scrollbar-color-thumb-hover: var(--scrollbar-color-thumb-hover);
+
 .page-wrapper {
     background-color: $page-color;
     color: $default-text-color;
@@ -92,4 +98,16 @@ $second-hover-color: var(--second-hover-color);
 a {
     text-decoration: none;
     color: $default-text-color;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb {
+    background: $scrollbar-color-thumb; 
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: $scrollbar-color-thumb-hover;
 }

@@ -13,6 +13,7 @@ export type RepositoryPageEvents =
     | { type: 'repository-page/repository/success'; data: IRepositoryPageD }
     | { type: 'repository-page/repository/loading' }
     | { type: 'repository-page/repository/error' }
+    | { type: 'repository-page/files/path'; data: string[] }
     | { type: 'repository-page/files/success'; data: IRepositoryPageD }
     | { type: 'repository-page/files/loading' }
     | { type: 'repository-page/files/error' };
@@ -24,6 +25,7 @@ export type RepositoryPageStore = {
     };
     files: {
         data?: File[];
+        path: string[];
         fetchStatus: FetchStatus;
     };
 };
@@ -35,6 +37,7 @@ const initialState: RepositoryPageStore = {
     },
     files: {
         data: undefined,
+        path: [],
         fetchStatus: FetchStatus.loading,
     },
 };
@@ -74,6 +77,7 @@ export const repositoryPageReducer = (
         const result = { ...state };
 
         result.files = {
+            path: result.files.path,
             data: event.data.files?.data,
             fetchStatus: FetchStatus.successed,
         };
@@ -93,6 +97,14 @@ export const repositoryPageReducer = (
         const result = { ...state };
 
         result.files.fetchStatus = FetchStatus.error;
+
+        return result;
+    }
+
+    if (event.type === 'repository-page/files/path') {
+        const result = { ...state };
+
+        result.files.path = event.data;
 
         return result;
     }

@@ -14,6 +14,6 @@ export type RepositoriesByFilterRD = {
         name: string;
         isDir: boolean;
         hasSubFiles: boolean;
-        pathToFile: string;
+        pathToFile: string[];
     }[];
 }[];

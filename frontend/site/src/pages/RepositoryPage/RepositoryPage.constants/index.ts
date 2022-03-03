@@ -4,7 +4,7 @@ import { getMainPage, getAllRepositories, getUserPage, getRepository } from 'con
 export const cnRepositoryPage = cn('repository-page')();
 export const cnTitle = cn('repository-page', 'title')();
 
-export const getPaths = (username: string, entityName = 'error') => [
+export const getPaths = (username: string, entityName = 'error', entityValue = '') => [
     {
         title: 'Главная',
         url: getMainPage,
@@ -19,6 +19,6 @@ export const getPaths = (username: string, entityName = 'error') => [
     },
     {
         title: entityName,
-        url: getRepository(username, entityName),
+        url: getRepository(username, entityValue),
     },
 ];

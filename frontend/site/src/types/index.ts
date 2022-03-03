@@ -7,7 +7,6 @@ export type Empty = Record<string, never>;
 
 export enum FetchStatus {
     successed,
-    failed,
     loading,
     error,
     none,
@@ -23,7 +22,7 @@ export type File = {
     name: string;
     isDir: boolean;
     hasSubFiles: boolean;
-    pathToFile: string;
+    pathToFile: string[];
 };
 
 export type Repository = {

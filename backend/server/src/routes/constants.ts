@@ -5,4 +5,5 @@ export {
     CHECK_IS_REPOSIROTY_NAME_FREE_URL,
     REPOSITORY_BY_ID_URL,
     DOWNLOAD_FILE_URL,
+    GET_FILES_BY_DIR_PATH_URL
 } from '../../../../api-types/repository';

@@ -1,4 +1,5 @@
-import { LoginUserData, LoginUserReturnData, CheckAuthReturnData } from '@api-types/auth';
+import { CheckAuthRD } from '@api-types/auth/check-auth';
+import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
 
 import { ajax, ContentType, AjaxType } from '../ajax';
 import type { IServerError, Empty } from '../types';
@@ -6,62 +7,70 @@ import type { Dispatch } from '../store';
 import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
 import { CHECK_AUTH_URL, LOGIN_USER_URL } from './urls';
 
-export const loginUser = async (dispath: Dispatch, props: LoginUserData) => {
+export const loginUser = async (dispath: Dispatch, props: LoginUserD) => {
     dispath({ type: 'login-form/loading' });
 
-    const response = await ajax<LoginUserReturnData | IServerError, LoginUserData>({
-        type: AjaxType.post,
-        contentType: ContentType.JSON,
-        url: LOGIN_USER_URL,
-        data: props,
-    }).catch(() => {
-        dispath({ type: 'login-form/failed' });
-        return;
-    });
+    let response: LoginUserRD | IServerError;
 
-    if (!response) {
+    try {
+        response = await ajax<LoginUserRD | IServerError, LoginUserD>({
+            type: AjaxType.post,
+            contentType: ContentType.JSON,
+            url: LOGIN_USER_URL,
+            data: props,
+        });
+    } catch (error) {
+        dispath({ type: 'login-form/error', data: { error: '' } });
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
         return;
     }
 
-    if ('id' in response) {
-        const user = {
-            userId: response.id,
-            username: response.username,
-            email: response.email,
-            isAdmin: response.is_admin,
-        };
-
-        dispath({ type: 'login-form/success' });
-
-        dispath({ type: 'user/success', data: user });
-    } else {
+    if ('error' in response) {
         if (response.error === NO_SUCH_USER || response.error === INCORRECT_PASSWORD) {
             dispath({ type: 'login-form/error', data: { error: response.error } });
             return;
         }
 
-        dispath({ type: 'login-form/failed' });
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Неизвестная ошибка :(', description: '' } });
+        dispath({ type: 'login-form/error', data: { error: '' } });
+        return;
     }
+
+    dispath({ type: 'login-form/success' });
+    dispath({
+        type: 'user/success',
+        data: {
+            userId: response.id,
+            username: response.username,
+            email: response.email,
+            isAdmin: response.is_admin,
+        },
+    });
 };
 
 export const checkAuth = async (dispath: Dispatch) => {
     dispath({ type: 'user/loading' });
 
-    const response = await ajax<CheckAuthReturnData | IServerError, Empty>({
-        type: AjaxType.get,
-        contentType: ContentType.JSON,
-        url: CHECK_AUTH_URL,
-    }).catch(() => {
+    let response: CheckAuthRD | IServerError;
+
+    try {
+        response = await ajax<CheckAuthRD | IServerError, Empty>({
+            type: AjaxType.get,
+            contentType: ContentType.JSON,
+            url: CHECK_AUTH_URL,
+        });
+    } catch (error) {
         dispath({ type: 'user/none' });
-        return {};
-    });
+        return;
+    }
 
     if ('error' in response) {
         dispath({ type: 'user/none' });
-    } else {
-        dispath({
-            type: 'user/success',
-            data: response,
-        });
+        return;
     }
+
+    dispath({
+        type: 'user/success',
+        data: response,
+    });
 };

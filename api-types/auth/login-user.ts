@@ -6,7 +6,7 @@ export type LoginUserD = {
     email: string;
 }
 
-export type LoginUserReturnD = {
+export type LoginUserRD = {
     id: number;
     username: string;
     email: string;

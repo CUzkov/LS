@@ -8,7 +8,7 @@ export interface IUserStoreD {
 }
 
 export type UserEvents =
-    | { type: 'user/failed' }
+    | { type: 'user/error' }
     | { type: 'user/success'; data: IUserStoreD }
     | { type: 'user/loading' }
     | { type: 'user/none' };
@@ -30,10 +30,10 @@ const initialState: UserStore = {
 };
 
 export const userReducer = (state: UserStore = initialState, event: UserEvents): UserStore => {
-    if (event.type === 'user/failed') {
+    if (event.type === 'user/error') {
         return {
             ...state,
-            fetchStatus: FetchStatus.failed,
+            fetchStatus: FetchStatus.error,
         };
     }
 

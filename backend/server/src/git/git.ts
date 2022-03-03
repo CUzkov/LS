@@ -11,7 +11,7 @@ export type File = {
     name: string;
     isDir: boolean;
     hasSubFiles: boolean;
-    pathToFile: string;
+    pathToFile: string[];
 };
 
 type GitUser = {
@@ -47,10 +47,10 @@ export class Git {
         this.gitCore.init();
     }
 
-    async getFolderFiles(pathToDir = ''): Promise<File[]> {
+    async getFolderFiles(pathToDir: string[] = []): Promise<File[]> {
         const files: Array<File & { index?: number }> = [];
 
-        const fullPathToDir = path.join(this.path, pathToDir);
+        const fullPathToDir = path.join(this.path, ...pathToDir);
         let dir: string[] = [];
 
         try {
@@ -86,7 +86,7 @@ export class Git {
                 name: file,
                 hasSubFiles,
                 isDir,
-                pathToFile,
+                pathToFile: path.join(...pathToDir, file).split(path.sep),
                 index,
             });
         });
@@ -107,5 +107,9 @@ export class Git {
                 delete file.index;
                 return file;
             });
+    }
+
+    getFullPathToFile(pathToFile: string[]): string {
+        return path.join(this.path, ...pathToFile);
     }
 }

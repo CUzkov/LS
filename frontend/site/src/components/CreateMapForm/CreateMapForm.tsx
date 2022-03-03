@@ -28,17 +28,10 @@ export const CreateMapForm: FC = () => {
         createMap(dispatch, userForm);
     }, []);
 
-    const formValidate = useCallback(() => {
-        return {};
-    }, [createMapFormStore.error]);
-
-    const modifiedSinceLastSubmit = useCallback((_: IFormSpy) => {}, [createMapFormStore.error]);
-
     return (
         <div className={cnCreateMapForm}>
             <Form
                 onSubmit={onSubmit}
-                validate={formValidate}
                 render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
                         <div className={cnCreateMapFormFields}>
@@ -51,20 +44,12 @@ export const CreateMapForm: FC = () => {
                                     isDisable={createMapFormStore.fetchStatus === FetchStatus.loading}
                                 />
                             </div>
-
-                            <FormSpy
-                                subscription={{ dirtyFieldsSinceLastSubmit: true, modifiedSinceLastSubmit: true }}
-                                onChange={modifiedSinceLastSubmit}
-                            />
                         </div>
                         <div className={cnCreateMapFormButton}>
                             <Button
                                 text={'Создать'}
                                 type={'submit'}
-                                isDisable={
-                                    createMapFormStore.fetchStatus === FetchStatus.loading ||
-                                    createMapFormStore.error !== ''
-                                }
+                                isDisable={createMapFormStore.fetchStatus === FetchStatus.loading}
                             />
                         </div>
                         <div

@@ -1,7 +1,7 @@
 export const CHECK_AUTH_URL = '/api/auth/check';
 
-export type CheckAuthReturnD = {
-    id: string;
+export type CheckAuthRD = {
+    id: number;
     username: string;
     email: string;
     is_admin: boolean;

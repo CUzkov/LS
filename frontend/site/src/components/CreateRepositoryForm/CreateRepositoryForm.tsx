@@ -58,8 +58,6 @@ export const CreateRepositoryForm: FC = () => {
         [store],
     );
 
-    const modifiedSinceLastSubmit = useCallback((_: IFormSpy) => {}, [store.error]);
-
     const handleRepositoryNameBlur = useCallback(
         (event: React.FocusEvent<HTMLInputElement, Element>) => {
             if (event.target.value !== lastRepositoryName) {
@@ -72,7 +70,6 @@ export const CreateRepositoryForm: FC = () => {
 
     const isSubmitDisable =
         store.fetchStatus === FetchStatus.loading ||
-        store.error !== '' ||
         store.repositoryNameStatus.status === RepositoryNameStatuses.notChecked ||
         store.repositoryNameStatus.status === RepositoryNameStatuses.busy;
 
@@ -108,11 +105,6 @@ export const CreateRepositoryForm: FC = () => {
                                     isDisable={store.fetchStatus === FetchStatus.loading}
                                 />
                             </div>
-
-                            <FormSpy
-                                subscription={{ dirtyFieldsSinceLastSubmit: true, modifiedSinceLastSubmit: true }}
-                                onChange={modifiedSinceLastSubmit}
-                            />
                         </div>
                         <div className={cnButton}>
                             <Button text={'Создать'} type={'submit'} isDisable={isSubmitDisable} />

@@ -1,72 +1,73 @@
+import { CreateRepositoryD, CreateRepositoryRD } from '@api-types/repository/create-repository';
 import {
-    CreateRepositoryD,
     CheckIsRepositoryNameFreeD,
     CheckIsRepositoryNameFreeRD,
-    CreateRepositoryRD,
-} from '@api-types/repository';
+} from '@api-types/repository/check-is-repository-name-free';
 
 import { ajax, ContentType, AjaxType } from '../ajax';
 import { IServerError, Repository } from '../types';
 import { Dispatch } from '../store';
-import { CREATE_REPOSITORY_URL, CHECK_IS_REPOSIROTY_NAME_FREE_URL, DOWNLOAD_FILE_URL } from './urls';
+import { CREATE_REPOSITORY_URL, CHECK_IS_REPOSIROTY_NAME_FREE_URL } from './urls';
 
 export const createRepository = async (dispath: Dispatch, props: CreateRepositoryD): Promise<Repository | void> => {
     dispath({ type: 'create-repository-form/loading' });
 
-    const response = await ajax<CreateRepositoryRD | IServerError, CreateRepositoryD>({
-        type: AjaxType.post,
-        contentType: ContentType.JSON,
-        url: CREATE_REPOSITORY_URL,
-        data: props,
-    }).catch(() => {
-        dispath({ type: 'create-repository-form/failed' });
-        return;
-    });
+    let response: CreateRepositoryRD | IServerError;
 
-    if (!response) {
+    try {
+        response = await ajax<CreateRepositoryRD | IServerError, CreateRepositoryD>({
+            type: AjaxType.post,
+            contentType: ContentType.JSON,
+            url: CREATE_REPOSITORY_URL,
+            data: props,
+        });
+    } catch (error) {
+        dispath({ type: 'create-repository-form/error' });
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
         return;
     }
 
-    if ('title' in response) {
-        dispath({ type: 'create-repository-form/success' });
-        dispath({
-            type: 'logger/add-log',
-            data: { title: 'Репозиторий создан', description: 'Успешное создание нового репозитория', type: 'success' },
-        });
-        return response;
-    } else {
-        dispath({ type: 'create-repository-form/error', data: {} });
+    if ('error' in response) {
+        dispath({ type: 'create-repository-form/error' });
         dispath({
             type: 'logger/add-log',
             data: { title: response.error, description: response.description, type: 'error' },
         });
     }
+
+    dispath({ type: 'create-repository-form/success' });
+    dispath({
+        type: 'logger/add-log',
+        data: { title: 'Репозиторий создан', description: 'Успешное создание нового репозитория', type: 'success' },
+    });
 };
 
 export const checkIsRepositoryNameFree = async (dispath: Dispatch, props: { title: string }) => {
     dispath({ type: 'create-repository-form/is-repository-name-free/loading' });
 
-    const response = await ajax<CheckIsRepositoryNameFreeRD | IServerError, CheckIsRepositoryNameFreeD>({
-        type: AjaxType.post,
-        contentType: ContentType.JSON,
-        url: CHECK_IS_REPOSIROTY_NAME_FREE_URL,
-        data: props,
-    }).catch(() => {
-        dispath({ type: 'create-repository-form/is-repository-name-free/failed' });
-        return;
-    });
+    let response: CheckIsRepositoryNameFreeRD | IServerError;
 
-    if (!response) {
-        dispath({ type: 'create-repository-form/is-repository-name-free/failed' });
+    try {
+        response = await ajax<CheckIsRepositoryNameFreeRD | IServerError, CheckIsRepositoryNameFreeD>({
+            type: AjaxType.post,
+            contentType: ContentType.JSON,
+            url: CHECK_IS_REPOSIROTY_NAME_FREE_URL,
+            data: props,
+        });
+    } catch (error) {
+        dispath({ type: 'create-repository-form/is-repository-name-free/error' });
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
         return;
     }
 
-    if ('isFree' in response) {
-        dispath({ type: 'create-repository-form/is-repository-name-free/status', data: { isFree: response.isFree } });
-    } else {
+    if ('error' in response) {
+        dispath({ type: 'create-repository-form/is-repository-name-free/error' });
         dispath({
             type: 'logger/add-log',
             data: { title: response.error, description: response.description, type: 'error' },
         });
+        return;
     }
+
+    dispath({ type: 'create-repository-form/is-repository-name-free/status', data: { isFree: response.isFree } });
 };

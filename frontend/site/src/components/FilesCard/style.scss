@@ -3,11 +3,12 @@
 .files-card {
 	width: 100%;
 	background-color: $cards-color;
-	margin-bottom: 10px;
 	border-radius: 5px;
 	border: 1px solid $default-border-color;
 	padding: 10px 0;
 	box-sizing: border-box;
+	height: calc(100vh - 224px);
+	overflow: auto;
 
 	&__title {
 		cursor: pointer;
@@ -70,5 +71,9 @@
 			height: 20px;
 			width: 20px;
 		}
+	}
+
+	&__empty-message {
+		margin-left: 10px;
 	}
 }

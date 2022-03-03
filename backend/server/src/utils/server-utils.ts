@@ -37,7 +37,7 @@ export const getUnauthorizedResponse = (response: ServerResponse, error: string,
     });
 
     response
-        .writeHead(Code.badRequest, {
+        .writeHead(Code.unauthorized, {
             'Content-Length': Buffer.byteLength(body),
             'Content-Type': 'application/json;charset=utf-8',
         })

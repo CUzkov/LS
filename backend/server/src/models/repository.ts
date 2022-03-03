@@ -2,7 +2,7 @@ import { QueryResult } from 'pg';
 
 import { UserFns } from './';
 import { pg } from '../database';
-import { Git } from '../git';
+import { Git, File } from '../git';
 import { errors } from '../constants/errors';
 
 import {
@@ -30,12 +30,7 @@ export type Repository = {
     title: string;
     rubric_id?: number;
     map_id?: number;
-    rootFiles: {
-        name: string;
-        isDir: boolean;
-        hasSubFiles: boolean;
-        pathToFile: string;
-    }[];
+    rootFiles: File[];
 };
 
 type RepositoryFilters = {
@@ -139,7 +134,7 @@ export const RepositoryFns = {
             rootFiles: [],
         }));
     },
-    getRepositoryById: async (id: number, userId: number): Promise<Repository> => {
+    getRepositoryById: async (id: number, userId: number): Promise<[Repository, Git]> => {
         const user = await UserFns.getUserById(userId);
         let result: QueryResult<GetRepositoryByIdR>;
 
@@ -167,10 +162,15 @@ export const RepositoryFns = {
 
         const rootFiles = await git.getFolderFiles();
 
-        return { ...repository, rootFiles: rootFiles };
+        return [{ ...repository, rootFiles: rootFiles }, git];
     },
-    getFilePath: async (id: number, userId: number, pathToFile: string): Promise<string> => {
-        RepositoryFns.getRepositoryById(id, userId);
-        return pathToFile;
+    getFilePath: async (id: number, userId: number, pathToFile: string[]): Promise<string> => {
+        const [, git] = await RepositoryFns.getRepositoryById(id, userId);
+        return git.getFullPathToFile(pathToFile);
     },
+    getFilesByDirPath: async (id: number, userId: number, pathToDir: string[]): Promise<File[]> => {
+        const [, git] = await RepositoryFns.getRepositoryById(id, userId);
+        const files = git.getFolderFiles(pathToDir);
+        return files;
+    }
 };

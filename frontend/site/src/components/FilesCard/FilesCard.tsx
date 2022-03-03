@@ -11,6 +11,7 @@ import {
     cnFileIcon,
     cnFileTitle,
     cnFileActions,
+    cnEmptyMessage,
     cnFileActionIcon,
 } from './FilesCard.constants';
 import { getIconByExtension } from './FilesCard.utils';
@@ -21,9 +22,18 @@ import './style.scss';
 interface FilesCardProps {
     files: File[];
     repositoryId: number;
+    path: string[];
+    onClickDir: (pathToDir: string[]) => void;
+    onClickToUpDir: () => void;
 }
 
-export const FilesCard: FC<FilesCardProps> = ({ files, repositoryId }: FilesCardProps) => {
+export const FilesCard: FC<FilesCardProps> = ({
+    files,
+    repositoryId,
+    path,
+    onClickDir,
+    onClickToUpDir,
+}: FilesCardProps) => {
     const [isFileHoverMap, setIsFileHoverMap] = useState<boolean[]>([]);
     const createDivRef: () => React.RefObject<HTMLDivElement> = createRef;
     const rowsRefs = useMemo(() => files.map(() => createDivRef()), [files]);
@@ -48,15 +58,29 @@ export const FilesCard: FC<FilesCardProps> = ({ files, repositoryId }: FilesCard
         [isFileHoverMap, rowsRefs],
     );
 
+    const handleClickDir = useCallback(
+        (pathToDir: string[]) => {
+            onClickDir(pathToDir);
+            setIsFileHoverMap(files.map(() => false));
+        },
+        [dispatch],
+    );
+
     return (
         <div className={cnFilesCard}>
+            {path.length ? (
+                <div className={cnFileRow} onClick={() => onClickToUpDir()}>
+                    <div className={cnFileTitle}>{'...'}</div>
+                </div>
+            ) : null}
             {files.map((file, index) => (
                 <div
                     className={cnFileRow}
-                    key={index}
+                    key={file.name + index}
                     ref={rowsRefs[index]}
                     onMouseOver={(e) => handleToggleHover(index, e)}
                     onMouseOut={(e) => handleToggleHover(index, e)}
+                    onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
                 >
                     <div className={cnFileTitle}>
                         <div className={cnFileIcon}>{getIconByExtension(file.name, file.isDir)}</div>
@@ -64,7 +88,7 @@ export const FilesCard: FC<FilesCardProps> = ({ files, repositoryId }: FilesCard
                     </div>
                     <div className={cnFileActions({ hover: isFileHoverMap[index] })}>
                         <a
-                            href={getDownloadLink(repositoryId, file.pathToFile)}
+                            href={getDownloadLink(repositoryId, file.pathToFile.join('~'))}
                             target="_blank"
                             download={file.isDir ? `${file.name}.zip` : file.name}
                         >
@@ -75,6 +99,7 @@ export const FilesCard: FC<FilesCardProps> = ({ files, repositoryId }: FilesCard
                     </div>
                 </div>
             ))}
+            {files.length === 0 && <div className={cnEmptyMessage}>{'Репозиторий пуст'}</div>}
         </div>
     );
 };
