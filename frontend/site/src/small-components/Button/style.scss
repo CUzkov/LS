@@ -1,4 +1,4 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
 button {
     border: none;
@@ -27,23 +27,21 @@ button {
         background-color: $button-hover;
     }
 
-    &--disable {
+    &.disable {
         background-color: $button-disable;
         cursor: default;
         pointer-events: none;
     }
 
-    &--size {
-        &--s {
-            height: 20px;
-        }
+    &.s {
+        height: 20px;
+    }
 
-        &--m {
-            height: 30px;
-        }
+    &.m {
+        height: 30px;
+    }
 
-        &--l {
-            height: 45px;
-        }
+    &.l {
+        height: 45px;
     }
 }

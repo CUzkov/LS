@@ -1,19 +1,5 @@
 body {
     margin: 0;
-}
-
-.page-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    font-family: Verdana, Verdana, Geneva, sans-serif;
-    position: relative;
-
-    .logger-wrapper {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-    }
 
     // dark theme
 
@@ -90,8 +76,8 @@ $second-hover-color: var(--second-hover-color);
 $scrollbar-color-thumb: var(--scrollbar-color-thumb);
 $scrollbar-color-thumb-hover: var(--scrollbar-color-thumb-hover);
 
-.page-wrapper {
-    background-color: $page-color;
+body {
+    font-family: Verdana, Verdana, Geneva, sans-serif;
     color: $default-text-color;
 }
 

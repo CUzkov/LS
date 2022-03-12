@@ -1,12 +1,12 @@
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
 
-import { cnMenu, cnMenuItem, cnMenuDivider } from './Menu.constants';
+import { useSelector } from 'store/store';
+
 import { MenuItem } from './MenuItem';
 import { getMenu } from './Menu.constants';
 
-import './style.scss';
-import { useSelector } from 'store/store';
+import styles from './style.scss';
 
 export const Menu: FC = () => {
     const { username } = useSelector((root) => root.user);
@@ -24,18 +24,16 @@ export const Menu: FC = () => {
     );
 
     return (
-        <div className={cnMenu}>
-            <div className={cnMenuDivider} />
+        <div>
+            <div className={styles.divider} />
             {menuItems.map((item, index) => (
                 <Fragment key={index}>
-                    <div className={cnMenuItem}>
-                        <MenuItem
-                            {...item}
-                            isExpand={isExpandMap[index]}
-                            onClickTitle={toggleMenuItem(index, item.links.length === 0)}
-                        />
-                    </div>
-                    <div className={cnMenuDivider} />
+                    <MenuItem
+                        {...item}
+                        isExpand={isExpandMap[index]}
+                        onClickTitle={toggleMenuItem(index, item.links.length === 0)}
+                    />
+                    <div className={styles.divider} />
                 </Fragment>
             ))}
         </div>

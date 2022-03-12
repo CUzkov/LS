@@ -2,9 +2,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { Link } from 'react-router-dom';
 
-import { cnBreadcrumbs, cnBreadcrumbsItem, cnBreadcrumbsItemBox } from './Breadcrumbs.constants';
-
-import './style.scss';
+import styles from './style.scss';
 
 interface IBreadcrumbsProps {
     paths: {
@@ -15,16 +13,11 @@ interface IBreadcrumbsProps {
 
 export const Breadcrumbs: FC<IBreadcrumbsProps> = ({ paths }) => {
     return (
-        <div className={cnBreadcrumbs}>
+        <div className={styles.breadcrumbs}>
             {paths.map((breadcrumb, index, all) => (
-                <Link
-                    key={index}
-                    className={cnBreadcrumbsItem}
-                    style={{ zIndex: all.length - index }}
-                    to={breadcrumb.url}
-                >
+                <Link key={index} className={styles.item} style={{ zIndex: all.length - index }} to={breadcrumb.url}>
                     <span>{breadcrumb.title}</span>
-                    <div className={cnBreadcrumbsItemBox} />
+                    <div className={styles.itemBox} />
                 </Link>
             ))}
         </div>

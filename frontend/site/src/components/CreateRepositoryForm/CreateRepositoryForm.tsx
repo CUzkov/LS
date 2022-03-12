@@ -1,6 +1,7 @@
 import React, { useCallback, FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, FormSpy } from 'react-final-form';
+import cn from 'classnames';
+import { Form } from 'react-final-form';
 
 import { FetchStatus } from 'types/index';
 import { getRepository } from 'constants/routers';
@@ -10,19 +11,9 @@ import { TextField, Button, CheckboxField } from 'small-components/index';
 import { reuqiredValidate } from 'utils/final-forms';
 import { RepositoryNameStatuses } from 'store/reducers/create-repository-form';
 
-import { IFormSpy } from './CreateRepositoryForm.typings';
-import {
-    cnCreateRepositoryForm,
-    cnButton,
-    cnField,
-    cnFields,
-    cnSpinner,
-    cnRepositoryNameSpinner,
-} from './CreateRepositoryForm.constants';
-
 import Spinner from 'assets/spinner.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 export const CreateRepositoryForm: FC = () => {
     const dispatch = useDispatch();
@@ -74,14 +65,14 @@ export const CreateRepositoryForm: FC = () => {
         store.repositoryNameStatus.status === RepositoryNameStatuses.busy;
 
     return (
-        <div className={cnCreateRepositoryForm}>
+        <div className={styles.createRepositoryFrom}>
             <Form
                 onSubmit={handleSubmit}
                 validate={formValidate}
                 render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
-                        <div className={cnFields}>
-                            <div className={cnField}>
+                        <div>
+                            <div className={styles.field}>
                                 <TextField
                                     name="title"
                                     type="text"
@@ -91,14 +82,16 @@ export const CreateRepositoryForm: FC = () => {
                                     onBlur={handleRepositoryNameBlur}
                                 />
                                 <div
-                                    className={cnRepositoryNameSpinner({
-                                        loading: store.repositoryNameStatus.fetchStatus === FetchStatus.loading,
-                                    })}
+                                    className={cn(
+                                        styles.repositoryNameSpinner,
+                                        store.repositoryNameStatus.fetchStatus === FetchStatus.loading &&
+                                            styles.loading,
+                                    )}
                                 >
                                     <Spinner />
                                 </div>
                             </div>
-                            <div className={cnField}>
+                            <div className={styles.field}>
                                 <CheckboxField
                                     name="isPrivate"
                                     title="сделать приватным"
@@ -106,13 +99,13 @@ export const CreateRepositoryForm: FC = () => {
                                 />
                             </div>
                         </div>
-                        <div className={cnButton}>
-                            <Button text={'Создать'} type={'submit'} isDisable={isSubmitDisable} />
+                        <div className={styles.buttonWrapper}>
+                            <div className={styles.button}>
+                                <Button text={'Создать'} type={'submit'} isDisable={isSubmitDisable} />
+                            </div>
                         </div>
                         <div
-                            className={cnSpinner({
-                                loading: store.fetchStatus === FetchStatus.loading,
-                            })}
+                            className={cn(styles.spinner, store.fetchStatus === FetchStatus.loading && styles.loading)}
                         >
                             <Spinner />
                         </div>

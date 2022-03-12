@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router, useNavigate, useLocation } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 
-import { App } from './App';
+import { App } from './app/App';
 import { store } from './store';
 
 // https://github.com/pbeshai/use-query-params/issues/108

@@ -9,9 +9,9 @@ import { RepositoriesPageFilters } from 'components/RepositoriesPageFilters';
 import { getRepository } from 'constants/routers';
 import { PageTitle } from 'components/PageTitle';
 
-import { getPaths, cnItems, cnRepositoriesListPage } from './RepositoriesListPage.constants';
+import { getPaths } from './RepositoriesListPage.constants';
 
-import './style.scss';
+import styles from './style.scss';
 
 export const RepositoriesListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
@@ -37,9 +37,9 @@ export const RepositoriesListPage: FC = () => {
     const paths = useMemo(() => getPaths(username), [username]);
     const content = useMemo(
         () => (
-            <div className={cnRepositoriesListPage}>
+            <div className={styles.repositoriesListPage}>
                 <PageTitle title={'Репозитории'} rightChild={<RepositoriesPageFilters />} />
-                <div className={cnItems}>
+                <div>
                     {repositories.data.map((repository, index) => (
                         <ItemCard
                             title={repository.title}

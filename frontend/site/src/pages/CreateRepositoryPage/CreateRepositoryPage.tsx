@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 
-import { getPaths, cnCreateRepositoryPage, cnCreateRepositoryPageForm } from './CreateRepositoryPage.constants';
+import { getPaths } from './CreateRepositoryPage.constants';
 import { PageWrapper } from 'pages/PageWrapper';
 import { useSelector } from 'store/store';
 import { CreateRepositoryForm } from 'components/CreateRepositoryForm';
 import { PageTitle } from 'components/PageTitle';
 
-import './style.scss';
+import styles from './style.scss';
 
 export const CreateRepositoryPage: FC = () => {
     const { username } = useSelector((root) => root.user);
@@ -15,9 +15,9 @@ export const CreateRepositoryPage: FC = () => {
     const paths = useMemo(() => getPaths(username), [username]);
     const content = useMemo(
         () => (
-            <div className={cnCreateRepositoryPage}>
+            <div className={styles.createRepositoryPage}>
                 <PageTitle title={'Создание нового репозитория'} />
-                <div className={cnCreateRepositoryPageForm}>
+                <div className={styles.form}>
                     <CreateRepositoryForm />
                 </div>
             </div>

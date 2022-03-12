@@ -1,6 +1,6 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.login-from {
+.loginFrom {
     form {
         width: 300px;
 
@@ -13,11 +13,11 @@
         margin-top: 10px;
     }
 
-    &__fields {
+    .fields {
         position: relative;
     }
 
-    &__spinner {
+    .spinner {
         position: absolute;
         top: 50%;
         left: 50%;
@@ -26,7 +26,7 @@
         pointer-events: none;
         transition: all 0.2s;
 
-        &--loading {
+        &.loading {
             opacity: 1;
         }
     }

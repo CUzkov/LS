@@ -33,6 +33,7 @@ export const createRepository = async (dispath: Dispatch, props: CreateRepositor
             type: 'logger/add-log',
             data: { title: response.error, description: response.description, type: 'error' },
         });
+        return;
     }
 
     dispath({ type: 'create-repository-form/success' });
@@ -40,6 +41,8 @@ export const createRepository = async (dispath: Dispatch, props: CreateRepositor
         type: 'logger/add-log',
         data: { title: 'Репозиторий создан', description: 'Успешное создание нового репозитория', type: 'success' },
     });
+
+    return response;
 };
 
 export const checkIsRepositoryNameFree = async (dispath: Dispatch, props: { title: string }) => {

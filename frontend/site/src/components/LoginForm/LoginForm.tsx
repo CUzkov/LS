@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 import type { FC } from 'react';
 import { Form, FormSpy } from 'react-final-form';
+import cn from 'classnames';
 
 import { loginUser } from 'actions/user';
 import { setLoginForm } from 'actions/login-form';
 import { useDispatch, useSelector } from 'store/store';
-import { cnLoginFrom, cnLoginFromFields, cnLoginFromSpinner } from './LoginForm.constants';
 import { TextField, Button } from 'small-components/index';
 import { emailValidate, reuqiredValidate } from 'utils/final-forms';
 import type { ILoginFormProps, IFormSpy } from './LoginForm.typings';
@@ -14,7 +14,7 @@ import { FetchStatus } from 'types/index';
 
 import Spinner from 'assets/spinner.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 export const LoginForm: FC = () => {
     const dispatch = useDispatch();
@@ -78,13 +78,13 @@ export const LoginForm: FC = () => {
     );
 
     return (
-        <div className={cnLoginFrom}>
+        <div className={styles.loginFrom}>
             <Form
                 onSubmit={onSubmit}
                 validate={formValidate}
                 render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
-                        <div className={cnLoginFromFields}>
+                        <div className={styles.fields}>
                             <TextField
                                 name="email-username"
                                 type="email-username"
@@ -114,9 +114,10 @@ export const LoginForm: FC = () => {
                             />
 
                             <div
-                                className={cnLoginFromSpinner({
-                                    loading: loginFormStore.fetchStatus === FetchStatus.loading,
-                                })}
+                                className={cn(
+                                    styles.spinner,
+                                    loginFormStore.fetchStatus === FetchStatus.loading && styles.loading,
+                                )}
                             >
                                 <Spinner />
                             </div>

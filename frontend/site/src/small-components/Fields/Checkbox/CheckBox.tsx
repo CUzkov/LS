@@ -1,18 +1,14 @@
 import React, { FC, ReactElement } from 'react';
+import cn from 'classnames';
 import { Field } from 'react-final-form';
 
 import { composeValidators } from 'utils/final-forms';
+
 import { FieldProps } from '../Fields.typings';
-import {
-    cnCheckboxField,
-    cnCheckboxFieldErrorText,
-    cnCheckboxFieldInput,
-    cnCheckboxFieldLabel,
-    cnCheckboxFieldFakeInput,
-} from '../Fields.constants';
+
 import TickIcon from '../Fields.assets/tick.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 interface TextFieldProps {
     name: string;
@@ -30,24 +26,16 @@ export const CheckboxField: FC<TextFieldProps> = ({
     return (
         <Field name={name} validate={composeValidators(...validators)} type="checkbox" defaultValue={false}>
             {({ input, meta }: FieldProps<string>): ReactElement => (
-                <div
-                    className={cnCheckboxField({
-                        focus: meta.active,
-                        'not-valid': !!meta.error && (!!meta.touched || !!meta.submitSucceeded),
-                        checked: input.checked,
-                    })}
-                >
-                    <div className={cnCheckboxFieldInput({ disable: isDisable })}>
+                <div className={cn(styles.checkboxField, input.checked && styles.checked)}>
+                    <div className={cn(styles.input, isDisable && styles.disable)}>
                         <input id={name} {...input} />
-                        <div className={cnCheckboxFieldFakeInput}>{input.checked && <TickIcon />}</div>
-                        <label htmlFor={name} className={cnCheckboxFieldLabel}>
+                        <div className={styles.fakeInput}>{input.checked && <TickIcon />}</div>
+                        <label htmlFor={name} className={styles.label}>
                             {title}
                         </label>
                     </div>
 
-                    <div className={cnCheckboxFieldErrorText}>
-                        {!!meta.touched || !!meta.submitSucceeded ? meta.error : ''}
-                    </div>
+                    <div className={styles.errorText}>{!!meta.touched || !!meta.submitSucceeded ? meta.error : ''}</div>
                 </div>
             )}
         </Field>

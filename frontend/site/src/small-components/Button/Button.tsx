@@ -1,9 +1,8 @@
 import React from 'react';
 import type { FC } from 'react';
+import cn from 'classnames';
 
-import { cnButton } from './Button.constants';
-
-import './style.scss';
+import styles from './style.scss';
 
 interface ButtonProps {
     text: string;
@@ -23,10 +22,13 @@ export const Button: FC<ButtonProps> = ({
     return (
         <button
             type={type}
-            className={cnButton({
-                disable: isDisable,
-                size,
-            })}
+            className={cn(
+                styles.button,
+                isDisable && styles.disable,
+                size === 's' && styles.s,
+                size === 'l' && styles.l,
+                size === 'm' && styles.m,
+            )}
             onClick={onClick}
         >
             {text}

@@ -18,17 +18,20 @@ export type Map = {
     id: number;
 };
 
-export type File = {
+export type FileMeta = {
     name: string;
     isDir: boolean;
     hasSubFiles: boolean;
     pathToFile: string[];
+    fantom?: {
+        action: 'delete' | 'add' | 'rewrite' | 'rename';
+    };
 };
 
 export type Repository = {
     title: string;
     id: number;
-    rootFiles: File[];
+    rootFiles: FileMeta[];
 };
 
 export const enum RWA {

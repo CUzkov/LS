@@ -1,3 +1,6 @@
-import { cn } from 'utils/classname';
-
-export const cnMainPage = cn('MainPage')();
+export const paths = [
+    {
+        title: 'Главная',
+        url: '/',
+    },
+];

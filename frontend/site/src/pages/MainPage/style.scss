@@ -1,6 +1,5 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-$root: '.MainPage';
-
-#{$root} {
+.mainPage {
+    border-color: aliceblue;
 }

@@ -1,4 +1,4 @@
-import { LoginUserD, LoginUserReturnD, CheckAuthReturnD } from '@api-types/auth';
+import { LoginUserD, LoginUserRD, CheckAuthRD } from '@api-types/auth';
 
 import { ResponseCallback, Empty, ServerError, Code } from '../types';
 import {
@@ -37,7 +37,7 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
     cookies?.set('user_id', String(userId));
     cookies?.set('expired', newTime);
 
-    getOkResponse<LoginUserReturnD>(response, {
+    getOkResponse<LoginUserRD>(response, {
         email: user.email,
         id: Number(user.id),
         is_admin: user.is_admin,
@@ -52,7 +52,7 @@ export const checkAuth: ResponseCallback<Empty, Empty> = async ({ response, user
 
     try {
         const user = await UserFns.getUserById(userId);
-        getOkResponse<CheckAuthReturnD>(response, user);
+        getOkResponse<CheckAuthRD>(response, user);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);

@@ -1,10 +1,9 @@
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import type { FC } from 'react';
+import cn from 'classnames';
 
-import { cnMenuItem, cnMenuItemTitle, cnMenuItemList, cnMenuItemLink, cnMenuItemTitleIcon } from './MenuItem.constants';
-
-import './style.scss';
+import styles from './style.scss';
 
 interface IMenuItemProps {
     title: string;
@@ -19,15 +18,15 @@ interface IMenuItemProps {
 
 export const MenuItem: FC<IMenuItemProps> = ({ title, icon, links, isExpand, onClickTitle }) => {
     return (
-        <div className={cnMenuItem({ expand: isExpand })} onClick={onClickTitle}>
-            <div className={cnMenuItemTitle}>
-                <div className={cnMenuItemTitleIcon}>{icon}</div>
+        <div className={cn(styles.menuItem, isExpand && styles.expand)} onClick={onClickTitle}>
+            <div className={styles.title}>
+                <div className={styles.titleIcon}>{icon}</div>
                 {title}
             </div>
-            <div className={cnMenuItemList}>
+            <div className={styles.list}>
                 {links.map((link, index) => (
                     <Link to={link.url} key={index}>
-                        <div key={index} className={cnMenuItemLink}>
+                        <div key={index} className={styles.link}>
                             {link.title}
                         </div>
                     </Link>

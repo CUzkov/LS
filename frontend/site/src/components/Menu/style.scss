@@ -1,12 +1,8 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.menu {
-    .menu {
-        &__divider {
-            height: 1px;
-            margin: 5px 10px;
-            box-sizing: border-box;
-            background-color: $default-dark-border;
-        }
-    }
+.divider {
+    height: 1px;
+    margin: 5px 10px;
+    box-sizing: border-box;
+    background-color: $default-dark-border;
 }

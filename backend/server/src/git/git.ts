@@ -96,9 +96,10 @@ export class Git {
         return files
             .sort((a, b) => {
                 const isBothDir = a.isDir && b.isDir;
+                const isBothFile = !a.isDir && !b.isDir;
 
-                if (isBothDir) {
-                    return (a.index ?? 0) - (b.index ?? 0);
+                if (isBothDir || isBothFile) {
+                    return a.name > b.name ? 1 : -1;
                 }
 
                 return (a.isDir && -1) || 1;

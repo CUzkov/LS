@@ -1,4 +1,4 @@
-@import '../../../style.scss';
+@import '../../../index.scss';
 
 .log {
     width: 300px;
@@ -10,25 +10,23 @@
     max-height: 400px;
     transition: all .3s;
 
-    &--type {
-        &--success {
-            svg {
-                path {
-                    stroke: $default-icon-succes-color;
-                }
-            }
-        }
-
-        &--error {
-            svg {
-                path {
-                    stroke: $default-icon-error-color;
-                }
+    .success {
+        svg {
+            path {
+                stroke: $default-icon-succes-color;
             }
         }
     }
 
-    &__title {
+    .error {
+        svg {
+            path {
+                stroke: $default-icon-error-color;
+            }
+        }
+    }
+
+    .title {
         font-size: 16px;
         display: flex;
         align-items: center;
@@ -43,7 +41,7 @@
         }
     }
 
-    &__description {
+    .description {
         display: flex;
         align-items: flex-start;
         font-size: 14px;
@@ -56,7 +54,7 @@
         }
     }
 
-    &--close {
+    .close {
         max-height: 0;
         padding-top: 0;
         padding-bottom: 0;

@@ -9,16 +9,7 @@ import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { useDispatch } from 'store/store';
 import { RWA } from 'types/index';
 
-import {
-    cnRepositoriesPageFilters,
-    cnSearchField,
-    cnRWAField,
-    cnFindButton,
-    cnSearchForm,
-    cnResetButton,
-} from './RepositoriesPageFilters.constants';
-
-import './style.scss';
+import styles from './style.scss';
 
 const getRwaFromFlags = (is_rw: boolean, is_rwa: boolean) => {
     if (is_rw) {
@@ -93,12 +84,12 @@ export const RepositoriesPageFilters: FC = () => {
     );
 
     return (
-        <div className={cnRepositoriesPageFilters}>
+        <div className={styles.repositoriesPageFilters}>
             <Form
                 onSubmit={() => {}}
                 render={() => (
-                    <form className={cnRepositoriesPageFilters}>
-                        <div className={cnRWAField}>
+                    <form className={styles.rwaForm}>
+                        <div className={styles.rwaField}>
                             <SelectField
                                 name="rwa"
                                 options={options}
@@ -120,11 +111,11 @@ export const RepositoriesPageFilters: FC = () => {
             <Form
                 onSubmit={handleSubmitTitleForm}
                 render={({ handleSubmit, modified, dirtySinceLastSubmit, values, form }) => (
-                    <form onSubmit={handleSubmit} className={cnSearchForm}>
-                        <div className={cnSearchField}>
+                    <form onSubmit={handleSubmit} className={styles.searchForm}>
+                        <div className={styles.searchField}>
                             <TextField name="title" type="search" isNoNeedErrors defaultValue={query.title || ''} />
                         </div>
-                        <div className={cnFindButton}>
+                        <div className={styles.findButton}>
                             <Button
                                 text="найти"
                                 type="submit"
@@ -134,7 +125,7 @@ export const RepositoriesPageFilters: FC = () => {
                                 }
                             />
                         </div>
-                        <div className={cnResetButton}>
+                        <div className={styles.resetButton}>
                             <Button
                                 text="сбросить"
                                 type="button"

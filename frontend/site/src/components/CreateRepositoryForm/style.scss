@@ -1,11 +1,11 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.create-repository-from {
+.createRepositoryFrom {
     form {
         position: relative;
     }
 
-    &__field {
+    .field {
         width: 335px;
 
         &:first-child {
@@ -14,7 +14,7 @@
         }
     }
 
-    &__repository-name-spinner {
+    .repositoryNameSpinner {
         width: 35px;
         height: 35px;
         margin-bottom: 20px;
@@ -27,12 +27,12 @@
             width: 35px;
         }
 
-        &--loading {
+        &.loading {
             opacity: 1;
         }
     }
 
-    &__spinner {
+    .spinner {
         position: absolute;
         top: 50%;
         left: 50%;
@@ -41,17 +41,17 @@
         pointer-events: none;
         transition: all 0.2s;
 
-        &--loading {
+        &.loading {
             opacity: 1;
         }
     }
 
-    &__button {
+    .button {
+        width: 300px;
+    }
+
+    .buttonWrapper {
         display: flex;
         justify-content: flex-end;
-
-        .button {
-            width: 300px;
-        }
     }
 }

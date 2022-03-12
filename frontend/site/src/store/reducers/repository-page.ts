@@ -1,22 +1,33 @@
-import { FetchStatus, Repository, File } from '../../types';
+import { FetchStatus, Repository, FileMeta } from '../../types';
 
-export interface IRepositoryPageD {
+interface IRepositoryPageUpdateRepositoryD {
     repository?: {
         data: Repository;
     };
+}
+
+interface IRepositoryPageUpdateFilesD {
     files?: {
-        data: File[];
+        data: FileMeta[];
     };
 }
 
+interface IRepositoryPageAddResponseD {
+    fileMeta: FileMeta;
+    file: File;
+    key: string;
+}
+
 export type RepositoryPageEvents =
-    | { type: 'repository-page/repository/success'; data: IRepositoryPageD }
+    | { type: 'repository-page/repository/success'; data: IRepositoryPageUpdateRepositoryD }
     | { type: 'repository-page/repository/loading' }
     | { type: 'repository-page/repository/error' }
     | { type: 'repository-page/files/path'; data: string[] }
-    | { type: 'repository-page/files/success'; data: IRepositoryPageD }
+    | { type: 'repository-page/files/success'; data: IRepositoryPageUpdateFilesD }
     | { type: 'repository-page/files/loading' }
-    | { type: 'repository-page/files/error' };
+    | { type: 'repository-page/files/error' }
+    | { type: 'repository-page/unsaved/add-file'; data: IRepositoryPageAddResponseD }
+    | { type: 'repository-page/unsaved/clear' };
 
 export type RepositoryPageStore = {
     repository: {
@@ -24,10 +35,17 @@ export type RepositoryPageStore = {
         fetchStatus: FetchStatus;
     };
     files: {
-        data?: File[];
+        data?: FileMeta[];
         path: string[];
         fetchStatus: FetchStatus;
     };
+    unsavedChanges: Record<
+        string,
+        {
+            fileMeta: FileMeta;
+            file: File;
+        }
+    >;
 };
 
 const initialState: RepositoryPageStore = {
@@ -40,6 +58,7 @@ const initialState: RepositoryPageStore = {
         path: [],
         fetchStatus: FetchStatus.loading,
     },
+    unsavedChanges: {},
 };
 
 export const repositoryPageReducer = (
@@ -105,6 +124,25 @@ export const repositoryPageReducer = (
         const result = { ...state };
 
         result.files.path = event.data;
+
+        return result;
+    }
+
+    if (event.type === 'repository-page/unsaved/add-file') {
+        const result = { ...state };
+
+        result.unsavedChanges = {
+            ...state.unsavedChanges,
+            [event.data.key]: { ...event.data },
+        };
+
+        return result;
+    }
+
+    if (event.type === 'repository-page/unsaved/clear') {
+        const result = { ...state };
+
+        result.unsavedChanges = {};
 
         return result;
     }

@@ -1,12 +1,12 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.create-repository-page {
+.createRepositoryPage {
     width: calc(100% - 65px);
     box-sizing: border-box;
     border-top: 1px solid $default-dark-border;
     margin: 5px 10px 0 55px;
 
-    &__form {
+    .form {
         box-sizing: border-box;
         padding: 15px;
         border-radius: 10px;

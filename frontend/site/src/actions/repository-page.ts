@@ -75,3 +75,26 @@ export const getFilesByDirPath = async (dispath: Dispatch, queryParams: FilesByD
 export const changeFilesDirPath = (dispath: Dispatch, path: string[]) => {
     dispath({ type: 'repository-page/files/path', data: path });
 };
+
+export const addFantomFile = (dispath: Dispatch, pathToFile: string[], file: File, key: string) => {
+    dispath({
+        type: 'repository-page/unsaved/add-file',
+        data: {
+            file,
+            key,
+            fileMeta: {
+                hasSubFiles: false,
+                name: file.name,
+                isDir: false,
+                fantom: {
+                    action: 'add',
+                },
+                pathToFile,
+            },
+        },
+    });
+};
+
+export const clearFantomFiles = (dispath: Dispatch) => {
+    dispath({ type: 'repository-page/unsaved/clear' });
+};

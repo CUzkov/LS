@@ -1,17 +1,15 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { cnHeader, cnHeaderLeft, cnHeaderRigth } from './Header.constants';
-
 // import UserIcon from './Header.assets/user.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 export const Header: FC = () => {
     return (
-        <div className={cnHeader}>
-            <div className={cnHeaderLeft}>DocsHub</div>
-            <div className={cnHeaderRigth}>{/* <UserIcon /> */}</div>
+        <div className={styles.Header}>
+            <div className={styles.HeaderLeft}>DocsHub</div>
+            <div>{/* <UserIcon /> */}</div>
         </div>
     );
 };

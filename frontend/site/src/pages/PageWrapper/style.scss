@@ -1,23 +1,21 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-$root: '.PageWrapper';
-
-#{$root} {
+.pageWrapper {
     display: flex;
 	flex-direction: column;
     width: 100%;
     min-height: calc(100% - 69px);
     max-height: min-content;
 
-	#{$root}-Page {
+	.page {
 		display: flex;
 	}
 
-	#{$root}-Menu {
+	.menu {
 		width: 325px;
 	}
 
-	#{$root}-Content {
+	.content {
 		width: calc(100vw - 325px);
 		box-sizing: border-box;
 	}

@@ -40,10 +40,12 @@ const webpackConfig = (): Configuration => ({
                 },
                 exclude: /build/,
             },
-            {
-                test: /\.s?css$/,
-                use: ['style-loader', 'css-loader', 'sass-loader'],
-            },
+            { test: /\.scss$/, use: [ 
+                { loader: "style-loader" },  // to inject the result into the DOM as a style block
+                { loader: "css-modules-typescript-loader" },  // to generate a .d.ts module next to the .scss file (also requires a declaration.d.ts with "declare modules '*.scss';" in it to tell TypeScript that "import styles from './styles.scss';" means to load the module "./styles.scss.d.td")
+                { loader: "css-loader", options: { modules: { localIdentName:'[local]_[hash:base64:10]' } } },  // to convert the resulting CSS to Javascript to be bundled (modules:true to rename CSS classes in output to cryptic identifiers, except if wrapped in a :global(...) pseudo class)
+                { loader: "sass-loader" },  // to convert SASS to CSS
+            ] }, 
             {
                 test: /\.svg$/,
                 use: ['@svgr/webpack'],
@@ -52,7 +54,7 @@ const webpackConfig = (): Configuration => ({
     },
     devServer: {
         port: 3000,
-        open: true,
+        // open: true,
         historyApiFallback: true,
         proxy: {
             '/api/**': 'http://localhost:8000',

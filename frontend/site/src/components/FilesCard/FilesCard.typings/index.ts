@@ -6,4 +6,5 @@ export enum Extensions {
     cpp = 'cpp',
     db = 'db',
     h = 'h',
+    png = 'png',
 }

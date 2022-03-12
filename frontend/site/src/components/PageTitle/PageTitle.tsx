@@ -1,9 +1,7 @@
 import React, { ReactNode } from 'react';
 import type { FC } from 'react';
 
-import { cnPageTitle, cnRightChild, cnText } from './PageTitle.constants';
-
-import './style.scss';
+import styles from './style.scss';
 
 interface PageTitleProps {
     title: ReactNode;
@@ -12,9 +10,9 @@ interface PageTitleProps {
 
 export const PageTitle: FC<PageTitleProps> = ({ title, rightChild }: PageTitleProps) => {
     return (
-        <div className={cnPageTitle}>
-            <div className={cnText}>{title}</div>
-            {rightChild && <div className={cnRightChild}>{rightChild}</div>}
+        <div className={styles.pageTitle}>
+            <div className={styles.text}>{title}</div>
+            {rightChild && <div>{rightChild}</div>}
         </div>
     );
 };

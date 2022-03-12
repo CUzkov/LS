@@ -1,30 +1,35 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.repositories-page-filters {
+.repositoriesPageFilters {
 	display: flex;
 	align-items: center;
 
-	&__search-field {
+	.searchField {
 		width: 250px;
 		margin-right: 15px;
 	}
-
-	&__rwa-field {
+	
+	.rwaField {
 		width: 300px;
 		margin-right: 25px;
 	}
-
-	&__find-button {
+	
+	.findButton {
 		width: 75px;
 		margin-right: 10px;
 	}
-
-	&__reset-button {
-		width: 75px;
-	}
-
-	&__search-form {
+	
+	.searchForm {
 		display: flex;
 		align-items: center;
+	}
+
+	.rwaForm {
+		display: flex;
+		align-items: center;
+	}
+	
+	.resetButton {
+		width: 75px;
 	}
 }

@@ -1,18 +1,36 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.repository-page {
+.repositoryPage {
     width: calc(100% - 65px);
     box-sizing: border-box;
     border-top: 1px solid $default-dark-border;
     margin: 5px 10px 0 55px;
-	padding-top: 25px;
 
-    &__title {
-        font-size: 24px;
-        letter-spacing: 1px;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+    .editIcon {
+        height: 45px;
+        width: 45px;
+        border-radius: 50%;
+        transition: background-color .2s;
+        cursor: pointer;
+        position: relative;
+        
+        &:hover {
+            background-color: $default-hover-color;
+        }
+
+        &.editing {
+            background-color: $default-hover-color;
+        }
+
+        svg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    .fileInput {
+        display: none;
     }
 }

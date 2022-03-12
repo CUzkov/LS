@@ -1,8 +1,6 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-$root: '.LoginPage';
-
-#{$root} {
+.loginPage {
 	min-height: calc(100vh - 72px);
 	display: flex;
 	align-items: center;

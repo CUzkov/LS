@@ -5,16 +5,18 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "webpack-cli serve --mode=development --env development --open --hot",
+        "start": "webpack-cli serve --mode=development --env development --hot",
         "build": "webpack --mode=production --env production --progress",
         "lint": "eslint src/**/*.{ts,tsx} --quiet --fix",
-        "lint2": "./node_modules/.bin/eslint . --fix"
+        "lint2": "./node_modules/.bin/eslint . --fix",
+        "tsc": "tsc"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
         "@bem-react/classname": "^1.5.12",
+        "classnames": "^2.3.1",
         "file-icon-vectors": "^1.0.0",
         "history": "^5.1.0",
         "lodash": "^4.17.21",
@@ -40,6 +42,7 @@
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
         "css-loader": "^6.4.0",
+        "css-modules-typescript-loader": "^4.0.1",
         "eslint": "^7.32.0",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-import": "^2.25.2",

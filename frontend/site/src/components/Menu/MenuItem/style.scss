@@ -1,18 +1,18 @@
-@import '../../../style.scss';
+@import '../../../index.scss';
 
-.menu-item {
+.menuItem {
     transition: all 0.3s;
     border-radius: 0 10px 10px 0;
     padding: 20px 10px 10px 10px;
 	cursor: pointer;
 
-    &__list {
+    .list {
         max-height: 0;
         overflow: hidden;
         transition: all 0.3s;
     }
 
-    &__link {
+    .link {
         padding: 10px 55px 10px 45px;
         cursor: pointer;
         border-radius: 5px;
@@ -23,14 +23,14 @@
         }
     }
 
-    &__title {
+    .title {
         cursor: pointer;
         margin: 0 0 10px 0;
 		display: flex;
 		align-items: center;
     }
 
-    &__title-icon {
+    .titleIcon {
         width: 45px;
         display: flex;
         align-items: flex-end;
@@ -49,10 +49,10 @@
         background-color: $menu-hover-color;
 	}
 
-    &--expand {
+    &.expand {
         background-color: $menu-hover-color;
 
-        .menu-item__list {
+        .list {
             max-height: 300px;
         }
     }

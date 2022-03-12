@@ -1,17 +1,9 @@
 import React, { FC, ReactElement, useCallback, useState } from 'react';
 import { Field } from 'react-final-form';
+import cn from 'classnames';
 
 import { composeValidators } from 'utils/final-forms';
-import { IsNoneEmptyStr } from 'utils/classname';
 import { FieldProps, FieldMeta } from '../Fields.typings';
-import {
-    cnTextField,
-    cnTextFieldErrorText,
-    cnTextFieldInput,
-    cnTextFieldLabel,
-    cnTextFieldPasswordIcon,
-    cnTextFieldSearchIcon,
-} from '../Fields.constants';
 
 import ViewedIcon from '../Fields.assets/viewed.svg';
 import NotViewedIcon from '../Fields.assets/not-viewed.svg';
@@ -19,7 +11,7 @@ import UserIcon from '../Fields.assets/user.svg';
 import LockIcon from '../Fields.assets/lock.svg';
 import SearchIcon from '../Fields.assets/search.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 interface TextFieldProps {
     name: string;
@@ -60,21 +52,16 @@ export const TextField: FC<TextFieldProps> = ({
     return (
         <Field name={name} validate={composeValidators(...validators)} defaultValue={defaultValue}>
             {({ input, meta }: FieldProps<string>): ReactElement => (
-                <div
-                    className={cnTextField({
-                        focus: meta.active,
-                        'not-valid': IsNoneEmptyStr(meta.error) && ((meta.touched ?? false) || meta.submitSucceeded),
-                    })}
-                >
+                <div className={styles.textField}>
                     {title && (
-                        <label htmlFor={name} className={cnTextFieldLabel}>
+                        <label htmlFor={name} className={styles.label}>
                             {type === 'email-username' && <UserIcon />}
                             {type === 'password' && <LockIcon />}
                             {title}
                         </label>
                     )}
 
-                    <div className={cnTextFieldInput({ disable: isDisable })}>
+                    <div className={cn(styles.input, isDisable && styles.disable)}>
                         <input
                             {...input}
                             id={name}
@@ -82,19 +69,19 @@ export const TextField: FC<TextFieldProps> = ({
                             onBlur={handleBlur(input.onBlur, meta)}
                         />
                         {type === 'password' && (
-                            <div className={cnTextFieldPasswordIcon} onClick={toggleVisible}>
+                            <div className={styles.passwordIcon} onClick={toggleVisible}>
                                 {isVisible ? <ViewedIcon /> : <NotViewedIcon />}
                             </div>
                         )}
                         {type === 'search' && (
-                            <div className={cnTextFieldSearchIcon}>
+                            <div className={styles.searchIcon}>
                                 <SearchIcon />
                             </div>
                         )}
                     </div>
 
                     {!isNoNeedErrors && (
-                        <div className={cnTextFieldErrorText}>
+                        <div className={styles.errorText}>
                             {(meta.touched ?? false) || (meta.submitSucceeded ?? false) ? meta.error : ''}
                         </div>
                     )}

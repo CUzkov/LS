@@ -1,5 +1,7 @@
 import React, { ReactNode } from 'react';
 
+import { FileMeta } from 'types';
+
 import DirIcon from 'file-icon-vectors/dist/icons/vivid/folder.svg';
 import NoneIcon from 'file-icon-vectors/dist/icons/vivid/blank.svg';
 
@@ -18,4 +20,15 @@ export const getIconByExtension = (name: string, isDir = false): ReactNode => {
     }
 
     return extensionToIconMap[ext];
+};
+
+export const sortFiles = (a: FileMeta, b: FileMeta) => {
+    const isBothDir = a.isDir && b.isDir;
+    const isBothFile = !a.isDir && !b.isDir;
+
+    if (isBothDir || isBothFile) {
+        return a.name > b.name ? 1 : -1;
+    }
+
+    return (a.isDir && -1) || 1;
 };

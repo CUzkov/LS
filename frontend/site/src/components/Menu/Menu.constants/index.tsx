@@ -6,12 +6,6 @@ import SettingsIcon from './assets/settings.svg';
 
 import { getAllMaps, getMapCreate, getRepositoryCreate, getAllRepositories } from 'constants/routers';
 
-import { cn } from 'utils/classname';
-
-export const cnMenu = cn('menu')();
-export const cnMenuItem = cn('menu', 'item')();
-export const cnMenuDivider = cn('menu', 'divider')();
-
 export const getMenu = (username: string) => [
     {
         title: 'Карты',

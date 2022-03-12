@@ -1,6 +1,6 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
-.item-card {
+.itemCard {
 	width: 100%;
 	background-color: $cards-color;
 	margin-bottom: 10px;
@@ -9,7 +9,7 @@
 	padding: 10px;
 	box-sizing: border-box;
 
-	&__title {
+	.title {
 		cursor: pointer;
 		transition: .3s color;
 

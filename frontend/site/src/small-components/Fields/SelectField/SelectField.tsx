@@ -1,22 +1,14 @@
 import React, { FC, ReactElement, useCallback, useRef, Fragment } from 'react';
 import { Field, useForm } from 'react-final-form';
+import cn from 'classnames';
 
 import { composeValidators } from 'utils/final-forms';
-import { FieldProps } from '../Fields.typings';
-import {
-    cnSelectField,
-    cnSelectFieldButton,
-    cnSelectFieldChevron,
-    cnSelectFieldOptions,
-    cnSelectFieldOption,
-    cnSelectFieldOptionLine,
-    cnSelectFieldButtonText,
-} from '../Fields.constants';
 import { useOutsideClick, useBooleanState } from 'hooks/index';
 
 import ChevronIcon from '../Fields.assets/chevron.svg';
+import { FieldProps } from '../Fields.typings';
 
-import './style.scss';
+import styles from './style.scss';
 
 interface SelectFieldProps {
     name: string;
@@ -57,7 +49,7 @@ export const SelectField: FC<SelectFieldProps> = ({
             defaultValue={defaultValue || options?.[0]?.value}
         >
             {({ input }: FieldProps<string>): ReactElement => (
-                <div className={cnSelectField} ref={selectRef}>
+                <div className={styles.selectField} ref={selectRef}>
                     <select {...input} id={name}>
                         {options.map((option, i) => (
                             <option value={i} key={option.title}>
@@ -65,32 +57,32 @@ export const SelectField: FC<SelectFieldProps> = ({
                             </option>
                         ))}
                     </select>
-                    <div className={cnSelectFieldButton} onClick={toggleSelect}>
+                    <div className={styles.button} onClick={toggleSelect}>
                         {options.map(
                             (option) =>
                                 option.value === input.value && (
-                                    <span key={option.title} className={cnSelectFieldButtonText}>
+                                    <span key={option.title} className={styles.buttonText}>
                                         {option.title}
                                     </span>
                                 ),
                         )}
-                        <div className={cnSelectFieldChevron({ expand: isExpand })}>
+                        <div className={cn(styles.chevron, isExpand && styles.expand)}>
                             <ChevronIcon />
                         </div>
                     </div>
-                    <div className={cnSelectFieldOptions({ expand: isExpand })}>
+                    <div className={cn(styles.options, isExpand && styles.expand)}>
                         {options.map((option, i) => (
                             <Fragment key={option.title}>
-                                <div className={cnSelectFieldOptionLine} />
+                                <div className={styles.optionLine} />
                                 <div
-                                    className={cnSelectFieldOption({ active: input.value === option.value })}
+                                    className={cn(styles.option, input.value === option.value && styles.active)}
                                     onClick={() => handleClickOption(i)}
                                 >
                                     {option.title}
                                 </div>
                             </Fragment>
                         ))}
-                        <div className={cnSelectFieldOptionLine} />
+                        <div className={styles.optionLine} />
                     </div>
                 </div>
             )}

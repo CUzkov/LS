@@ -1,28 +1,23 @@
 import React, { createRef, useCallback, useEffect, useMemo, useState } from 'react';
+import cn from 'classnames';
 import type { FC } from 'react';
 
 import { useDispatch } from 'store';
-import { File } from 'types';
+import { FileMeta } from 'types';
 import { getDownloadLink } from 'utils/urls';
 
-import {
-    cnFilesCard,
-    cnFileRow,
-    cnFileIcon,
-    cnFileTitle,
-    cnFileActions,
-    cnEmptyMessage,
-    cnFileActionIcon,
-} from './FilesCard.constants';
-import { getIconByExtension } from './FilesCard.utils';
+import { getIconByExtension, sortFiles } from './FilesCard.utils';
 import DownloadIcon from './FilesCard.assets/download.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 interface FilesCardProps {
-    files: File[];
+    files: Array<FileMeta & { fantomKey?: string }>;
     repositoryId: number;
     path: string[];
+    isEditing?: boolean;
+    fantomFiles?: Array<FileMeta & { fantomKey: string }>;
+    onClickAddFile: () => void;
     onClickDir: (pathToDir: string[]) => void;
     onClickToUpDir: () => void;
 }
@@ -31,17 +26,16 @@ export const FilesCard: FC<FilesCardProps> = ({
     files,
     repositoryId,
     path,
+    fantomFiles = [],
+    isEditing = false,
+    onClickAddFile,
     onClickDir,
     onClickToUpDir,
 }: FilesCardProps) => {
     const [isFileHoverMap, setIsFileHoverMap] = useState<boolean[]>([]);
     const createDivRef: () => React.RefObject<HTMLDivElement> = createRef;
-    const rowsRefs = useMemo(() => files.map(() => createDivRef()), [files]);
+    const rowsRefs = useMemo(() => files.concat(fantomFiles).map(() => createDivRef()), [files, fantomFiles]);
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        setIsFileHoverMap(files.map(() => false));
-    }, [files]);
 
     const handleToggleHover = useCallback(
         (index: number, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -66,40 +60,57 @@ export const FilesCard: FC<FilesCardProps> = ({
         [dispatch],
     );
 
+    useEffect(() => {
+        setIsFileHoverMap(files.map(() => false));
+    }, [files]);
+
     return (
-        <div className={cnFilesCard}>
+        <div className={styles.filesCard}>
             {path.length ? (
-                <div className={cnFileRow} onClick={() => onClickToUpDir()}>
-                    <div className={cnFileTitle}>{'...'}</div>
+                <div className={styles.row} onClick={() => onClickToUpDir()}>
+                    <div className={styles.title}>{'...'}</div>
                 </div>
             ) : null}
-            {files.map((file, index) => (
-                <div
-                    className={cnFileRow}
-                    key={file.name + index}
-                    ref={rowsRefs[index]}
-                    onMouseOver={(e) => handleToggleHover(index, e)}
-                    onMouseOut={(e) => handleToggleHover(index, e)}
-                    onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
-                >
-                    <div className={cnFileTitle}>
-                        <div className={cnFileIcon}>{getIconByExtension(file.name, file.isDir)}</div>
-                        {file.name}
+            {isEditing ? (
+                <>
+                    <div className={styles.row} onClick={onClickAddFile}>
+                        <div className={styles.title}>{'+ добавить файл'}</div>
                     </div>
-                    <div className={cnFileActions({ hover: isFileHoverMap[index] })}>
-                        <a
-                            href={getDownloadLink(repositoryId, file.pathToFile.join('~'))}
-                            target="_blank"
-                            download={file.isDir ? `${file.name}.zip` : file.name}
-                        >
-                            <div className={cnFileActionIcon}>
-                                <DownloadIcon />
-                            </div>
-                        </a>
+                    <div className={styles.row}>
+                        <div className={styles.title}>{'+ добавить папку'}</div>
                     </div>
-                </div>
-            ))}
-            {files.length === 0 && <div className={cnEmptyMessage}>{'Репозиторий пуст'}</div>}
+                </>
+            ) : null}
+            {files
+                .concat(fantomFiles)
+                .sort(sortFiles)
+                .map((file, index) => (
+                    <div
+                        className={cn(styles.row, file.fantom?.action === 'add' && styles.added)}
+                        key={file.name + index}
+                        ref={rowsRefs[index]}
+                        onMouseOver={(e) => handleToggleHover(index, e)}
+                        onMouseOut={(e) => handleToggleHover(index, e)}
+                        onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
+                    >
+                        <div className={styles.title}>
+                            <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
+                            {file.name}
+                        </div>
+                        <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>
+                            <a
+                                href={getDownloadLink(repositoryId, file.pathToFile.join('~'))}
+                                target="_blank"
+                                download={file.isDir ? `${file.name}.zip` : file.name}
+                            >
+                                <div className={styles.actionIcon}>
+                                    <DownloadIcon />
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                ))}
+            {files.length === 0 && <div className={styles.emptyMessage}>{'Репозиторий пуст'}</div>}
         </div>
     );
 };

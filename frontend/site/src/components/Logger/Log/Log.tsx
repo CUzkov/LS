@@ -1,15 +1,14 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import cn from 'classnames';
 import type { FC } from 'react';
 
 import type { Log as ILog } from 'store/reducers/logger';
-
-import { cnLog, cnLogDescription, cnLogTitle } from './Log.constants';
 
 import OkIcon from './Log.assets/ok.svg';
 import ErrorIcon from './Log.assets/error.svg';
 import CrossIcon from './Log.assets/cross.svg';
 
-import './style.scss';
+import styles from './style.scss';
 
 interface ILogProps {
     log: ILog;
@@ -18,14 +17,22 @@ interface ILogProps {
 
 export const Log: FC<ILogProps> = ({ log, onClickCross }) => {
     const [isClickCross, setIsClickCross] = useState(false);
+    const logTypeStyle = useMemo(() => {
+        if (log.type === 'error') return styles.error;
+        if (log.type === 'success') return styles.success;
+    }, [log.type]);
+
     const onClick = useCallback(() => {
         setIsClickCross(true);
     }, []);
 
     return (
-        <div className={cnLog({ type: log.type, close: isClickCross })} onTransitionEndCapture={onClickCross}>
+        <div
+            className={cn(styles.log, logTypeStyle, isClickCross && styles.close)}
+            onTransitionEndCapture={onClickCross}
+        >
             {log.title && (
-                <div className={cnLogTitle}>
+                <div className={styles.title}>
                     {log.title}
                     <div onClick={onClick}>
                         <CrossIcon />
@@ -33,7 +40,7 @@ export const Log: FC<ILogProps> = ({ log, onClickCross }) => {
                 </div>
             )}
             {log.description && (
-                <div className={cnLogDescription}>
+                <div className={styles.description}>
                     {log.type === 'success' ? <OkIcon /> : <ErrorIcon />}
                     {log.description}
                 </div>

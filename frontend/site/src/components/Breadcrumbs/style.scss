@@ -1,4 +1,4 @@
-@import '../../style.scss';
+@import '../../index.scss';
 
 .breadcrumbs {
     display: flex;
@@ -6,51 +6,49 @@
     padding: 10px;
     position: relative;
 
-    .breadcrumbs {
-        &__item {
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
+    .item {
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        position: relative;
+        border: 1px solid $default-border-color;
+        border-right: none;
+        font-size: 12px;
+        transition: background-color 0.3s;
+
+        span {
             position: relative;
-            border: 1px solid $default-border-color;
-            border-right: none;
-            font-size: 12px;
-            transition: background-color 0.3s;
-    
-            span {
-                position: relative;
-                z-index: 1;
-            }
-    
-            &:hover {
+            z-index: 1;
+        }
+
+        &:hover {
+            background-color: $breadcrumbs-hover-color;
+
+            .itemBox {
                 background-color: $breadcrumbs-hover-color;
-    
-                .breadcrumbs__item-box {
-                    background-color: $breadcrumbs-hover-color;
-                }
-            }
-    
-            &:not(:first-child) {
-                border-left: none;
-                padding-left: 34px;
             }
         }
 
-        &__item-box {
-            position: absolute;
-            content: '';
-            width: 28px;
-            height: 28px;
-            transform: rotate(45deg);
-            left: calc(100% - 18px);
-            top: 9%;
-            border: 1px solid $default-border-color;
+        &:not(:first-child) {
             border-left: none;
-            border-bottom: none;
-            border-radius: 5px;
-            background-color: $page-color;
-            transition: background-color .3s;
+            padding-left: 34px;
         }
+    }
+
+    .itemBox {
+        position: absolute;
+        content: '';
+        width: 28px;
+        height: 28px;
+        transform: rotate(45deg);
+        left: calc(100% - 18px);
+        top: 9%;
+        border: 1px solid $default-border-color;
+        border-left: none;
+        border-bottom: none;
+        border-radius: 5px;
+        background-color: $page-color;
+        transition: background-color .3s;
     }
 }

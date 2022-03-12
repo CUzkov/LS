@@ -4,10 +4,9 @@ import type { FC } from 'react';
 import { useDispatch, useSelector } from 'store/store';
 import { deleteLog } from 'actions/logger';
 
-import { cnLogger, cnLoggerHint } from './Logger.constants';
 import { Log } from './Log';
 
-import './style.scss';
+import styles from './style.scss';
 
 let keys = 0;
 
@@ -23,11 +22,11 @@ export const Logger: FC = () => {
     );
 
     return (
-        <div className={cnLogger}>
+        <div className={styles.logger}>
             {loggerStore.logs.slice(0, 3).map((log, i) => (
                 <Log log={log} key={keys++} onClickCross={onClickCross(i)} />
             ))}
-            <div className={cnLoggerHint} />
+            <div className={styles.loggerHint} />
         </div>
     );
 };
