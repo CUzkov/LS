@@ -20,7 +20,15 @@
 		justify-content: space-between;
 
 		&.added {
-			color: $default-text-succes-color;
+			color: $add-color;
+		}
+
+		&.rewrite {
+			color: $modify-color;
+		}
+
+		&.delete {
+			color: $delete-color;
 		}
 
 		&:hover {

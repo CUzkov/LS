@@ -10,17 +10,53 @@
     min-width: 400px;
     pointer-events: all;
     z-index: 100;
+
+    .header {
+        height: 15px;
+        padding: 10px;
+        user-select: none;
+        color: $default-text-color;
+        border-bottom: 1px solid $default-border-color;
+        font-size: 16px;
+    }
+    
+    .content {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        border-top: 1px solid $default-border-color;
+    }
+
+    .button {
+        width: 150px;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+    }
 }
 
-.header {
-    height: 15px;
-    padding: 5px 5px 10px 5px;
-    user-select: none;
-    color: $default-text-color;
-    border-bottom: 1px solid $default-border-color;
+.noInteract {
+    pointer-events: none;
 }
 
-.content {
-    padding: 5px;
+.closeError {
+    animation: close-error-animation .15s;
+    animation-iteration-count: 6;
+}
 
+@keyframes close-error-animation {
+    from {
+        box-shadow: none;
+        border: 1px solid $cards-color;
+    }
+    to {
+        box-shadow: 0px 0px 5px 0px $default-shadow-color;
+        border: 1px solid $default-border-color;
+    }
 }

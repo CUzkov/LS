@@ -26,6 +26,10 @@ body {
     --default-text-error-color: #ee6868;
     --default-text-succes-color: #83a300;
 
+    --add-color: forestgreen;
+    --modify-color: gold;
+    --delete-color: firebrick;
+
     --default-icon-color: #77909b;
     --default-icon-error-color: #ee6868;
     --default-icon-succes-color: #B9F287;
@@ -62,6 +66,10 @@ $default-text-color: var(--default-text-color);
 $default-text-hover-color: var(--default-text-hover-color);
 $default-text-error-color: var(--default-text-error-color);
 $default-text-succes-color: var(--default-text-succes-color);
+
+$add-color: var(--add-color);
+$modify-color: var(--modify-color);
+$delete-color: var(--delete-color);
 
 $default-icon-color: var(--default-icon-color);
 $default-icon-error-color: var(--default-icon-error-color);

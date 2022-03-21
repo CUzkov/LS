@@ -37,6 +37,21 @@ export const FilesCard: FC<FilesCardProps> = ({
     const rowsRefs = useMemo(() => files.concat(fantomFiles).map(() => createDivRef()), [files, fantomFiles]);
     const dispatch = useDispatch();
 
+    const filesToShow = useMemo(
+        () =>
+            files
+                .concat(fantomFiles)
+                .sort(sortFiles)
+                .filter((file) => {
+                    if (!file.fantom && fantomFiles.some((fantomFile) => fantomFile.name === file.name)) {
+                        return false;
+                    }
+
+                    return true;
+                }),
+        [files, fantomFiles],
+    );
+
     const handleToggleHover = useCallback(
         (index: number, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
             const isHover = isFileHoverMap[index];
@@ -81,35 +96,36 @@ export const FilesCard: FC<FilesCardProps> = ({
                     </div>
                 </>
             ) : null}
-            {files
-                .concat(fantomFiles)
-                .sort(sortFiles)
-                .map((file, index) => (
-                    <div
-                        className={cn(styles.row, file.fantom?.action === 'add' && styles.added)}
-                        key={file.name + index}
-                        ref={rowsRefs[index]}
-                        onMouseOver={(e) => handleToggleHover(index, e)}
-                        onMouseOut={(e) => handleToggleHover(index, e)}
-                        onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
-                    >
-                        <div className={styles.title}>
-                            <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
-                            {file.name}
-                        </div>
-                        <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>
-                            <a
-                                href={getDownloadLink(repositoryId, file.pathToFile.join('~'))}
-                                target="_blank"
-                                download={file.isDir ? `${file.name}.zip` : file.name}
-                            >
-                                <div className={styles.actionIcon}>
-                                    <DownloadIcon />
-                                </div>
-                            </a>
-                        </div>
+            {filesToShow.map((file, index) => (
+                <div
+                    className={cn(
+                        styles.row,
+                        file.fantom?.action === 'add' && styles.added,
+                        file.fantom?.action === 'rewrite' && styles.rewrite,
+                    )}
+                    key={file.name + index}
+                    ref={rowsRefs[index]}
+                    onMouseOver={(e) => handleToggleHover(index, e)}
+                    onMouseOut={(e) => handleToggleHover(index, e)}
+                    onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
+                >
+                    <div className={styles.title}>
+                        <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
+                        {file.name}
                     </div>
-                ))}
+                    <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>
+                        <a
+                            href={getDownloadLink(repositoryId, file.pathToFile.join('~'))}
+                            target="_blank"
+                            download={file.isDir ? `${file.name}.zip` : file.name}
+                        >
+                            <div className={styles.actionIcon}>
+                                <DownloadIcon />
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            ))}
             {files.length === 0 && <div className={styles.emptyMessage}>{'Репозиторий пуст'}</div>}
         </div>
     );

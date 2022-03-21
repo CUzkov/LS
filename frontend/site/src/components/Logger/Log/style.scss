@@ -10,22 +10,6 @@
     max-height: 400px;
     transition: all .3s;
 
-    .success {
-        svg {
-            path {
-                stroke: $default-icon-succes-color;
-            }
-        }
-    }
-
-    .error {
-        svg {
-            path {
-                stroke: $default-icon-error-color;
-            }
-        }
-    }
-
     .title {
         font-size: 16px;
         display: flex;
@@ -61,5 +45,21 @@
         opacity: 0;
         overflow: hidden;
         pointer-events: none;
+    }
+}
+
+.success {
+    svg {
+        path {
+            stroke: $default-icon-succes-color;
+        }
+    }
+}
+
+.error {
+    svg {
+        path {
+            stroke: $default-icon-error-color;
+        }
     }
 }

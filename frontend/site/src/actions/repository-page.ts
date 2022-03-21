@@ -76,9 +76,15 @@ export const changeFilesDirPath = (dispath: Dispatch, path: string[]) => {
     dispath({ type: 'repository-page/files/path', data: path });
 };
 
-export const addFantomFile = (dispath: Dispatch, pathToFile: string[], file: File, key: string) => {
+export const addFantomFile = (
+    dispath: Dispatch,
+    pathToFile: string[],
+    file: File,
+    key: string,
+    type: 'delete' | 'add' | 'rewrite' | 'rename',
+) => {
     dispath({
-        type: 'repository-page/unsaved/add-file',
+        type: 'repository-page/unsaved/add-fantom-file',
         data: {
             file,
             key,
@@ -87,12 +93,16 @@ export const addFantomFile = (dispath: Dispatch, pathToFile: string[], file: Fil
                 name: file.name,
                 isDir: false,
                 fantom: {
-                    action: 'add',
+                    action: type,
                 },
                 pathToFile,
             },
         },
     });
+};
+
+export const deleteFantomFile = (dispath: Dispatch, key: string) => {
+    dispath({ type: 'repository-page/unsaved/delete-fantom-file', data: { key } });
 };
 
 export const clearFantomFiles = (dispath: Dispatch) => {

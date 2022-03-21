@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, FC, useCallback, useRef, useContext } from '
 import { useParams } from 'react-router-dom';
 import cn from 'classnames';
 
-import { getPaths } from './RepositoryPage.constants';
 import { PageWrapper } from 'pages/PageWrapper';
 import { useDispatch, useSelector } from 'store/store';
 import { PageTitle } from 'components/PageTitle';
@@ -13,14 +12,19 @@ import {
     changeFilesDirPath,
     addFantomFile,
     clearFantomFiles,
+    deleteFantomFile,
 } from 'actions/repository-page';
 import { FilesCard } from 'components/FilesCard';
 import { useBooleanState } from 'hooks';
 import { MovablePopupManagerContext } from 'components/MovablePopupManager';
 
 import EditIcon from './RepositoryPage.assets/edit.svg';
+import { getPaths } from './RepositoryPage.constants';
 
 import styles from './style.scss';
+
+const DUPLICATED_FILES = 'DUPLICATED_FILES';
+const DUPLICATED_NEW_FILES = 'DUPLICATED_NEW_FILES';
 
 export const RepositoryPage: FC = () => {
     const dispatch = useDispatch();
@@ -86,7 +90,7 @@ export const RepositoryPage: FC = () => {
     }, [inputRef]);
 
     const handleChangeInput = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
+        async (event: React.ChangeEvent<HTMLInputElement>) => {
             const filesToAdd = event.target.files;
 
             if (!filesToAdd?.length) {
@@ -100,29 +104,91 @@ export const RepositoryPage: FC = () => {
                     continue;
                 }
 
-                const duplicateFile = files.data?.filter(({ name }) => name === file.name) ?? [];
-                const duplicateFileInNew = Object.values(unsavedChanges).filter(
-                    ({ fileMeta }) => fileMeta.name === file.name,
+                const duplicateFiles = files.data?.filter(({ name }) => name === file.name) ?? [];
+                const duplicateFileInNew = Object.entries(unsavedChanges).filter(
+                    ([, { fileMeta }]) => fileMeta.name === file.name,
                 );
 
-                if (duplicateFile.length) {
+                if (duplicateFiles.length) {
+                    const isRewrite = await new Promise<boolean>((resolve) => {
+                        context.addPopup({
+                            id: DUPLICATED_FILES,
+                            content: `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
+                            isRequired: true,
+                            title: 'Конфликт',
+                            buttons: [
+                                {
+                                    text: 'нет',
+                                    action: () => {
+                                        resolve(false);
+                                        context.removePopup(DUPLICATED_FILES);
+                                    },
+                                },
+                                {
+                                    text: 'да',
+                                    action: () => {
+                                        resolve(true);
+                                        context.removePopup(DUPLICATED_FILES);
+                                    },
+                                },
+                            ],
+                        });
+                    });
+
+                    if (isRewrite) {
+                        const key = file.name + (new Date().getTime() + i);
+                        addFantomFile(dispatch, [...files.path], file, key, 'rewrite');
+                    }
+
+                    continue;
+                }
+
+                if (duplicateFileInNew.length) {
+                    const isReadd = await new Promise<boolean>((resolve) => {
+                        context.addPopup({
+                            id: DUPLICATED_NEW_FILES,
+                            content: `Файл с названием ${file.name} уже добавлен ранее, хотите заменить его?`,
+                            isRequired: true,
+                            title: 'Конфликт',
+                            buttons: [
+                                {
+                                    text: 'нет',
+                                    action: () => {
+                                        resolve(false);
+                                        context.removePopup(DUPLICATED_NEW_FILES);
+                                    },
+                                },
+                                {
+                                    text: 'да',
+                                    action: () => {
+                                        resolve(true);
+                                        context.removePopup(DUPLICATED_NEW_FILES);
+                                    },
+                                },
+                            ],
+                        });
+                    });
+
+                    if (isReadd) {
+                        const key = file.name + (new Date().getTime() + i);
+                        deleteFantomFile(dispatch, duplicateFileInNew[0][0]);
+                        addFantomFile(dispatch, [...files.path], file, key, 'add');
+                    }
+
+                    continue;
                 }
 
                 const key = file.name + (new Date().getTime() + i);
-                addFantomFile(dispatch, [...files.path], file, key);
+                addFantomFile(dispatch, [...files.path], file, key, 'add');
             }
         },
-        [files],
+        [files, unsavedChanges],
     );
 
     useEffect(() => {
         if (id) {
             getPageRepositoriesById(dispatch, { id: Number(id) });
         }
-
-        context.addPopup('Подтвердите действие1', <div className="awdawdawd">awdadawd</div>);
-        context.addPopup('Подтвердите действие2', <div className="awdawdawd">awdadawd</div>);
-        context.addPopup('Подтвердите действие3', <div className="awdawdawd">awdadawd</div>);
     }, [id]);
 
     useEffect(() => {
@@ -154,16 +220,18 @@ export const RepositoryPage: FC = () => {
                         </div>
                     }
                 />
-                <FilesCard
-                    files={files.data ?? []}
-                    repositoryId={repository.data?.id ?? 0}
-                    path={files.path}
-                    onClickDir={handleClickDir}
-                    onClickToUpDir={handleClickToUpDir}
-                    onClickAddFile={handleAddFile}
-                    isEditing={isEditing}
-                    fantomFiles={currendDirFantomFiles}
-                />
+                <div style={{pointerEvents: 'all'}}>
+                    <FilesCard
+                        files={files.data ?? []}
+                        repositoryId={repository.data?.id ?? 0}
+                        path={files.path}
+                        onClickDir={handleClickDir}
+                        onClickToUpDir={handleClickToUpDir}
+                        onClickAddFile={handleAddFile}
+                        isEditing={isEditing}
+                        fantomFiles={currendDirFantomFiles}
+                    />
+                </div>
                 <input type="file" ref={inputRef} multiple className={styles.fileInput} onChange={handleChangeInput} />
             </div>
         ),

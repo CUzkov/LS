@@ -1,62 +1,98 @@
-import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import ReactDom from 'react-dom';
+import cn from 'classnames';
 import type { FC } from 'react';
 
 import { Popup } from './Popup';
+import {
+    IAddPopup,
+    MovablePopupManagerContext as MovablePopupManagerContextType,
+    Popup as PopupType,
+} from './MovablePopup.types';
 
 import styles from './style.scss';
 
-export const MovablePopupManagerContext = React.createContext({
-    addPopup: (title: string, content: ReactNode) => {
-        console.log();
-    },
-    removePopup: () => {
-        console.log();
-    },
-});
-
-type Popup = {
-    content: ReactNode;
-    title: string;
-    priority: number;
-    isRequired?: boolean;
+const context: MovablePopupManagerContextType = {
+    addPopup: () => {},
+    removePopup: () => {},
 };
+
+export const MovablePopupManagerContext = React.createContext(context);
 
 interface IMovablePopupManagerProps {
     children: ReactNode;
 }
 
 export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children }) => {
-    const [popups, setPopups] = useState<Popup[]>([]);
+    const [popups, setPopups] = useState<PopupType[]>([]);
 
     const createDivRef: () => React.RefObject<HTMLDivElement> = React.createRef;
     const popupsRefs = useMemo(() => popups.map(() => createDivRef()), [popups]);
+    const isSomeRequired = useMemo(() => popups.some((popup) => popup.isRequired), [popups]);
 
-    const handleAddPopup = useCallback((title: string, content: ReactNode) => {
-        setPopups((prev) => prev.map((popup) => ({...popup, priority: popup.priority + 1})).concat([{
-            title,
-            content,
-            priority: 1,
-        }]));
-    }, [popups]);
+    const handleAddPopup = useCallback(
+        ({ id, title, content, isRequired, buttons }: IAddPopup) => {
+            setPopups((prev) =>
+                prev
+                    .map((popup) => ({ ...popup, priority: popup.priority + 1 }))
+                    .concat([
+                        {
+                            id,
+                            title,
+                            content,
+                            priority: 1,
+                            isRequired,
+                            buttons,
+                        },
+                    ]),
+            );
+        },
+        [popups],
+    );
 
-    const handleRemovePopup = useCallback(() => {}, []);
+    const handleRemovePopup = useCallback((id: string) => {
+        setPopups((prev) => {
+            let deletePopup: PopupType;
 
-    const handleMouseDown = useCallback((index) => {
-        const popupPriority = popups[index].priority;
+            const filterPopups = prev.filter((popup) => {
+                if (popup.id === id) {
+                    deletePopup = { ...popup };
+                    return false;
+                }
 
-        setPopups(prev => prev.map((popup, i) => {
-            if (i === index) {
-                return {...popup, priority: 1};
-            }
+                return true;
+            });
 
-            if (popup.priority < popupPriority) {
-                return {...popup, priority: popup.priority + 1};
-            }
+            return filterPopups.map((popup) => {
+                if (popup.priority > deletePopup.priority) {
+                    return { ...popup, priority: popup.priority - 1 };
+                }
 
-            return popup;
-        }))
-    }, [popups]);
+                return popup;
+            });
+        });
+    }, []);
+
+    const handleMouseDown = useCallback(
+        (index) => {
+            const popupPriority = popups[index].priority;
+
+            setPopups((prev) =>
+                prev.map((popup, i) => {
+                    if (i === index) {
+                        return { ...popup, priority: 1 };
+                    }
+
+                    if (popup.priority < popupPriority) {
+                        return { ...popup, priority: popup.priority + 1 };
+                    }
+
+                    return popup;
+                }),
+            );
+        },
+        [popups],
+    );
 
     const handleMouseMove = useCallback(
         (index: number, mouseX: number, mouseY: number, e: MouseEvent) => {
@@ -70,6 +106,16 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
         [popupsRefs],
     );
 
+    useEffect(() => {
+        if (isSomeRequired) {
+            document.body.style.pointerEvents = 'none';
+        }
+
+        return () => {
+            document.body.style.pointerEvents = '';
+        }
+    }, [isSomeRequired]);
+
     return (
         <>
             <MovablePopupManagerContext.Provider
@@ -81,8 +127,8 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
                 {children}
             </MovablePopupManagerContext.Provider>
             {ReactDom.createPortal(
-                <div className={styles.popupsLayout}>
-                    {popups.map(({ content, title, priority }, index) => (
+                <div className={cn(styles.popupsLayout)}>
+                    {popups.map(({ content, title, priority, isRequired, buttons }, index) => (
                         <Popup
                             title={title}
                             key={title + index}
@@ -92,6 +138,9 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
                             }
                             onMouseDown={() => handleMouseDown(index)}
                             zIndex={10000 - priority}
+                            isRequired={isRequired && priority === 1}
+                            anotherRequired={isSomeRequired}
+                            buttons={buttons}
                         >
                             {content}
                         </Popup>

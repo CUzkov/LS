@@ -26,7 +26,8 @@ export type RepositoryPageEvents =
     | { type: 'repository-page/files/success'; data: IRepositoryPageUpdateFilesD }
     | { type: 'repository-page/files/loading' }
     | { type: 'repository-page/files/error' }
-    | { type: 'repository-page/unsaved/add-file'; data: IRepositoryPageAddResponseD }
+    | { type: 'repository-page/unsaved/add-fantom-file'; data: IRepositoryPageAddResponseD }
+    | { type: 'repository-page/unsaved/delete-fantom-file'; data: { key: string } }
     | { type: 'repository-page/unsaved/clear' };
 
 export type RepositoryPageStore = {
@@ -128,13 +129,21 @@ export const repositoryPageReducer = (
         return result;
     }
 
-    if (event.type === 'repository-page/unsaved/add-file') {
+    if (event.type === 'repository-page/unsaved/add-fantom-file') {
         const result = { ...state };
 
         result.unsavedChanges = {
             ...state.unsavedChanges,
             [event.data.key]: { ...event.data },
         };
+
+        return result;
+    }
+
+    if (event.type === 'repository-page/unsaved/delete-fantom-file') {
+        const result = { ...state };
+
+        delete result.unsavedChanges[event.data.key];
 
         return result;
     }
