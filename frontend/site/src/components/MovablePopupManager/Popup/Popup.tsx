@@ -91,7 +91,7 @@ export const Popup: FC<IMovablePopupProps> = ({
                 top: innerRef?.current?.style?.top ?? popupLastPosition.y,
                 left: innerRef?.current?.style?.left ?? popupLastPosition.x,
                 zIndex,
-                pointerEvents: 'all'
+                pointerEvents: 'all',
             }}
         >
             <div className={styles.header} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>

@@ -1,0 +1,50 @@
+@import '../../../index.scss';
+
+.editIcon {
+    height: 45px;
+    width: 45px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    font-size: 14px;
+    line-height: 14px;
+    transition: background-color .2s, opacity .2s, margin-right .1s;
+    user-select: none;
+    
+    &:hover {
+        background-color: $default-hover-color;
+    }
+
+    &.editing {
+        background-color: $default-hover-color;
+    }
+}
+
+.actionIcon {
+    opacity: 0;
+    margin-right: 10px;
+    width: min-content;
+    border-radius: 22px;
+    white-space: nowrap;
+
+    svg {
+        margin-right: 10px;
+        min-width: 20px;
+    }
+
+    &.editing {
+        opacity: 1;
+        background-color: transparent;
+    }
+
+    &:hover {
+        background-color: $default-hover-color;
+    }
+}
+
+.actions {
+    display: flex;
+}

@@ -113,7 +113,7 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
 
         return () => {
             document.body.style.pointerEvents = '';
-        }
+        };
     }, [isSomeRequired]);
 
     return (

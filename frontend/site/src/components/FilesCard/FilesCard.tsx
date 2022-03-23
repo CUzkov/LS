@@ -1,34 +1,28 @@
-import React, { createRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createRef, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 import type { FC } from 'react';
 
 import { useDispatch } from 'store';
 import { FileMeta } from 'types';
-import { getDownloadLink } from 'utils/urls';
 
 import { getIconByExtension, sortFiles } from './FilesCard.utils';
-import DownloadIcon from './FilesCard.assets/download.svg';
 
 import styles from './style.scss';
 
 interface FilesCardProps {
-    files: Array<FileMeta & { fantomKey?: string }>;
-    repositoryId: number;
+    files: Array<FileMeta>;
     path: string[];
-    isEditing?: boolean;
-    fantomFiles?: Array<FileMeta & { fantomKey: string }>;
-    onClickAddFile: () => void;
+    fantomFiles?: Array<FileMeta>;
+    actions?: (file: FileMeta) => ReactNode;
     onClickDir: (pathToDir: string[]) => void;
     onClickToUpDir: () => void;
 }
 
 export const FilesCard: FC<FilesCardProps> = ({
     files,
-    repositoryId,
     path,
     fantomFiles = [],
-    isEditing = false,
-    onClickAddFile,
+    actions = () => <></>,
     onClickDir,
     onClickToUpDir,
 }: FilesCardProps) => {
@@ -43,7 +37,12 @@ export const FilesCard: FC<FilesCardProps> = ({
                 .concat(fantomFiles)
                 .sort(sortFiles)
                 .filter((file) => {
-                    if (!file.fantom && fantomFiles.some((fantomFile) => fantomFile.name === file.name)) {
+                    if (
+                        !file.fantom &&
+                        fantomFiles.some(
+                            (fantomFile) => fantomFile.isDir === file.isDir && fantomFile.name === file.name,
+                        )
+                    ) {
                         return false;
                     }
 
@@ -86,44 +85,31 @@ export const FilesCard: FC<FilesCardProps> = ({
                     <div className={styles.title}>{'...'}</div>
                 </div>
             ) : null}
-            {isEditing ? (
-                <>
-                    <div className={styles.row} onClick={onClickAddFile}>
-                        <div className={styles.title}>{'+ добавить файл'}</div>
-                    </div>
-                    <div className={styles.row}>
-                        <div className={styles.title}>{'+ добавить папку'}</div>
-                    </div>
-                </>
-            ) : null}
             {filesToShow.map((file, index) => (
                 <div
                     className={cn(
                         styles.row,
                         file.fantom?.action === 'add' && styles.added,
                         file.fantom?.action === 'rewrite' && styles.rewrite,
+                        file.fantom?.action === 'delete' && styles.delete,
                     )}
                     key={file.name + index}
                     ref={rowsRefs[index]}
                     onMouseOver={(e) => handleToggleHover(index, e)}
                     onMouseOut={(e) => handleToggleHover(index, e)}
-                    onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
+                    onClick={
+                        file.isDir && file.fantom?.action !== 'delete'
+                            ? () => handleClickDir(file.pathToFile)
+                            : undefined
+                    }
                 >
                     <div className={styles.title}>
                         <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
                         {file.name}
                     </div>
-                    <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>
-                        <a
-                            href={getDownloadLink(repositoryId, file.pathToFile.join('~'))}
-                            target="_blank"
-                            download={file.isDir ? `${file.name}.zip` : file.name}
-                        >
-                            <div className={styles.actionIcon}>
-                                <DownloadIcon />
-                            </div>
-                        </a>
-                    </div>
+                    {actions && (
+                        <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>{actions(file)}</div>
+                    )}
                 </div>
             ))}
             {files.length === 0 && <div className={styles.emptyMessage}>{'Репозиторий пуст'}</div>}

@@ -22,7 +22,8 @@ export const Log: FC<ILogProps> = ({ log, onClickCross }) => {
         if (log.type === 'success') return styles.success;
     }, [log.type]);
 
-    const onClick = useCallback(() => {
+    const handleClick = useCallback(() => {
+        console.log(324234);
         setIsClickCross(true);
     }, []);
 
@@ -34,7 +35,7 @@ export const Log: FC<ILogProps> = ({ log, onClickCross }) => {
             {log.title && (
                 <div className={styles.title}>
                     {log.title}
-                    <div onClick={onClick}>
+                    <div onClick={handleClick}>
                         <CrossIcon />
                     </div>
                 </div>

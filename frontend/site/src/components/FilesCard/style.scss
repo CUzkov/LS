@@ -42,26 +42,11 @@
 	}
 
 	.actions {
-		display: flex;
-		align-items: center;
 		transition: .2s all;
 		opacity: 0;
 
 		&.hover {
 			opacity: 1;
-		}
-	}
-
-	.actionIcon {
-		height: 34px;
-		width: 34px;
-		box-sizing: border-box;
-		padding: 7px;
-		transition: .2s all;
-		border-radius: 50%;
-
-		&:hover {
-			background-color: $second-hover-color;
 		}
 	}
 

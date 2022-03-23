@@ -143,7 +143,9 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/unsaved/delete-fantom-file') {
         const result = { ...state };
 
-        delete result.unsavedChanges[event.data.key];
+        result.unsavedChanges = Object.entries(state.unsavedChanges)
+            .filter(([key]) => key !== event.data.key)
+            .reduce((acc, [key, file]) => ({ ...acc, [key]: file }), {});
 
         return result;
     }

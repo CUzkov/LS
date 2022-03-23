@@ -82,6 +82,7 @@ export const addFantomFile = (
     file: File,
     key: string,
     type: 'delete' | 'add' | 'rewrite' | 'rename',
+    isDir: boolean,
 ) => {
     dispath({
         type: 'repository-page/unsaved/add-fantom-file',
@@ -91,7 +92,7 @@ export const addFantomFile = (
             fileMeta: {
                 hasSubFiles: false,
                 name: file.name,
-                isDir: false,
+                isDir,
                 fantom: {
                     action: type,
                 },

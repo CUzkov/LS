@@ -1,0 +1,12 @@
+@import '../../index.scss';
+
+.repositoryPage {
+    width: calc(100% - 65px);
+    box-sizing: border-box;
+    border-top: 1px solid $default-dark-border;
+    margin: 5px 10px 0 55px;
+
+    .fileInput {
+        display: none;
+    }
+}

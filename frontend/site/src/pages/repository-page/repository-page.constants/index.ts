@@ -1,3 +1,5 @@
+import { StringParam } from 'use-query-params';
+
 import { getMainPage, getAllRepositories, getUserPage, getRepository } from 'constants/routers';
 
 export const getPaths = (username: string, entityName = 'error', entityValue = '') => [
@@ -18,3 +20,7 @@ export const getPaths = (username: string, entityName = 'error', entityValue = '
         url: getRepository(username, entityValue),
     },
 ];
+
+export const queryParamConfig = {
+    pathToDir: StringParam,
+};
