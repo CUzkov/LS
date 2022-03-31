@@ -7,4 +7,6 @@ export enum Extensions {
     db = 'db',
     h = 'h',
     png = 'png',
+    txt = 'txt',
+    jpg = 'jpg'
 }

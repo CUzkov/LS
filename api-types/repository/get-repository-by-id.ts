@@ -7,10 +7,4 @@ export type RepositoryByIdQP = {
 export type RepositoryByIdRD = {
     title: string;
     id: number;
-    rootFiles: {
-        name: string;
-        isDir: boolean;
-        hasSubFiles: boolean;
-        pathToFile: string[];
-    }[];
 };

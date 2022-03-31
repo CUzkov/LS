@@ -23,7 +23,6 @@ export const Log: FC<ILogProps> = ({ log, onClickCross }) => {
     }, [log.type]);
 
     const handleClick = useCallback(() => {
-        console.log(324234);
         setIsClickCross(true);
     }, []);
 

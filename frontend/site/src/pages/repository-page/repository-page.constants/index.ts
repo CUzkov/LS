@@ -22,5 +22,5 @@ export const getPaths = (username: string, entityName = 'error', entityValue = '
 ];
 
 export const queryParamConfig = {
-    pathToDir: StringParam,
+    fullPathToDir: StringParam,
 };

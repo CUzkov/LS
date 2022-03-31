@@ -1,34 +1,56 @@
 @import '../../../index.scss';
 
-.actions {
-    display: flex;
-    align-items: center;
-}
+.filesCard {
+    .actions {
+        display: flex;
+        align-items: center;
+    }
+    
+    .actionIcon {
+        height: 34px;
+        width: 34px;
+        box-sizing: border-box;
+        padding: 7px;
+        transition: .2s all;
+        border-radius: 50%;
+        display: flex;
+        align-items: baseline;
+        cursor: pointer;
+        color: $default-text-color;
+    
+        &:hover {
+            background-color: $second-hover-color;
+        }
+    
+        &.textButton {
+            width: min-content;
+            border-radius: 17px;
+            font-size: 14px;
+            padding: 0 10px;
+            box-sizing: border-box;
+            margin-right: 10px;
+            line-height: 34px;
+            user-select: none;
+        }
 
-.actionIcon {
-    height: 34px;
-    width: 34px;
-    box-sizing: border-box;
-    padding: 7px;
-    transition: .2s all;
-    border-radius: 50%;
-    display: flex;
-    align-items: baseline;
-    cursor: pointer;
-    color: $default-text-color;
-
-    &:hover {
-        background-color: $second-hover-color;
+        &.disable {
+            pointer-events: none;
+            cursor: default;
+        }
     }
 
-    &.textButton {
-        width: min-content;
-        border-radius: 17px;
-        font-size: 14px;
-        padding: 0 10px;
-        box-sizing: border-box;
-        margin-right: 10px;
-        line-height: 34px;
-        user-select: none;
+    .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+
+    .downloadIconWrapper {
+        &.disable {
+            pointer-events: none;
+            cursor: default;
+        }
     }
 }

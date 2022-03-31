@@ -23,6 +23,7 @@ export enum FileStatus {
     add = 'add',
     modify = 'modify',
     delete = 'delete',
+    noExists = 'noExists'
 }
 
 export type FileMeta = {

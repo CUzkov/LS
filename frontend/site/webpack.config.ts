@@ -54,11 +54,9 @@ const webpackConfig = (): Configuration => ({
     },
     devServer: {
         port: 3000,
-        // open: true,
         historyApiFallback: true,
         proxy: {
             '/api/**': 'http://localhost:8000',
-            // '/ws/**': 'ws://localhost:8000',
         },
     },
     plugins: [

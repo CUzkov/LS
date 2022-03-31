@@ -6,4 +6,6 @@ export {
     REPOSITORY_BY_ID_URL,
     DOWNLOAD_FILE_URL,
     GET_FILES_BY_DIR_PATH_URL,
+    ADD_FILE_TO_REPOSITORY,
+    DELETE_FILE_FROM_REPOSITORY,
 } from '../../../../api-types/repository';

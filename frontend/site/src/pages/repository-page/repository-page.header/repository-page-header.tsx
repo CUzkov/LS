@@ -14,31 +14,14 @@ import styles from './style.scss';
 type RepositoryPageHeaderProps = {
     isEditing: boolean;
     inputRef: RefObject<HTMLInputElement>;
-    endEditing: () => void;
     toggleEditing: () => void;
 };
 
-export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({
-    isEditing,
-    inputRef,
-    endEditing,
-    toggleEditing,
-}) => {
+export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing, inputRef, toggleEditing }) => {
     const dispatch = useDispatch();
     const { repository } = useSelector((root) => root.repositoryPage);
 
     const handleToggleEditing = useCallback(() => {
-        if (isEditing) {
-            const isCancelEditing = confirm('Вы хотите выйти из режима редактирования и отменить изменения?');
-
-            if (isCancelEditing) {
-                endEditing();
-                clearChanges(dispatch);
-            }
-
-            return;
-        }
-
         toggleEditing();
     }, [toggleEditing, isEditing, dispatch]);
 

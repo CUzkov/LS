@@ -1,4 +1,4 @@
-export const GET_FILES_BY_DIR_PATH_URL = '/api/repository/files';
+export const DELETE_FILE_FROM_REPOSITORY = '/api/repository/delete-file';
 
 enum FileStatus {
     commit = 'commit',
@@ -8,15 +8,15 @@ enum FileStatus {
     noExists = 'noExists'
 }
 
-export type FilesByDirPathQP = {
-    repositoryId: number;
-    pathToDir: string;
-    dirName: string;
-}
-
-export type FilesByDirPathRD = {
+export type DeleteFileFromRepositoryD = {
     name: string;
-    isDir: boolean;
+    pathToFile: string;
+    repositoryId: number;
+};
+
+export type DeleteFileFromRepositoryRD = {
+    name: string;
     pathToFile: string[];
+    isDir: boolean;
     status: FileStatus;
-}[];
+};

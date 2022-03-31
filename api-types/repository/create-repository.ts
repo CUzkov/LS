@@ -7,11 +7,5 @@ export type CreateRepositoryD = {
 
 export type CreateRepositoryRD = {
     title: string;
-    rootFiles: {
-        name: string;
-        isDir: boolean;
-        hasSubFiles: boolean;
-        pathToFile: string[];
-    }[];
     id: number;
 }

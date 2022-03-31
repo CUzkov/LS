@@ -10,10 +10,4 @@ export type RepositoriesByFilterQP = {
 export type RepositoriesByFilterRD = {
     title: string;
     id: number;
-    rootFiles: {
-        name: string;
-        isDir: boolean;
-        hasSubFiles: boolean;
-        pathToFile: string[];
-    }[];
 }[];

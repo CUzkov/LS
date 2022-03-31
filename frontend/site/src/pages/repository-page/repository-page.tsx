@@ -3,84 +3,68 @@ import React, { useEffect, useMemo, FC, useCallback, useRef, useContext } from '
 import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/PageWrapper';
-import { useDispatch, useSelector } from 'store/store';
-import { getPageRepositoriesById, getFilesByDirPath } from 'actions/repository-page';
+import { useSelector } from 'store/store';
+import { getPageRepositoriesById, getFilesByDirPath, addFile, changeFilesDirPath } from 'actions/repository-page';
 import { useBooleanState } from 'hooks';
 import { MovablePopupManagerContext } from 'components/MovablePopupManager';
 import { yesNoPopup } from 'constants/popups';
-import { rewriteFile, addFile } from 'actions/repository-editor';
-import {toBase64} from 'utils/base64'
 
 import { getPaths } from './repository-page.constants';
 import { RepositoryPageFilesCard } from './repository-page.files-card';
 import { RepositoryPageHeader } from './repository-page.header';
-import { getDirPathByKey, getWsResponse } from './repository-page.utils';
+import { getDirPathByKey } from './repository-page.utils';
 import { queryParamConfig } from './repository-page.constants';
-import {AddAction, EditorActions, EditorEvents} from './repository-page.types';
 
 import styles from './style.scss';
-import { establishWsConnection } from 'utils/ws';
+import { FileStatus } from 'types';
 
 export const RepositoryPage: FC = () => {
-    const dispatch = useDispatch();
     const inputRef = useRef<HTMLInputElement>(null);
     const context = useContext(MovablePopupManagerContext);
 
     const { username } = useSelector((root) => root.user);
-    const { repository, files, currentPath} = useSelector((root) => root.repositoryPage);
+    const { repository, files, currentPath } = useSelector((root) => root.repositoryPage);
     const { id } = useParams();
 
-    const [isEditing, , endEditing, toggleEditing] = useBooleanState(false);
+    const [isEditing, , , toggleEditing] = useBooleanState(false);
     const [query] = useQueryParams(queryParamConfig);
 
     const handleChangeInput = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            try {
-                establishWsConnection(async (ws) => {
-                    const filesToAdd = event.target.files;
-    
-                    if (!filesToAdd?.length) {
-                        return;
+        async (event: React.ChangeEvent<HTMLInputElement>) => {
+            const filesToAdd = event.target.files;
+
+            if (!filesToAdd?.length) {
+                return;
+            }
+
+            for (let i = 0; i < filesToAdd.length; i++) {
+                const file = filesToAdd.item(i);
+
+                if (!file) {
+                    continue;
+                }
+
+                const duplicateFiles =
+                    files.filter(({ name, isDir }) => (isDir ? undefined : name) === file.name) ?? [];
+
+                if (duplicateFiles.length) {
+                    const isRewrite = await yesNoPopup(
+                        context,
+                        'Конфликт',
+                        duplicateFiles[0].status === FileStatus.delete ?
+                        `Вы удалили файл с названием ${file.name}. Хотите перезаписать его?` :
+                        `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
+                        true,
+                    );
+
+                    if (isRewrite) {
+                        addFile(file, true);
                     }
-        
-                    for (let i = 0; i < filesToAdd.length; i++) {
-                        const file = filesToAdd.item(i);
-                        const messageId = (new Date()).getTime().toString();
-        
-                        if (!file) {
-                            continue;
-                        }
-        
-                        const duplicateFiles =
-                            files.filter(({ name, isDir }) => (isDir ? undefined : name) === file.name) ?? [];
-    
-                        if (duplicateFiles.length) {
-                            const isRewrite = await yesNoPopup(
-                                context,
-                                'Конфликт',
-                                `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
-                                true,
-                            );
-        
-                            if (isRewrite) {
-                                rewriteFile(dispatch, file, duplicateFiles[0]);
-                            }
-        
-                            continue;
-                        }
-        
-                        const message: AddAction = {
-                            file: await toBase64(file),
-                            fileName: file.name,
-                            pathToFile: currentPath,
-                            repositoryId: repository?.id ?? -1
-                        };
-    
-                        ws.send(getWsResponse(messageId, EditorActions.ADD_FILE, JSON.stringify(message)))
-                    }
-                });
-            } catch (error) {
-                
+
+                    continue;
+                }
+
+                addFile(file);
             }
         },
         [files, currentPath, repository],
@@ -88,18 +72,21 @@ export const RepositoryPage: FC = () => {
 
     useEffect(() => {
         if (id) {
-            getPageRepositoriesById(dispatch, { id: Number(id) });
+            getPageRepositoriesById(Number(id));
         }
     }, [id]);
 
     useEffect(() => {
-        getFilesByDirPath(dispatch, { repositoryId: Number(id), pathToDir: query.pathToDir || '' }, currentPath);
-        // changeFilesDirPath(dispatch, getDirPathByKey(query.pathToDir));
-    }, [query.pathToDir]);
+        if (repository?.id) {
+            // query.pathToDir включает в себя dirName
+            getFilesByDirPath([query.fullPathToDir || ''], '');
+        }
+        changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
+    }, [query.fullPathToDir, repository?.id]);
 
     const additionalPaths = useMemo(
-        () => getDirPathByKey(query.pathToDir).map((path) => ({ title: path, url: '' })),
-        [query.pathToDir],
+        () => getDirPathByKey(query.fullPathToDir).map((path) => ({ title: path, url: '' })),
+        [query.fullPathToDir],
     );
     const paths = useMemo(
         () => getPaths(username, repository?.title, String(repository?.id)).concat(additionalPaths),
@@ -108,12 +95,7 @@ export const RepositoryPage: FC = () => {
     const content = useMemo(
         () => (
             <div className={styles.repositoryPage}>
-                <RepositoryPageHeader
-                    isEditing={isEditing}
-                    inputRef={inputRef}
-                    endEditing={endEditing}
-                    toggleEditing={toggleEditing}
-                />
+                <RepositoryPageHeader isEditing={isEditing} inputRef={inputRef} toggleEditing={toggleEditing} />
                 <div style={{ pointerEvents: 'all' }}>
                     <RepositoryPageFilesCard isEditing={isEditing} />
                 </div>

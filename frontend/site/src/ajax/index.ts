@@ -1,3 +1,7 @@
+import axios from 'axios';
+
+import { getFullUrl } from 'constants/host';
+
 export enum AjaxType {
     get,
     post,
@@ -59,4 +63,35 @@ export const ajax = async <T, D>({ type, url, contentType, data, queryParams }: 
         body: JSON.stringify(data),
         credentials: 'include',
     }).then((result) => result.json());
+};
+
+export const ajax2 = {
+    async get<RD, QP>({ url, queryParams }: { url: string; queryParams?: QP }) {
+        return (
+            await axios.get<RD>(getFullUrl(url), {
+                withCredentials: true,
+                params: queryParams,
+            })
+        ).data;
+    },
+    async post<D, RD, QP>({
+        url,
+        data,
+        queryParams,
+        onUploadProgress,
+    }: {
+        url: string;
+        queryParams?: QP;
+        data?: FormData | D;
+        onUploadProgress?: (e: {}) => void;
+    }) {
+        return (
+            await axios.post<RD>(getFullUrl(url), data, {
+                withCredentials: true,
+                params: queryParams,
+                headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {},
+                onUploadProgress,
+            })
+        ).data;
+    },
 };

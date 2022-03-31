@@ -9,6 +9,7 @@
 	box-sizing: border-box;
 	height: calc(100vh - 224px);
 	overflow: auto;
+	position: relative;
 
 	.row {
 		padding: 8px 10px;
@@ -66,10 +67,6 @@
 		}
 	}
 
-	.emptyMessage {
-		margin-left: 10px;
-	}
-
 	.actionChar {
 		opacity: 0;
 		transition: 0 all;
@@ -92,5 +89,12 @@
 		&.showActionChar {
 			opacity: 1;
 		}
+	}
+	
+	.spinner {
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		position: absolute;
 	}
 }
