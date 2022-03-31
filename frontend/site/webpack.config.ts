@@ -58,6 +58,7 @@ const webpackConfig = (): Configuration => ({
         historyApiFallback: true,
         proxy: {
             '/api/**': 'http://localhost:8000',
+            // '/ws/**': 'ws://localhost:8000',
         },
     },
     plugins: [

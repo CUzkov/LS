@@ -2,9 +2,6 @@ import React, { FC, ReactNode, RefObject, useCallback, useEffect, useState } fro
 import cn from 'classnames';
 
 import { useBooleanState, useOutsideClick } from 'hooks';
-import { Button } from 'small-components/Button';
-
-import { PopupButtons } from './Popup.types';
 
 import styles from './style.scss';
 
@@ -15,7 +12,6 @@ interface IMovablePopupProps {
     innerRef: RefObject<HTMLDivElement>;
     isRequired: boolean;
     anotherRequired: boolean;
-    buttons: PopupButtons;
     onMouseDown: () => void;
     onMouseMove: (mouseX: number, mouseY: number, e: MouseEvent) => void;
 }
@@ -27,7 +23,6 @@ export const Popup: FC<IMovablePopupProps> = ({
     zIndex,
     isRequired,
     anotherRequired,
-    buttons,
     onMouseMove,
     onMouseDown,
 }) => {
@@ -98,13 +93,6 @@ export const Popup: FC<IMovablePopupProps> = ({
                 {title}
             </div>
             <div className={styles.content}>{children}</div>
-            <div className={styles.buttons}>
-                {buttons.map(({ text, action }) => (
-                    <div className={styles.button}>
-                        <Button text={text} onClick={action} />
-                    </div>
-                ))}
-            </div>
         </div>
     );
 };

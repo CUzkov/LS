@@ -4,24 +4,22 @@ import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/PageWrapper';
 import { useDispatch, useSelector } from 'store/store';
-import {
-    getPageRepositoriesById,
-    getFilesByDirPath,
-    changeFilesDirPath,
-    addFantomFile,
-    deleteFantomFile,
-} from 'actions/repository-page';
+import { getPageRepositoriesById, getFilesByDirPath } from 'actions/repository-page';
 import { useBooleanState } from 'hooks';
 import { MovablePopupManagerContext } from 'components/MovablePopupManager';
 import { yesNoPopup } from 'constants/popups';
+import { rewriteFile, addFile } from 'actions/repository-editor';
+import {toBase64} from 'utils/base64'
 
 import { getPaths } from './repository-page.constants';
 import { RepositoryPageFilesCard } from './repository-page.files-card';
 import { RepositoryPageHeader } from './repository-page.header';
+import { getDirPathByKey, getWsResponse } from './repository-page.utils';
 import { queryParamConfig } from './repository-page.constants';
-import { getFantomFileKey, getDirPathByKey, getDirKeyByPath } from './repository-page.utils';
+import {AddAction, EditorActions, EditorEvents} from './repository-page.types';
 
 import styles from './style.scss';
+import { establishWsConnection } from 'utils/ws';
 
 export const RepositoryPage: FC = () => {
     const dispatch = useDispatch();
@@ -29,67 +27,63 @@ export const RepositoryPage: FC = () => {
     const context = useContext(MovablePopupManagerContext);
 
     const { username } = useSelector((root) => root.user);
-    const { repository, files, unsavedChanges } = useSelector((root) => root.repositoryPage);
+    const { repository, files, currentPath} = useSelector((root) => root.repositoryPage);
     const { id } = useParams();
 
     const [isEditing, , endEditing, toggleEditing] = useBooleanState(false);
     const [query] = useQueryParams(queryParamConfig);
 
     const handleChangeInput = useCallback(
-        async (event: React.ChangeEvent<HTMLInputElement>) => {
-            const filesToAdd = event.target.files;
-
-            if (!filesToAdd?.length) {
-                return;
-            }
-
-            for (let i = 0; i < filesToAdd.length; i++) {
-                const file = filesToAdd.item(i);
-
-                if (!file) {
-                    continue;
-                }
-
-                const unsavedFileKey = getFantomFileKey([...files.path], file.name, false);
-                const duplicateFiles =
-                    files.data?.filter(({ name, isDir }) => (isDir ? undefined : name) === file.name) ?? [];
-                const duplicateFileInNew = unsavedChanges[unsavedFileKey];
-
-                if (duplicateFiles.length) {
-                    const isRewrite = await yesNoPopup(
-                        context,
-                        'Конфликт',
-                        `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
-                        true,
-                    );
-
-                    if (isRewrite) {
-                        addFantomFile(dispatch, [...files.path], file, unsavedFileKey, 'rewrite', false);
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            try {
+                establishWsConnection(async (ws) => {
+                    const filesToAdd = event.target.files;
+    
+                    if (!filesToAdd?.length) {
+                        return;
                     }
-
-                    continue;
-                }
-
-                if (duplicateFileInNew) {
-                    const isReadd = await yesNoPopup(
-                        context,
-                        'Конфликт',
-                        `Файл с названием ${file.name} уже добавлен ранее, хотите заменить его?`,
-                        true,
-                    );
-
-                    if (isReadd) {
-                        deleteFantomFile(dispatch, unsavedFileKey);
-                        addFantomFile(dispatch, [...files.path], file, unsavedFileKey, 'add', false);
+        
+                    for (let i = 0; i < filesToAdd.length; i++) {
+                        const file = filesToAdd.item(i);
+                        const messageId = (new Date()).getTime().toString();
+        
+                        if (!file) {
+                            continue;
+                        }
+        
+                        const duplicateFiles =
+                            files.filter(({ name, isDir }) => (isDir ? undefined : name) === file.name) ?? [];
+    
+                        if (duplicateFiles.length) {
+                            const isRewrite = await yesNoPopup(
+                                context,
+                                'Конфликт',
+                                `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
+                                true,
+                            );
+        
+                            if (isRewrite) {
+                                rewriteFile(dispatch, file, duplicateFiles[0]);
+                            }
+        
+                            continue;
+                        }
+        
+                        const message: AddAction = {
+                            file: await toBase64(file),
+                            fileName: file.name,
+                            pathToFile: currentPath,
+                            repositoryId: repository?.id ?? -1
+                        };
+    
+                        ws.send(getWsResponse(messageId, EditorActions.ADD_FILE, JSON.stringify(message)))
                     }
-
-                    continue;
-                }
-
-                addFantomFile(dispatch, [...files.path], file, unsavedFileKey, 'add', false);
+                });
+            } catch (error) {
+                
             }
         },
-        [files, unsavedChanges],
+        [files, currentPath, repository],
     );
 
     useEffect(() => {
@@ -99,8 +93,8 @@ export const RepositoryPage: FC = () => {
     }, [id]);
 
     useEffect(() => {
-        getFilesByDirPath(dispatch, { repositoryId: Number(id), pathToDir: query.pathToDir || '' });
-        changeFilesDirPath(dispatch, getDirPathByKey(query.pathToDir));
+        getFilesByDirPath(dispatch, { repositoryId: Number(id), pathToDir: query.pathToDir || '' }, currentPath);
+        // changeFilesDirPath(dispatch, getDirPathByKey(query.pathToDir));
     }, [query.pathToDir]);
 
     const additionalPaths = useMemo(
@@ -108,7 +102,7 @@ export const RepositoryPage: FC = () => {
         [query.pathToDir],
     );
     const paths = useMemo(
-        () => getPaths(username, repository.data?.title, String(repository.data?.id)).concat(additionalPaths),
+        () => getPaths(username, repository?.title, String(repository?.id)).concat(additionalPaths),
         [username, repository, additionalPaths],
     );
     const content = useMemo(
@@ -126,7 +120,7 @@ export const RepositoryPage: FC = () => {
                 <input type="file" ref={inputRef} multiple className={styles.fileInput} onChange={handleChangeInput} />
             </div>
         ),
-        [repository, files, toggleEditing, isEditing],
+        [repository, files, toggleEditing, isEditing, currentPath],
     );
 
     return <PageWrapper content={content} paths={paths} />;

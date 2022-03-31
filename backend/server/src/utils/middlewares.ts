@@ -1,5 +1,6 @@
 import Cookies from 'cookies';
 import { ServerResponse } from 'http';
+import { IncomingForm } from 'formidable';
 
 import { MiddlewareRequest } from '../types';
 import { getBadRequestResponse } from './server-utils';
@@ -8,6 +9,7 @@ import { redis } from '../database';
 enum MiddlewareCode {
     noCookies = 'noCookies',
     noAuth = 'noAuth',
+    formDataError = 'formDataError',
 }
 
 const middlewaresErrors = {
@@ -15,9 +17,15 @@ const middlewaresErrors = {
         getBadRequestResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
     [MiddlewareCode.noAuth]: (response: ServerResponse) =>
         getBadRequestResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
+    [MiddlewareCode.formDataError]: (response: ServerResponse) =>
+        getBadRequestResponse(response, 'Ошибка чтения формы', ''),
 };
 
 export const dataMiddleware = (request: MiddlewareRequest, resolve: () => void) => {
+    if (request.request.headers['content-type']?.startsWith('multipart/form-data')) {
+        return resolve();
+    }
+
     let data = '';
     request.request.on('data', (chunk) => {
         data += chunk;
@@ -32,6 +40,30 @@ export const cookiesMiddleware = (request: MiddlewareRequest, resolve: () => voi
     const cookies = new Cookies(request.request, request.response);
     request.cookies = cookies;
     resolve();
+};
+
+export const formDataMiddleware = (
+    request: MiddlewareRequest,
+    resolve: () => void,
+    reject: (value: MiddlewareCode) => void,
+) => {
+    const form = new IncomingForm({ maxFileSize: 1024 * 1024 * 1024 });
+
+    if (!request.request.headers['content-type']?.startsWith('multipart/form-data')) {
+        return resolve();
+    }
+
+    form.parse(request.request, (err, fields, files) => {
+        if (err) {
+            console.log(err);
+
+            reject(MiddlewareCode.formDataError);
+        }
+
+        request.formData = { fields, files };
+
+        resolve();
+    });
 };
 
 export const authMiddleware = async (
@@ -60,7 +92,7 @@ export const authMiddleware = async (
     reject(MiddlewareCode.noCookies);
 };
 
-const MIDDLEWARES = [cookiesMiddleware, authMiddleware, dataMiddleware];
+const MIDDLEWARES = [cookiesMiddleware, authMiddleware, dataMiddleware, formDataMiddleware];
 
 export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
     let isError = false;
@@ -72,11 +104,14 @@ export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
             const promise = new Promise<void>((resolve, reject) =>
                 middleware(middlewareRequest, resolve, reject),
             ).catch((error) => {
+                console.log(error);
                 middlewaresErrors[error as MiddlewareCode](middlewareRequest.response);
                 isError = true;
             });
             await promise;
         } catch (error) {
+            console.log(error);
+
             middlewaresErrors[error as MiddlewareCode](middlewareRequest.response);
             isError = true;
             return;
@@ -93,5 +128,6 @@ export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
         userId: middlewareRequest.userId,
         response: middlewareRequest.response,
         queryParams: middlewareRequest.queryParams,
+        formData: middlewareRequest.formData,
     });
 };

@@ -1,17 +1,25 @@
 import path from 'path';
 import fsSync from 'fs';
-import simpleGit, { SimpleGit } from 'simple-git';
+import simpleGit, { SimpleGit, FileStatusResult } from 'simple-git';
 
 const fsAsync = fsSync.promises;
 
 import { baseGitPath } from '../env';
 import { errors } from '../constants/errors';
 
-export type File = {
+enum FileStatus {
+    commit = 'commit',
+    add = 'add',
+    modify = 'modify',
+    delete = 'delete',
+    noExists = 'noExists',
+}
+
+export type FileMeta = {
     name: string;
     isDir: boolean;
-    hasSubFiles: boolean;
     pathToFile: string[];
+    status: FileStatus;
 };
 
 type GitUser = {
@@ -47,70 +55,140 @@ export class Git {
         this.gitCore.init();
     }
 
-    async getFolderFiles(pathToDir: string[] = []): Promise<File[]> {
-        const files: Array<File & { index?: number }> = [];
+    async getDirFiles(pathToDir: string[] = [], dirName: string): Promise<FileMeta[]> {
+        await this.add();
 
-        const fullPathToDir = path.join(this.path, ...pathToDir);
-        let dir: string[] = [];
+        const files: FileMeta[] = [];
+
+        const absFullPathToDir = path.join(this.path, ...pathToDir, dirName);
+        const fullPathToDir = pathToDir.concat(dirName).filter(Boolean);
+        let dirs: string[] = [];
 
         try {
-            dir = await fsAsync.readdir(fullPathToDir);
+            dirs = await fsAsync.readdir(absFullPathToDir);
         } catch (error) {
             const e = error as { message: string };
             throw errors.readFileError(e.message);
         }
 
-        const dirPromises = dir.map(async (file, index) => {
-            if (file === '.git') {
+        const repositoryStatus = await this.gitCore.status();
+
+        const currentDirFilesWithStatus: Record<string, FileStatusResult> = {};
+        const currentDirDirsWithStatus: Record<string, FileStatus> = {};
+        const fullPathToDirStr = path.join(...fullPathToDir);
+
+        repositoryStatus.files.forEach((fileStatus) => {
+            const currFullPathToDirStr = path.normalize(path.dirname(fileStatus.path));
+            const currFileName = path.basename(fileStatus.path);
+            const currFullPathToFile = path.parse(fileStatus.path);
+            const currFullPathToFileStr = path.normalize(path.format(currFullPathToFile));
+
+            currentDirFilesWithStatus[currFullPathToFileStr] = fileStatus;
+
+            if (currFullPathToDirStr === fullPathToDirStr && fileStatus.index === 'D') {
+                files.push({
+                    isDir: false,
+                    name: currFileName,
+                    pathToFile: fullPathToDir,
+                    status: FileStatus.delete,
+                });
+            }
+
+            if (currentDirDirsWithStatus[currFullPathToDirStr]) {
+                const fileStatusIndex = this.getFileStatus(fileStatus.index);
+
+                if (currentDirDirsWithStatus[currFullPathToDirStr] !== fileStatusIndex) {
+                    currentDirDirsWithStatus[currFullPathToDirStr] = FileStatus.modify;
+                }
+            } else {
+                const newStatus = this.getFileStatus(fileStatus.index);
+                currentDirDirsWithStatus[currFullPathToDirStr] =
+                    newStatus === FileStatus.add ? newStatus : FileStatus.modify;
+            }
+        });
+
+        const dirPromises = dirs.map(async (currFileName) => {
+            if (currFileName === '.git') {
                 return;
             }
 
-            const pathToFile = path.join(fullPathToDir, file);
+            const currAbsFullPathToFile = path.join(absFullPathToDir, currFileName);
+            const currFileStat = await fsAsync.stat(currAbsFullPathToFile);
+            const isDir = currFileStat.isDirectory();
+            const currFullPathToFile = path.join(...fullPathToDir.concat(currFileName));
 
-            const dirStat = await fsAsync.stat(pathToFile);
-            const isDir = dirStat.isDirectory();
-
-            let hasSubFiles = false;
+            let status: FileStatus;
 
             if (isDir) {
-                try {
-                    const dir = await fsAsync.readdir(pathToFile);
-                    hasSubFiles = Boolean(dir.length);
-                } catch (error) {
-                    const e = error as Error;
-                    throw errors.readFileError(e.message);
+                const currDirStatuses = Object.entries(currentDirDirsWithStatus).filter(([path]) =>
+                    path.startsWith(currFullPathToFile),
+                );
+
+                if (currDirStatuses.length === 0) {
+                    status = FileStatus.commit;
+                } else if (currDirStatuses.every((status) => status === currDirStatuses[0])) {
+                    status = currDirStatuses[0][1] as FileStatus;
+                } else {
+                    status = FileStatus.modify;
                 }
+            } else {
+                status = this.getFileStatus(currentDirFilesWithStatus[currFullPathToFile]?.index);
             }
 
             files.push({
-                name: file,
-                hasSubFiles,
+                name: currFileName,
                 isDir,
-                pathToFile: path.join(...pathToDir, file).split(path.sep),
-                index,
+                pathToFile: fullPathToDir,
+                status,
             });
         });
 
         await Promise.all(dirPromises);
 
-        return files
-            .sort((a, b) => {
-                const isBothDir = a.isDir && b.isDir;
-                const isBothFile = !a.isDir && !b.isDir;
+        return files.sort((a, b) => {
+            const isBothDir = a.isDir && b.isDir;
+            const isBothFile = !a.isDir && !b.isDir;
 
-                if (isBothDir || isBothFile) {
-                    return a.name > b.name ? 1 : -1;
-                }
+            if (isBothDir || isBothFile) {
+                return a.name > b.name ? 1 : -1;
+            }
 
-                return (a.isDir && -1) || 1;
-            })
-            .map((file) => {
-                delete file.index;
-                return file;
-            });
+            return (a.isDir && -1) || 1;
+        });
     }
 
-    getFullPathToFile(pathToFile: string[]): string {
+    async add() {
+        await this.gitCore.add('.');
+    }
+
+    getFileStatus(index?: string): FileStatus {
+        switch (index) {
+            case 'A':
+                return FileStatus.add;
+            case 'M':
+                return FileStatus.modify;
+            case 'D':
+                return FileStatus.delete;
+            default:
+                return FileStatus.commit;
+        }
+    }
+
+    getAbsPathToFile(pathToFile: string[]): string {
         return path.join(this.path, ...pathToFile);
+    }
+
+    async getFileStatusByAbsFullPathToFile(absFullPathToFile: string) {
+        const repositoryStatus = await this.gitCore.status();
+
+        const status = repositoryStatus.files
+            // fileStatus.path включает в себя имя файла
+            .filter((fileStatus) => this.getAbsPathToFile([fileStatus.path]) === absFullPathToFile)?.[0];
+
+        if (!status) {
+            return FileStatus.noExists;
+        }
+
+        return this.getFileStatus(status.index);
     }
 }

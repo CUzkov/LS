@@ -1,16 +1,17 @@
 import { useQueryParams } from 'use-query-params';
-import React, { useMemo, FC, useCallback } from 'react';
+import React, { FC, useCallback, useContext } from 'react';
 import cn from 'classnames';
 
 import { useDispatch, useSelector } from 'store/store';
 import { FilesCard as FilesCardBase } from 'components/FilesCard';
 import { getDownloadLink } from 'utils/urls';
 import { FileMeta } from 'types';
-import { addFantomFile, deleteFantomFile } from 'actions/repository-page';
+import { deleteFileOrDir, renameFileOrDir } from 'actions/repository-editor';
+import { textInputPopup } from 'constants/popups';
+import { MovablePopupManagerContext } from 'components/MovablePopupManager';
 
 import { queryParamConfig } from '../repository-page.constants';
 import DownloadIcon from '../repository-page.assets/download.svg';
-import { getFantomFileKey, getDirKeyByPath } from '../repository-page.utils';
 
 import styles from './style.scss';
 
@@ -19,22 +20,10 @@ type RepositoryPageFilesCardProps = {
 };
 
 export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEditing }) => {
-    const dispatch = useDispatch();
-
-    const { repository, files, unsavedChanges } = useSelector((root) => root.repositoryPage);
-    const currentDitPath = files.path;
-
+    const {repository, files, currentPath} = useSelector((root) => root.repositoryPage);
     const [, setQuery] = useQueryParams(queryParamConfig);
-
-    const currendDirFantomFiles = useMemo(() => {
-        return Object.entries(unsavedChanges)
-            .filter(([, change]) => getDirKeyByPath(change.fileMeta.pathToFile) === getDirKeyByPath(currentDitPath))
-            .map(([, change]) => ({
-                ...change.fileMeta,
-                isDir: change.fileMeta.isDir,
-                pathToFile: [...change.fileMeta.pathToFile],
-            }));
-    }, [unsavedChanges, files]);
+    const dispatch = useDispatch();
+    const context = useContext(MovablePopupManagerContext);
 
     const handleClickDir = useCallback(
         (pathToDir: string[]) => {
@@ -44,43 +33,39 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
     );
 
     const handleClickToUpDir = useCallback(() => {
-        const newPath = files.path;
+        const newPath = currentPath;
         newPath.pop();
 
         const pathToDir = newPath.join('~');
 
         setQuery({ pathToDir: pathToDir || undefined });
-    }, [files]);
+    }, [currentPath]);
 
-    const handleDeleteButtonClick = useCallback(
-        (file: FileMeta, e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
+    const handleDeleteButtonClick = useCallback((file: FileMeta, e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
 
-            const unsavedFileKey = getFantomFileKey(currentDitPath, file.name, file.isDir);
-            const unsavedChangeFile = unsavedChanges[unsavedFileKey];
+        deleteFileOrDir(dispatch, file);
+    }, []);
 
-            if (
-                unsavedChangeFile?.fileMeta?.fantom?.action === 'add' ||
-                unsavedChangeFile?.fileMeta?.fantom?.action === 'delete'
-            ) {
-                deleteFantomFile(dispatch, unsavedFileKey);
-                return;
-            }
+    const handleRenameButtonClick = useCallback(async (file: FileMeta, e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
 
-            addFantomFile(dispatch, [...currentDitPath], new File([], file.name), unsavedFileKey, 'delete', file.isDir);
-        },
-        [unsavedChanges, currentDitPath],
-    );
+        const newName = await textInputPopup(
+            context,
+            file.isDir ? 'Введите новое имя папки' : 'Введите новое мя файла',
+            file.name,
+            true,
+        );
 
-    const handleRenameButtonClick = useCallback((file: FileMeta, e: React.MouseEvent<HTMLButtonElement>) => {}, []);
+        renameFileOrDir(dispatch, newName, file);
+    }, []);
 
     return (
         <FilesCardBase
-            files={files.data ?? []}
-            path={files.path}
+            files={files ?? []}
+            path={currentPath}
             onClickDir={handleClickDir}
             onClickToUpDir={handleClickToUpDir}
-            fantomFiles={currendDirFantomFiles}
             actions={(file) => (
                 <div className={styles.actions}>
                     {isEditing && (
@@ -95,12 +80,12 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
                                 className={cn(styles.actionIcon, styles.textButton)}
                                 onClick={(e) => handleDeleteButtonClick(file, e)}
                             >
-                                {file.fantom?.action === 'delete' ? 'восстановить' : 'удалить'}
+                                {/* {file.actions.includes(FantomActions.delete) ? 'восстановить' : 'удалить'} */}
                             </button>
                         </>
                     )}
                     <a
-                        href={getDownloadLink(repository.data?.id ?? 0, file.pathToFile.join('~'))}
+                        href={getDownloadLink(repository?.id ?? 0, file.pathToFile.join('~'))}
                         target="_blank"
                         download={file.isDir ? `${file.name}.zip` : file.name}
                         onClick={(e) => e.stopPropagation()}

@@ -7,7 +7,7 @@ import { loginUser } from 'actions/user';
 import { setLoginForm } from 'actions/login-form';
 import { useDispatch, useSelector } from 'store/store';
 import { TextField, Button } from 'small-components/index';
-import { emailValidate, reuqiredValidate } from 'utils/final-forms';
+import { emailValidate, requiredValidate } from 'utils/final-forms';
 import type { ILoginFormProps, IFormSpy } from './LoginForm.typings';
 import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
 import { FetchStatus } from 'types/index';
@@ -89,14 +89,14 @@ export const LoginForm: FC = () => {
                                 name="email-username"
                                 type="email-username"
                                 title="Логин"
-                                validators={[reuqiredValidate]}
+                                validators={[requiredValidate]}
                                 isDisable={loginFormStore.fetchStatus === FetchStatus.loading}
                             />
                             <TextField
                                 name="password"
                                 type="password"
                                 title="Пароль"
-                                validators={[reuqiredValidate]}
+                                validators={[requiredValidate]}
                                 isDisable={loginFormStore.fetchStatus === FetchStatus.loading}
                             />
 

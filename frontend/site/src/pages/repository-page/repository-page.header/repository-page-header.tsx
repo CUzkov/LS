@@ -3,7 +3,7 @@ import cn from 'classnames';
 
 import { useDispatch, useSelector } from 'store/store';
 import { PageTitle } from 'components/PageTitle';
-import { clearFantomFiles } from 'actions/repository-page';
+import { clearChanges } from 'actions/repository-page';
 
 import EditIcon from '../repository-page.assets/edit.svg';
 import AddFolderIcon from '../repository-page.assets/add-folder.svg';
@@ -25,22 +25,22 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({
     toggleEditing,
 }) => {
     const dispatch = useDispatch();
-    const { repository, unsavedChanges } = useSelector((root) => root.repositoryPage);
+    const { repository } = useSelector((root) => root.repositoryPage);
 
     const handleToggleEditing = useCallback(() => {
-        if (isEditing && Object.keys(unsavedChanges).length) {
+        if (isEditing) {
             const isCancelEditing = confirm('Вы хотите выйти из режима редактирования и отменить изменения?');
 
             if (isCancelEditing) {
                 endEditing();
-                clearFantomFiles(dispatch);
+                clearChanges(dispatch);
             }
 
             return;
         }
 
         toggleEditing();
-    }, [toggleEditing, isEditing, unsavedChanges, dispatch]);
+    }, [toggleEditing, isEditing, dispatch]);
 
     const handleAddFile = useCallback(() => {
         if (!inputRef.current) {
@@ -54,7 +54,7 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({
 
     return (
         <PageTitle
-            title={repository.data?.title}
+            title={repository?.title}
             rightChild={
                 <div className={styles.actions}>
                     <div

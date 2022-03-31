@@ -35,15 +35,11 @@ export const getPageRepositoriesById = async (dispath: Dispatch, queryParams: Re
 
     dispath({
         type: 'repository-page/repository/success',
-        data: {
-            repository: {
-                data: response,
-            },
-        },
+        data: response
     });
 };
 
-export const getFilesByDirPath = async (dispath: Dispatch, queryParams: FilesByDirPathQP) => {
+export const getFilesByDirPath = async (dispath: Dispatch, queryParams: FilesByDirPathQP, currentPath: string[]) => {
     dispath({ type: 'repository-page/files/loading' });
 
     let response: FilesByDirPathRD | IServerError;
@@ -69,43 +65,9 @@ export const getFilesByDirPath = async (dispath: Dispatch, queryParams: FilesByD
         return;
     }
 
-    dispath({ type: 'repository-page/files/success', data: { files: { data: response } } });
+    dispath({ type: 'repository-page/files/success', data: response });
 };
 
-export const changeFilesDirPath = (dispath: Dispatch, path: string[]) => {
-    dispath({ type: 'repository-page/files/path', data: path });
-};
+export const clearChanges = async (dispath: Dispatch) => {
 
-export const addFantomFile = (
-    dispath: Dispatch,
-    pathToFile: string[],
-    file: File,
-    key: string,
-    type: 'delete' | 'add' | 'rewrite' | 'rename',
-    isDir: boolean,
-) => {
-    dispath({
-        type: 'repository-page/unsaved/add-fantom-file',
-        data: {
-            file,
-            key,
-            fileMeta: {
-                hasSubFiles: false,
-                name: file.name,
-                isDir,
-                fantom: {
-                    action: type,
-                },
-                pathToFile,
-            },
-        },
-    });
-};
-
-export const deleteFantomFile = (dispath: Dispatch, key: string) => {
-    dispath({ type: 'repository-page/unsaved/delete-fantom-file', data: { key } });
-};
-
-export const clearFantomFiles = (dispath: Dispatch) => {
-    dispath({ type: 'repository-page/unsaved/clear' });
-};
+}

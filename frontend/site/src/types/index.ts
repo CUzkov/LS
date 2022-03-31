@@ -18,20 +18,23 @@ export type Map = {
     id: number;
 };
 
+export enum FileStatus {
+    commit = 'commit',
+    add = 'add',
+    modify = 'modify',
+    delete = 'delete',
+}
+
 export type FileMeta = {
     name: string;
-    isDir: boolean;
-    hasSubFiles: boolean;
     pathToFile: string[];
-    fantom?: {
-        action: 'delete' | 'add' | 'rewrite' | 'rename';
-    };
+    isDir: boolean;
+    status: FileStatus;
 };
 
 export type Repository = {
     title: string;
     id: number;
-    rootFiles: FileMeta[];
 };
 
 export const enum RWA {

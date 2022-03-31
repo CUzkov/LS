@@ -6,6 +6,8 @@ export enum ErrorsTypes {
     noSuchUser500 = 'noSuchUser500',
     dbError = 'dbError',
     repositoryNotFoundOrPermissionDenied = 'repositoryNotFoundOrPermissionDenied',
+    fileNameNotPresent = 'fileNameNotPresent',
+    deleteFileError = 'deleteFileError',
 }
 
 export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
@@ -32,6 +34,16 @@ export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
     [ErrorsTypes.repositoryNotFoundOrPermissionDenied]: (message: string) => ({
         code: Code.permissionDenied,
         name: 'Репозиторий не найден или доступ закрыт!',
+        message,
+    }),
+    [ErrorsTypes.fileNameNotPresent]: (message: string) => ({
+        code: Code.badRequest,
+        name: 'У загружаемого файла нет имени!',
+        message,
+    }),
+    [ErrorsTypes.deleteFileError]: (message: string) => ({
+        code: Code.internalServerError,
+        name: 'Ошибка удаления файла!',
         message,
     }),
 };

@@ -1,65 +1,31 @@
-import { FetchStatus, Repository, FileMeta } from '../../types';
+import { FetchStatus, FileMeta, Repository } from '../../types';
 
-interface IRepositoryPageUpdateRepositoryD {
-    repository?: {
-        data: Repository;
-    };
-}
+type ActionRepositoryLoadSuccess = Repository;
 
-interface IRepositoryPageUpdateFilesD {
-    files?: {
-        data: FileMeta[];
-    };
-}
-
-interface IRepositoryPageAddResponseD {
-    fileMeta: FileMeta;
-    file: File;
-    key: string;
-}
+type ActionFilesLoadSuccess = FileMeta[];
 
 export type RepositoryPageEvents =
-    | { type: 'repository-page/repository/success'; data: IRepositoryPageUpdateRepositoryD }
+    | { type: 'repository-page/repository/success'; data: ActionRepositoryLoadSuccess }
     | { type: 'repository-page/repository/loading' }
     | { type: 'repository-page/repository/error' }
-    | { type: 'repository-page/files/path'; data: string[] }
-    | { type: 'repository-page/files/success'; data: IRepositoryPageUpdateFilesD }
+    | { type: 'repository-page/files/success', data: ActionFilesLoadSuccess  }
     | { type: 'repository-page/files/loading' }
-    | { type: 'repository-page/files/error' }
-    | { type: 'repository-page/unsaved/add-fantom-file'; data: IRepositoryPageAddResponseD }
-    | { type: 'repository-page/unsaved/delete-fantom-file'; data: { key: string } }
-    | { type: 'repository-page/unsaved/clear' };
+    | { type: 'repository-page/files/error' };
 
 export type RepositoryPageStore = {
-    repository: {
-        data?: Repository;
-        fetchStatus: FetchStatus;
-    };
-    files: {
-        data?: FileMeta[];
-        path: string[];
-        fetchStatus: FetchStatus;
-    };
-    unsavedChanges: Record<
-        string,
-        {
-            fileMeta: FileMeta;
-            file: File;
-        }
-    >;
+    repository?: Repository;
+    repositoryFetchStatus: FetchStatus;
+    files: FileMeta[];
+    filesFetchStatus: FetchStatus;
+    currentPath: string[];
 };
 
 const initialState: RepositoryPageStore = {
-    repository: {
-        data: undefined,
-        fetchStatus: FetchStatus.loading,
-    },
-    files: {
-        data: undefined,
-        path: [],
-        fetchStatus: FetchStatus.loading,
-    },
-    unsavedChanges: {},
+    repository: undefined,
+    repositoryFetchStatus: FetchStatus.none,
+    files: [],
+    filesFetchStatus: FetchStatus.none,
+    currentPath: [],
 };
 
 export const repositoryPageReducer = (
@@ -69,10 +35,8 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/repository/success') {
         const result = { ...state };
 
-        result.repository = {
-            data: event.data.repository?.data,
-            fetchStatus: FetchStatus.successed,
-        };
+        result.repository = event.data;
+        result.repositoryFetchStatus = FetchStatus.successed;
 
         return result;
     }
@@ -80,7 +44,7 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/repository/loading') {
         const result = { ...state };
 
-        result.repository.fetchStatus = FetchStatus.loading;
+        result.repositoryFetchStatus = FetchStatus.loading;
 
         return result;
     }
@@ -88,7 +52,7 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/repository/error') {
         const result = { ...state };
 
-        result.repository.fetchStatus = FetchStatus.error;
+        result.repositoryFetchStatus = FetchStatus.error;
 
         return result;
     }
@@ -96,11 +60,8 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/files/success') {
         const result = { ...state };
 
-        result.files = {
-            path: result.files.path,
-            data: event.data.files?.data,
-            fetchStatus: FetchStatus.successed,
-        };
+        result.files = [...event.data];
+        result.filesFetchStatus = FetchStatus.successed;
 
         return result;
     }
@@ -108,7 +69,7 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/files/loading') {
         const result = { ...state };
 
-        result.files.fetchStatus = FetchStatus.loading;
+        result.filesFetchStatus = FetchStatus.loading;
 
         return result;
     }
@@ -116,44 +77,7 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/files/error') {
         const result = { ...state };
 
-        result.files.fetchStatus = FetchStatus.error;
-
-        return result;
-    }
-
-    if (event.type === 'repository-page/files/path') {
-        const result = { ...state };
-
-        result.files.path = event.data;
-
-        return result;
-    }
-
-    if (event.type === 'repository-page/unsaved/add-fantom-file') {
-        const result = { ...state };
-
-        result.unsavedChanges = {
-            ...state.unsavedChanges,
-            [event.data.key]: { ...event.data },
-        };
-
-        return result;
-    }
-
-    if (event.type === 'repository-page/unsaved/delete-fantom-file') {
-        const result = { ...state };
-
-        result.unsavedChanges = Object.entries(state.unsavedChanges)
-            .filter(([key]) => key !== event.data.key)
-            .reduce((acc, [key, file]) => ({ ...acc, [key]: file }), {});
-
-        return result;
-    }
-
-    if (event.type === 'repository-page/unsaved/clear') {
-        const result = { ...state };
-
-        result.unsavedChanges = {};
+        result.filesFetchStatus = FetchStatus.error;
 
         return result;
     }

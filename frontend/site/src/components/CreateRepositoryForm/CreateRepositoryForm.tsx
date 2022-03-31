@@ -8,7 +8,7 @@ import { getRepository } from 'constants/routers';
 import { checkIsRepositoryNameFree, createRepository } from 'actions/repositories';
 import { useDispatch, useSelector } from 'store/store';
 import { TextField, Button, CheckboxField } from 'small-components/index';
-import { reuqiredValidate } from 'utils/final-forms';
+import { requiredValidate } from 'utils/final-forms';
 import { RepositoryNameStatuses } from 'store/reducers/create-repository-form';
 
 import Spinner from 'assets/spinner.svg';
@@ -77,7 +77,7 @@ export const CreateRepositoryForm: FC = () => {
                                     name="title"
                                     type="text"
                                     title="Название репозитория"
-                                    validators={[reuqiredValidate]}
+                                    validators={[requiredValidate]}
                                     isDisable={store.fetchStatus === FetchStatus.loading}
                                     onBlur={handleRepositoryNameBlur}
                                 />

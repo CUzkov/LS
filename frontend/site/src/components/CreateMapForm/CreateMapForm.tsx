@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import type { FC } from 'react';
-import { Form, FormSpy } from 'react-final-form';
+import { Form } from 'react-final-form';
 
 import { createMap } from 'actions/maps';
 import { useDispatch, useSelector } from 'store/store';
@@ -12,8 +12,8 @@ import {
     cnCreateMapFormField,
 } from './CreateMapForm.constants';
 import { TextField, Button } from 'small-components/index';
-import { reuqiredValidate } from 'utils/final-forms';
-import type { ICreateMapProps, IFormSpy } from './CreateMapForm.typings';
+import { requiredValidate } from 'utils/final-forms';
+import type { ICreateMapProps } from './CreateMapForm.typings';
 import { FetchStatus } from 'types/index';
 
 import Spinner from 'assets/spinner.svg';
@@ -40,7 +40,7 @@ export const CreateMapForm: FC = () => {
                                     name="title"
                                     type="text"
                                     title="Название карты"
-                                    validators={[reuqiredValidate]}
+                                    validators={[requiredValidate]}
                                     isDisable={createMapFormStore.fetchStatus === FetchStatus.loading}
                                 />
                             </div>

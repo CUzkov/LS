@@ -6,6 +6,7 @@ import archive from 'archiver';
 
 import { Code } from '../types';
 import { baseGitPath } from '../env';
+import { noop } from './helpers';
 
 const fsAsync = fs.promises;
 
@@ -104,7 +105,7 @@ export const getFileResponse = async (response: ServerResponse, pathToFile: stri
         const filestream = fs.createReadStream(pathToZipFile);
         filestream.pipe(response);
 
-        response.on('close', () => fs.unlink(pathToZipFile, () => {}));
+        response.on('close', () => fs.unlink(pathToZipFile, noop));
 
         return;
     }

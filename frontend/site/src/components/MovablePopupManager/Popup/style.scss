@@ -24,21 +24,6 @@
         padding: 10px;
         font-size: 14px;
     }
-
-    .buttons {
-        display: flex;
-        justify-content: flex-end;
-        padding: 10px;
-        border-top: 1px solid $default-border-color;
-    }
-
-    .button {
-        width: 150px;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-    }
 }
 
 .noInteract {

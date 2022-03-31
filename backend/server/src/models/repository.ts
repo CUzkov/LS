@@ -1,8 +1,13 @@
 import { QueryResult } from 'pg';
+import { File } from 'formidable';
+import path from 'path';
+import fsSync from 'fs';
+
+const fsAsync = fsSync.promises;
 
 import { UserFns } from './';
 import { pg } from '../database';
-import { Git, File } from '../git';
+import { Git, FileMeta } from '../git';
 import { errors } from '../constants/errors';
 
 import {
@@ -30,7 +35,6 @@ export type Repository = {
     title: string;
     rubric_id?: number;
     map_id?: number;
-    rootFiles: File[];
 };
 
 type RepositoryFilters = {
@@ -79,7 +83,7 @@ export const RepositoryFns = {
 
         const repository = result.rows[0];
 
-        return { ...repository, rootFiles: [] };
+        return repository;
     },
     checkIsRepositoryNameFree: async (title: string, userId: number): Promise<{ isFree: boolean }> => {
         let result: QueryResult<CheckIsRepositoryNameFreeR>;
@@ -160,17 +164,75 @@ export const RepositoryFns = {
             repository.title,
         );
 
-        const rootFiles = await git.getFolderFiles();
-
-        return [{ ...repository, rootFiles: rootFiles }, git];
+        return [repository, git];
     },
-    getFilePath: async (id: number, userId: number, pathToFile: string[]): Promise<string> => {
+    getAbsFullPathToFile: async (
+        id: number,
+        userId: number,
+        pathToFile: string[],
+        fileName: string,
+    ): Promise<string> => {
         const [, git] = await RepositoryFns.getRepositoryById(id, userId);
-        return git.getFullPathToFile(pathToFile);
+        return git.getAbsPathToFile([...pathToFile, fileName]);
     },
-    getFilesByDirPath: async (id: number, userId: number, pathToDir: string[]): Promise<File[]> => {
+    getFilesByDirPath: async (
+        id: number,
+        userId: number,
+        pathToDir: string[] = [],
+        dirName = '',
+    ): Promise<FileMeta[]> => {
         const [, git] = await RepositoryFns.getRepositoryById(id, userId);
-        const files = git.getFolderFiles(pathToDir);
+        const files = git.getDirFiles(pathToDir, dirName);
         return files;
-    }
+    },
+    addFileToRepository: async (id: number, userId: number, pathToFile: string[], file: File): Promise<FileMeta> => {
+        const [, git] = await RepositoryFns.getRepositoryById(id, userId);
+
+        if (!file.originalFilename) {
+            throw errors.fileNameNotPresent('');
+        }
+
+        const absFullPathToFile = path.join(git.getAbsPathToFile(pathToFile), file.originalFilename || '');
+
+        await fsAsync.rename(file.filepath, absFullPathToFile);
+
+        await git.add();
+
+        return {
+            isDir: false,
+            name: file.originalFilename,
+            pathToFile,
+            status: await git.getFileStatusByAbsFullPathToFile(absFullPathToFile),
+        };
+    },
+    deleteFileFromRepository: async (
+        id: number,
+        userId: number,
+        pathToFile: string[] = [],
+        fileName: string,
+    ): Promise<FileMeta> => {
+        const [, git] = await RepositoryFns.getRepositoryById(id, userId);
+        const absFullPathToFile = git.getAbsPathToFile([...pathToFile, fileName]);
+
+        const fileStats = await fsAsync.stat(absFullPathToFile);
+
+        try {
+            if (fileStats.isDirectory()) {
+                await fsAsync.rm(absFullPathToFile, { recursive: true, force: true });
+            } else {
+                await fsAsync.unlink(absFullPathToFile);
+            }
+        } catch (error) {
+            throw errors.deleteFileError('');
+        }
+
+        await git.add();
+
+        return {
+            isDir: false,
+            name: fileName,
+            pathToFile,
+            status: await git.getFileStatusByAbsFullPathToFile(absFullPathToFile),
+        };
+    },
 };

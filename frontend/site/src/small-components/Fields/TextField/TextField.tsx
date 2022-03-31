@@ -22,6 +22,7 @@ interface TextFieldProps {
     isDisable?: boolean;
     onBlur?: (event: React.FocusEvent<HTMLInputElement, Element>, meta: FieldMeta<string>) => void;
     isNoNeedErrors?: boolean;
+    theme?: 'default' | 'outlined';
 }
 
 export const TextField: FC<TextFieldProps> = ({
@@ -33,6 +34,7 @@ export const TextField: FC<TextFieldProps> = ({
     validators = [],
     isDisable = false,
     isNoNeedErrors = false,
+    theme = 'default',
 }: TextFieldProps): ReactElement => {
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -52,7 +54,7 @@ export const TextField: FC<TextFieldProps> = ({
     return (
         <Field name={name} validate={composeValidators(...validators)} defaultValue={defaultValue}>
             {({ input, meta }: FieldProps<string>): ReactElement => (
-                <div className={styles.textField}>
+                <div className={cn(styles.textField, theme === 'outlined' && styles.outlined)}>
                     {title && (
                         <label htmlFor={name} className={styles.label}>
                             {type === 'email-username' && <UserIcon />}

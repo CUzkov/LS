@@ -67,4 +67,14 @@
             }
         }
     }
+
+    &.outlined {
+        .input {
+            input {
+                border: 1px solid $input-border;
+                border-radius: 10px;
+                padding: 0 5px;
+            }
+        }
+    }
 }

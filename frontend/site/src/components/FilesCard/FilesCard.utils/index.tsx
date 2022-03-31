@@ -5,7 +5,7 @@ import { FileMeta } from 'types';
 import DirIcon from 'file-icon-vectors/dist/icons/vivid/folder.svg';
 import NoneIcon from 'file-icon-vectors/dist/icons/vivid/blank.svg';
 
-import { extensionToIconMap } from '../FilesCard.constants';
+import { extensionToIconMap, mapFantomActionToChar } from '../FilesCard.constants';
 
 export const getIconByExtension = (name: string, isDir = false): ReactNode => {
     if (isDir) {
@@ -22,13 +22,4 @@ export const getIconByExtension = (name: string, isDir = false): ReactNode => {
     return extensionToIconMap[ext];
 };
 
-export const sortFiles = (a: FileMeta, b: FileMeta) => {
-    const isBothDir = a.isDir && b.isDir;
-    const isBothFile = !a.isDir && !b.isDir;
-
-    if (isBothDir || isBothFile) {
-        return a.name > b.name ? 1 : -1;
-    }
-
-    return (a.isDir && -1) || 1;
-};
+export const getCharsForFantomActions = (file: FileMeta) => mapFantomActionToChar[file.status];

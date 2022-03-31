@@ -9,7 +9,7 @@
         "build": "webpack --mode=production --env production --progress",
         "lint": "eslint src/**/*.{ts,tsx} --quiet --fix",
         "lint2": "./node_modules/.bin/eslint . --fix",
-        "tsc": "tsc"
+        "tsc": "tsc --build --clean"
     },
     "keywords": [],
     "author": "",
@@ -19,6 +19,7 @@
         "classnames": "^2.3.1",
         "file-icon-vectors": "^1.0.0",
         "history": "^5.1.0",
+        "lodash": "^4.17.21",
         "query-string": "^7.1.1",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
@@ -32,6 +33,7 @@
     },
     "devDependencies": {
         "@svgr/webpack": "^5.5.0",
+        "@types/lodash": "^4.14.180",
         "@types/node": "^16.11.4",
         "@types/react": "^17.0.32",
         "@types/react-dom": "^17.0.10",

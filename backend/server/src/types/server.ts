@@ -1,5 +1,6 @@
 import { IncomingMessage, ServerResponse as ServerResponseHttp } from 'http';
 import Cookies from 'cookies';
+import { Fields, Files } from 'formidable';
 
 export enum Code {
     ok = 200,
@@ -26,6 +27,10 @@ export type RequestPaylod<T, P> = {
     cookies?: Cookies;
     queryParams?: P;
     response: ServerResponseHttp;
+    formData?: {
+        files: Files;
+        fields: Fields;
+    };
 };
 
 export type ResponseCallback<T, P> = (payload: RequestPaylod<T, P>) => Promise<void>;
@@ -33,10 +38,12 @@ export type ResponseCallback<T, P> = (payload: RequestPaylod<T, P>) => Promise<v
 export enum Method {
     get = 'GET',
     post = 'POST',
+    options = 'OPTIONS',
 }
 
 export type Route = {
     name: string;
+    // eslint-disable-next-line
     callback: ResponseCallback<any, any>;
     method: Method;
     isNeedAuth: boolean;
@@ -51,6 +58,10 @@ export type MiddlewareRequest = {
     isAuth?: boolean;
     body?: string;
     queryParams?: Record<string, string | string[] | undefined>;
+    formData?: {
+        files: Files;
+        fields: Fields;
+    };
 };
 
 export type Empty = Record<string, never>;

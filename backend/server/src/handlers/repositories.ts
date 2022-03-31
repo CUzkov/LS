@@ -1,8 +1,15 @@
+import { File } from 'formidable';
+
 import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-repository-by-id';
 import { RepositoriesByFilterQP, RepositoriesByFilterRD } from '@api-types/repository/repositories-by-filter';
 import { CreateRepositoryD, CreateRepositoryRD } from '@api-types/repository/create-repository';
 import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
 import { DownloadFileQP } from '@api-types/repository/download-file';
+import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
+import {
+    DeleteFileFromRepositoryD,
+    DeleteFileFromRepositoryRD,
+} from '@api-types/repository/delete-file-from-repository';
 import {
     CheckIsRepositoryNameFreeD,
     CheckIsRepositoryNameFreeRD,
@@ -51,7 +58,10 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
     }
 
     try {
-        const repository = await RepositoryFns.createRepository({...data, title: formatTitleToPath(data.title)}, userId);
+        const repository = await RepositoryFns.createRepository(
+            { ...data, title: formatTitleToPath(data.title) },
+            userId,
+        );
         getOkResponse<CreateRepositoryRD>(response, repository);
     } catch (error) {
         const e = error as ServerError;
@@ -114,31 +124,109 @@ export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ re
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
 
-    if (!queryParams?.repositoryId || !queryParams.pathToFile) {
-        return getBadRequestResponse(response, 'Ошибка параметров', 'repositoryId и pathToFile являются обязательными параметрами!');
+    if (!queryParams?.repositoryId || !queryParams.pathToFile || !queryParams.fileName) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'repositoryId и pathToFile являются обязательными параметрами!',
+        );
     }
 
     try {
-        const pathToFile = await RepositoryFns.getFilePath(queryParams.repositoryId, userId, queryParams.pathToFile.split('~'));
-        getFileResponse(response, pathToFile);
+        const absFullPathToFile = await RepositoryFns.getAbsFullPathToFile(
+            queryParams.repositoryId,
+            userId,
+            queryParams.pathToFile.split('~'),
+            queryParams.fileName,
+        );
+
+        getFileResponse(response, absFullPathToFile);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
 };
 
-export const getFilesByDirPath: ResponseCallback<Empty, FilesByDirPathQP> = async ({ response, userId, queryParams }) => {
+export const getFilesByDirPath: ResponseCallback<Empty, FilesByDirPathQP> = async ({
+    response,
+    userId,
+    queryParams,
+}) => {
     if (!userId) {
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
 
-    if (!queryParams?.repositoryId || queryParams.pathToDir === undefined || queryParams.pathToDir === null) {
-        return getBadRequestResponse(response, 'Ошибка параметров', 'id и pathToDir являются обязательными параметрами!');
+    if (!queryParams?.repositoryId) {
+        return getBadRequestResponse(response, 'Ошибка параметров', 'id является обязательным параметром!');
     }
 
     try {
-        const files = await RepositoryFns.getFilesByDirPath(queryParams.repositoryId, userId, queryParams.pathToDir.split('~'));
+        const files = await RepositoryFns.getFilesByDirPath(
+            queryParams.repositoryId,
+            userId,
+            queryParams.pathToDir.split('~'),
+            queryParams.dirName,
+        );
         getOkResponse<FilesByDirPathRD>(response, files);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+    }
+};
+
+export const addFileToRepository: ResponseCallback<Empty, Empty> = async ({ response, userId, formData }) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!formData?.fields?.repositoryId || !formData.files?.file) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'file и repositoryId являются обязательными параметрами!',
+        );
+    }
+
+    try {
+        const addedFile = await RepositoryFns.addFileToRepository(
+            Number(formData.fields.repositoryId),
+            userId,
+            ((formData.fields.pathToDir as string) ?? '').split('~'),
+            formData.files.file as File,
+        );
+        getOkResponse<AddFileToRepositoryRD>(response, addedFile);
+    } catch (error) {
+        const e = error as ServerError;
+        console.log(e);
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+    }
+};
+
+export const deleteFileFromRepository: ResponseCallback<DeleteFileFromRepositoryD, Empty> = async ({
+    response,
+    userId,
+    data,
+}) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!data?.repositoryId || !data?.name) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'repositoryId, name и pathToFile являются обязательными параметрами!',
+        );
+    }
+
+    try {
+        const addedFile = await RepositoryFns.deleteFileFromRepository(
+            data.repositoryId,
+            userId,
+            data.pathToFile?.split('~'),
+            data.name,
+        );
+        getOkResponse<DeleteFileFromRepositoryRD>(response, addedFile);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);

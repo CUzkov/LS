@@ -1,4 +1,4 @@
-export const reuqiredValidate = (value: unknown): string | undefined => {
+export const requiredValidate = (value: unknown): string | undefined => {
     if (value !== undefined && value !== null && value !== '') {
         return undefined;
     }

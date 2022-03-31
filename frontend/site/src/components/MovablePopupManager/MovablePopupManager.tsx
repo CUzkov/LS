@@ -31,7 +31,7 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
     const isSomeRequired = useMemo(() => popups.some((popup) => popup.isRequired), [popups]);
 
     const handleAddPopup = useCallback(
-        ({ id, title, content, isRequired, buttons }: IAddPopup) => {
+        ({ id, title, content, isRequired }: IAddPopup) => {
             setPopups((prev) =>
                 prev
                     .map((popup) => ({ ...popup, priority: popup.priority + 1 }))
@@ -42,7 +42,6 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
                             content,
                             priority: 1,
                             isRequired,
-                            buttons,
                         },
                     ]),
             );
@@ -128,7 +127,7 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
             </MovablePopupManagerContext.Provider>
             {ReactDom.createPortal(
                 <div className={cn(styles.popupsLayout)}>
-                    {popups.map(({ content, title, priority, isRequired, buttons }, index) => (
+                    {popups.map(({ content, title, priority, isRequired }, index) => (
                         <Popup
                             title={title}
                             key={title + index}
@@ -140,7 +139,6 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
                             zIndex={10000 - priority}
                             isRequired={isRequired && priority === 1}
                             anotherRequired={isSomeRequired}
-                            buttons={buttons}
                         >
                             {content}
                         </Popup>

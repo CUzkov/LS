@@ -1,1 +1,1 @@
-export { Git, File } from './git';
+export { Git, FileMeta } from './git';

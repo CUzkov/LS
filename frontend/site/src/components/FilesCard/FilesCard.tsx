@@ -3,16 +3,15 @@ import cn from 'classnames';
 import type { FC } from 'react';
 
 import { useDispatch } from 'store';
-import { FileMeta } from 'types';
+import { FileMeta, FileStatus } from 'types';
 
-import { getIconByExtension, sortFiles } from './FilesCard.utils';
+import { getIconByExtension, getCharsForFantomActions } from './FilesCard.utils';
 
 import styles from './style.scss';
 
 interface FilesCardProps {
-    files: Array<FileMeta>;
+    files: FileMeta[];
     path: string[];
-    fantomFiles?: Array<FileMeta>;
     actions?: (file: FileMeta) => ReactNode;
     onClickDir: (pathToDir: string[]) => void;
     onClickToUpDir: () => void;
@@ -21,35 +20,14 @@ interface FilesCardProps {
 export const FilesCard: FC<FilesCardProps> = ({
     files,
     path,
-    fantomFiles = [],
     actions = () => <></>,
     onClickDir,
     onClickToUpDir,
 }: FilesCardProps) => {
     const [isFileHoverMap, setIsFileHoverMap] = useState<boolean[]>([]);
     const createDivRef: () => React.RefObject<HTMLDivElement> = createRef;
-    const rowsRefs = useMemo(() => files.concat(fantomFiles).map(() => createDivRef()), [files, fantomFiles]);
+    const rowsRefs = useMemo(() => files.map(() => createDivRef()), [files]);
     const dispatch = useDispatch();
-
-    const filesToShow = useMemo(
-        () =>
-            files
-                .concat(fantomFiles)
-                .sort(sortFiles)
-                .filter((file) => {
-                    if (
-                        !file.fantom &&
-                        fantomFiles.some(
-                            (fantomFile) => fantomFile.isDir === file.isDir && fantomFile.name === file.name,
-                        )
-                    ) {
-                        return false;
-                    }
-
-                    return true;
-                }),
-        [files, fantomFiles],
-    );
 
     const handleToggleHover = useCallback(
         (index: number, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -85,33 +63,42 @@ export const FilesCard: FC<FilesCardProps> = ({
                     <div className={styles.title}>{'...'}</div>
                 </div>
             ) : null}
-            {filesToShow.map((file, index) => (
-                <div
-                    className={cn(
-                        styles.row,
-                        file.fantom?.action === 'add' && styles.added,
-                        file.fantom?.action === 'rewrite' && styles.rewrite,
-                        file.fantom?.action === 'delete' && styles.delete,
-                    )}
-                    key={file.name + index}
-                    ref={rowsRefs[index]}
-                    onMouseOver={(e) => handleToggleHover(index, e)}
-                    onMouseOut={(e) => handleToggleHover(index, e)}
-                    onClick={
-                        file.isDir && file.fantom?.action !== 'delete'
-                            ? () => handleClickDir(file.pathToFile)
-                            : undefined
-                    }
-                >
-                    <div className={styles.title}>
-                        <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
-                        {file.name}
+            {files.map((file, index) => {
+                const rowTestStyle = cn(
+                    file.status === FileStatus.add && styles.added,
+                    file.status === FileStatus.modify && styles.modify,
+                    file.status === FileStatus.delete && styles.delete,
+                );
+                return (
+                    <div
+                        className={cn(styles.row, rowTestStyle)}
+                        key={file.name + index}
+                        ref={rowsRefs[index]}
+                        onMouseOver={(e) => handleToggleHover(index, e)}
+                        onMouseOut={(e) => handleToggleHover(index, e)}
+                        onClick={file.isDir ? () => handleClickDir(file.pathToFile) : undefined}
+                    >
+                        <div className={styles.title}>
+                            <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
+                            {file.name}
+                        </div>
+                        {/* <div
+                            className={cn(
+                                styles.actionChar,
+                                file.actions.length !== 0 && styles.showActionChar,
+                                rowTestStyle,
+                            )}
+                        >
+                            {file.actions.length !== 0 && getCharsForFantomActions(file)}
+                        </div> */}
+                        {actions && (
+                            <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>
+                                {actions(file)}
+                            </div>
+                        )}
                     </div>
-                    {actions && (
-                        <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>{actions(file)}</div>
-                    )}
-                </div>
-            ))}
+                );
+            })}
             {files.length === 0 && <div className={styles.emptyMessage}>{'Репозиторий пуст'}</div>}
         </div>
     );
