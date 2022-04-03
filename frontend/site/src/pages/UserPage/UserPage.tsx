@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { FC } from 'react';
 
 import { cnUserPage, getPaths, cnUserPageTitle } from './UserPage.constants';
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 
 import './style.scss';

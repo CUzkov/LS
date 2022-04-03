@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 
-import { getPaths } from './CreateRepositoryPage.constants';
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { CreateRepositoryForm } from 'components/CreateRepositoryForm';
+import { CreateRepositoryForm } from './create-repository-page.form';
 import { PageTitle } from 'components/PageTitle';
+
+import { getPaths } from './create-repository-page.constants';
 
 import styles from './style.scss';
 

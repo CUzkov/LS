@@ -75,9 +75,10 @@ const Actions = ({
 
 type RepositoryPageFilesCardProps = {
     isEditing: boolean;
+    isRepositoryLoading: boolean;
 };
 
-export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEditing }) => {
+export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEditing, isRepositoryLoading }) => {
     const { repository, files, dirs, currentPath, filesAndDirsFetchStatus } = useSelector(
         (root) => root.repositoryPage,
     );
@@ -128,14 +129,14 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
                 onClickDir={handleClickDir}
                 onClickToUpDir={handleClickToUpDir}
                 isLoaded={filesAndDirsFetchStatus === FetchStatus.successed}
-                isLoading={filesAndDirsFetchStatus === FetchStatus.loading}
+                isLoading={filesAndDirsFetchStatus === FetchStatus.loading || isRepositoryLoading}
                 actionsForFiles={(file) => (
                     <Actions
                         downloadLink={getDownloadLink(
                             repository?.id ?? 0,
                             file.pathToFile.join('~'),
                             file.name,
-                            isEditing
+                            isEditing,
                         )}
                         downloadName={file.name}
                         isDownloadDisable={file.status === FileStatus.delete}
@@ -147,7 +148,12 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
                 )}
                 actionsForDirs={(dir) => (
                     <Actions
-                        downloadLink={getDownloadLink(repository?.id ?? 0, dir.pathToDir.join('~'), dir.name, isEditing)}
+                        downloadLink={getDownloadLink(
+                            repository?.id ?? 0,
+                            dir.pathToDir.join('~'),
+                            dir.name,
+                            isEditing,
+                        )}
                         downloadName={`${dir.name}.zip`}
                         isDownloadDisable={dir.status === DirStatus.delete}
                         isEditing={isEditing}

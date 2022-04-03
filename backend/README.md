@@ -12,4 +12,3 @@
 
 ## Возможные траблы
  - git status выдаёт \340\532\543 вместо русских символов: git config --global core.quotepath false
- - 

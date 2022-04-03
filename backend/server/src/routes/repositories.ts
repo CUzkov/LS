@@ -3,7 +3,7 @@ import {
     createRepository,
     checkIsRepositoryNameFree,
     getRepositoryById,
-    downloadFile,
+    downloadFileOrDir,
     getFilesByFullDirPath,
     addFileToRepository,
     deleteFileOrDirFromRepository,
@@ -17,9 +17,9 @@ const CREATE_REPOSITORY_URL = '/api/repository/create';
 const CHECK_IS_REPOSIROTY_NAME_FREE_URL = '/api/repository/free';
 const REPOSITORIES_BY_FILTERS_URL = '/api/repository/filter';
 
-const GET_FILES_BY_DIR_PATH_URL = '/api/repository/files';
+const GET_FILES_BY_FULL_DIR_PATH_URL = '/api/repository/files';
 const GET_DRAFT_FILES_BY_FULL_DIR_PATH = '/api/repository/draft/files';
-const DOWNLOAD_FILE_URL = '/api/repository/download'; // draft and no draft
+const DOWNLOAD_FILE_OR_DIR_URL = '/api/repository/download'; // draft and no draft
 
 const RENAME_FILE_OR_DIR_IN_REPOSITORY = '/api/repository/draft/rename';
 const DELETE_FILE_OR_DIR_FROM_REPOSITORY = '/api/repository/draft/delete';
@@ -51,13 +51,13 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
         method: Method.get,
         isNeedAuth: true,
     },
-    [DOWNLOAD_FILE_URL]: {
-        name: 'downloadFile',
-        callback: downloadFile,
+    [DOWNLOAD_FILE_OR_DIR_URL]: {
+        name: 'downloadFileOrDir',
+        callback: downloadFileOrDir,
         method: Method.get,
         isNeedAuth: true,
     },
-    [GET_FILES_BY_DIR_PATH_URL]: {
+    [GET_FILES_BY_FULL_DIR_PATH_URL]: {
         name: 'getFilesByFullDirPath',
         callback: getFilesByFullDirPath,
         method: Method.get,

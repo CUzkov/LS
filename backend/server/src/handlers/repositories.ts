@@ -23,7 +23,7 @@ import {
     getInternalServerErrorResponse,
     getBadRequestResponse,
     getServerErrorResponse,
-    getFileResponse,
+    getDownloadResponse,
 } from '../utils/server-utils';
 import { RepositoryFns } from '../models';
 import { formatTitleToPath, isCorrectPath } from '../utils/paths';
@@ -121,7 +121,7 @@ export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = asyn
     }
 };
 
-export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ response, userId, queryParams }) => {
+export const downloadFileOrDir: ResponseCallback<Empty, DownloadFileQP> = async ({ response, userId, queryParams }) => {
     if (!userId) {
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
@@ -140,10 +140,10 @@ export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ re
             userId,
             queryParams.pathToFile?.split('~') ?? '',
             queryParams.fileName,
-            queryParams.isDraft
+            queryParams.isDraft,
         );
 
-        getFileResponse(response, absFullPathToFile);
+        getDownloadResponse(response, absFullPathToFile);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);

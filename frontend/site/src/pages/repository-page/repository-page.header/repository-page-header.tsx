@@ -9,7 +9,7 @@ import { clearChanges } from 'actions/repository-page';
 import EditIcon from '../repository-page.assets/edit.svg';
 import AddFolderIcon from '../repository-page.assets/add-folder.svg';
 import AddFileIcon from '../repository-page.assets/add-file.svg';
-import {queryParamConfig} from '../repository-page.constants'
+import { queryParamConfig } from '../repository-page.constants';
 
 import styles from './style.scss';
 
@@ -25,7 +25,7 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
 
     const handleToggleEditing = useCallback(() => {
         toggleEditing();
-        setQuery({fullPathToDir: undefined});
+        setQuery({ fullPathToDir: undefined });
     }, [toggleEditing]);
 
     const handleAddFile = useCallback(() => {

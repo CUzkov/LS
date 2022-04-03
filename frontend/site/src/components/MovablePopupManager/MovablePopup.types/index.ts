@@ -16,6 +16,6 @@ export interface IAddPopup {
 }
 
 export type MovablePopupManagerContext = {
-    addPopup: ({}: IAddPopup) => void;
+    addPopup: (props: IAddPopup) => void;
     removePopup: (id: string) => void;
 };

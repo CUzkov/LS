@@ -115,7 +115,7 @@ export class Git {
             const currFullPathToFile = path.join(...fullPathToDir.concat(currFileName));
 
             if (isDir) {
-                dirs.push(this.getDirWithStatus(statusesEntries, currFullPathToFile));
+                dirs.push(this.getDirWithStatusByFullPathToDir(statusesEntries, currFullPathToFile));
             } else {
                 const status = statuses[currFullPathToFile]?.status ?? FileStatus.commit;
 
@@ -265,7 +265,7 @@ export class Git {
         return result;
     }
 
-    getDirWithStatus(
+    getDirWithStatusByFullPathToDir(
         statusesEntries: [
             string,
             {
@@ -274,11 +274,11 @@ export class Git {
                 name: string;
             },
         ][],
-        fullPathToFile: string,
+        fullPathToDir: string,
     ): DirMeta {
         let status: DirStatus;
         const currDirStatuses = statusesEntries.filter(
-            ([path, { status }]) => status !== FileStatus.delete && path.startsWith(fullPathToFile),
+            ([path, { status }]) => status !== FileStatus.delete && path.startsWith(fullPathToDir),
         );
 
         if (!currDirStatuses.length) {
@@ -292,8 +292,8 @@ export class Git {
         }
 
         return {
-            name: path.basename(fullPathToFile),
-            pathToDir: path.dirname(fullPathToFile).split(path.sep),
+            name: path.basename(fullPathToDir),
+            pathToDir: path.dirname(fullPathToDir).split(path.sep),
             status,
         };
     }

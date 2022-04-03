@@ -84,7 +84,7 @@ export const getServerErrorResponse = (response: ServerResponse, error: string, 
         .end(body);
 };
 
-export const getFileResponse = async (response: ServerResponse, pathToFile: string) => {
+export const getDownloadResponse = async (response: ServerResponse, pathToFile: string) => {
     const mimetype = mime.lookup(pathToFile);
 
     response.setHeader('Content-type', mimetype);

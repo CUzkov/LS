@@ -50,6 +50,7 @@ export const repositoryPageReducer = (
         const result = { ...state };
 
         result.repositoryFetchStatus = FetchStatus.loading;
+        result.repository = undefined;
 
         return result;
     }

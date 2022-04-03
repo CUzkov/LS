@@ -1,8 +1,9 @@
+import { ReactNode } from 'react';
 import { StringParam } from 'use-query-params';
 
 import { getMainPage, getAllRepositories, getUserPage, getRepository } from 'constants/routers';
 
-export const getPaths = (username: string, entityName = 'error', entityValue = '') => [
+export const getPaths = (username: string, entityName: ReactNode, entityValue = '') => [
     {
         title: 'Главная',
         url: getMainPage,

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 
 import { cnMapsListPage, getPaths, cnMapsListPageItems } from './MapsListPage.constants';
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 import { useDispatch, useSelector } from 'store/store';
 import { getMapsListPageAllMaps } from 'actions/maps-list-page';
 import { ItemCard } from 'components/ItemCard';

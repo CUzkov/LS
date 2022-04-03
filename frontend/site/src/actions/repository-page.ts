@@ -17,7 +17,7 @@ import { Dispatch, store } from '../store';
 
 const REPOSITORY_BY_ID_URL = '/api/repository/id';
 
-const GET_FILES_BY_DIR_PATH_URL = '/api/repository/files';
+const GET_FILES_BY_FULL_DIR_PATH_URL = '/api/repository/files';
 const GET_DRAFT_FILES_BY_FULL_DIR_PATH = '/api/repository/draft/files';
 
 const RENAME_FILE_OR_DIR_IN_REPOSITORY = '/api/repository/draft/rename';
@@ -60,12 +60,16 @@ export const getPageRepositoriesById = async (id: number) => {
     });
 };
 
-export const getFilesByDirPath = async (pathToDir: string[], dirName: string, isDraft: boolean) => {
+export const getFilesByPath = async (pathToDir: string[], dirName: string, isDraft: boolean) => {
     const dispath: Dispatch = store.dispatch;
 
     const {
         repositoryPage: { repository },
     } = store.getState();
+
+    if (!repository?.id) {
+        return;
+    }
 
     dispath({ type: 'repository-page/files-and-dirs/loading' });
 
@@ -73,7 +77,7 @@ export const getFilesByDirPath = async (pathToDir: string[], dirName: string, is
 
     try {
         response = await ajax2.get<FilesByDirPathRD, FilesByDirPathQP>({
-            url: isDraft ? GET_DRAFT_FILES_BY_FULL_DIR_PATH : GET_FILES_BY_DIR_PATH_URL,
+            url: isDraft ? GET_DRAFT_FILES_BY_FULL_DIR_PATH : GET_FILES_BY_FULL_DIR_PATH_URL,
             queryParams: {
                 pathToDir: pathToDir.join('~'),
                 dirName,
@@ -99,8 +103,6 @@ export const getFilesByDirPath = async (pathToDir: string[], dirName: string, is
 
     dispath({ type: 'repository-page/files-and-dirs/success', data: response });
 };
-
-export const clearChanges = async (dispath: Dispatch) => {};
 
 export const addFile = async (file: File, isBeDeleted?: boolean) => {
     const dispath: Dispatch = store.dispatch;

@@ -1,7 +1,7 @@
 import { FetchStatus } from '../../types';
 
 export type CreateMapFormEvents =
-    | { type: 'create-map-form/failed' }
+    | { type: 'create-map-form/error' }
     | { type: 'create-map-form/success' }
     | { type: 'create-map-form/loading' };
 
@@ -17,10 +17,10 @@ export const createMapFormReducer = (
     state: CreateMapFormStore = initialState,
     event: CreateMapFormEvents,
 ): CreateMapFormStore => {
-    if (event.type === 'create-map-form/failed') {
+    if (event.type === 'create-map-form/error') {
         return {
             ...state,
-            fetchStatus: FetchStatus.failed,
+            fetchStatus: FetchStatus.error,
         };
     }
 

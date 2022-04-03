@@ -3,6 +3,8 @@ import ReactDom from 'react-dom';
 import cn from 'classnames';
 import type { FC } from 'react';
 
+import { noop } from 'utils/noop';
+
 import { Popup } from './Popup';
 import {
     IAddPopup,
@@ -13,8 +15,8 @@ import {
 import styles from './style.scss';
 
 const context: MovablePopupManagerContextType = {
-    addPopup: () => {},
-    removePopup: () => {},
+    addPopup: noop,
+    removePopup: noop,
 };
 
 export const MovablePopupManagerContext = React.createContext(context);

@@ -2,12 +2,14 @@ import { useQueryParams } from 'use-query-params';
 import React, { useEffect, useMemo, FC, useCallback, useRef, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { getPageRepositoriesById, getFilesByDirPath, addFile, changeFilesDirPath } from 'actions/repository-page';
+import { getPageRepositoriesById, getFilesByPath, addFile, changeFilesDirPath } from 'actions/repository-page';
 import { useBooleanState } from 'hooks';
 import { MovablePopupManagerContext } from 'components/MovablePopupManager';
+import { FetchStatus, FileStatus } from 'types';
 import { yesNoPopup } from 'constants/popups';
+import Spinner from 'assets/spinner.svg';
 
 import { getPaths } from './repository-page.constants';
 import { RepositoryPageFilesCard } from './repository-page.files-card';
@@ -16,14 +18,14 @@ import { getDirPathByKey } from './repository-page.utils';
 import { queryParamConfig } from './repository-page.constants';
 
 import styles from './style.scss';
-import { FileStatus } from 'types';
 
 export const RepositoryPage: FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const context = useContext(MovablePopupManagerContext);
 
     const { username } = useSelector((root) => root.user);
-    const { repository, files, currentPath } = useSelector((root) => root.repositoryPage);
+    const { repository, files, currentPath, repositoryFetchStatus } = useSelector((root) => root.repositoryPage);
+    const isRepositoryLoading = repositoryFetchStatus === FetchStatus.loading;
     const { id } = useParams();
 
     const [isEditing, , , toggleEditing] = useBooleanState(false);
@@ -78,7 +80,7 @@ export const RepositoryPage: FC = () => {
     useEffect(() => {
         if (repository?.id) {
             // query.pathToDir включает в себя dirName
-            getFilesByDirPath([query.fullPathToDir || ''], '', isEditing);
+            getFilesByPath([query.fullPathToDir || ''], '', isEditing);
         }
         changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
     }, [query.fullPathToDir, repository?.id, isEditing]);
@@ -87,16 +89,30 @@ export const RepositoryPage: FC = () => {
         () => getDirPathByKey(query.fullPathToDir).map((path) => ({ title: path, url: '' })),
         [query.fullPathToDir],
     );
-    const paths = useMemo(
-        () => getPaths(username, repository?.title, String(repository?.id)).concat(additionalPaths.filter(path => path.title !== '.')),
-        [username, repository, additionalPaths],
-    );
+
+    const paths = useMemo(() => {
+        const basePaths = getPaths(username, repository?.title, String(repository?.id));
+
+        if (isRepositoryLoading) {
+            basePaths[basePaths.length - 1] = {
+                title: (
+                    <div className={styles.breadcrumbsSpinner}>
+                        <Spinner />
+                    </div>
+                ),
+                url: '',
+            };
+        }
+
+        return basePaths.concat(additionalPaths.filter((path) => path.title !== '.'));
+    }, [username, repository, additionalPaths, isRepositoryLoading]);
+
     const content = useMemo(
         () => (
             <div className={styles.repositoryPage}>
                 <RepositoryPageHeader isEditing={isEditing} inputRef={inputRef} toggleEditing={toggleEditing} />
                 <div style={{ pointerEvents: 'all' }}>
-                    <RepositoryPageFilesCard isEditing={isEditing} />
+                    <RepositoryPageFilesCard isEditing={isEditing} isRepositoryLoading={isRepositoryLoading} />
                 </div>
                 <input type="file" ref={inputRef} multiple className={styles.fileInput} onChange={handleChangeInput} />
             </div>

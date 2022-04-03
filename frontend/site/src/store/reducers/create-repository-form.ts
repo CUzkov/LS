@@ -1,6 +1,6 @@
 import { FetchStatus } from 'types';
 
-export enum RepositoryNameStatuses {
+export enum RepositoryNameStatus {
     free,
     notChecked,
     busy,
@@ -12,11 +12,12 @@ export type CreateRepositoryFormEvents =
     | { type: 'create-repository-form/loading' }
     | { type: 'create-repository-form/is-repository-name-free/error' }
     | { type: 'create-repository-form/is-repository-name-free/loading' }
+    | { type: 'create-repository-form/is-repository-name-free/not-checked' }
     | { type: 'create-repository-form/is-repository-name-free/status'; data: { isFree: boolean } };
 
 export type CreateRepositoryFormStore = {
     repositoryNameStatus: {
-        status: RepositoryNameStatuses;
+        status: RepositoryNameStatus;
         fetchStatus: FetchStatus;
     };
     fetchStatus: FetchStatus;
@@ -24,7 +25,7 @@ export type CreateRepositoryFormStore = {
 
 const initialState: CreateRepositoryFormStore = {
     repositoryNameStatus: {
-        status: RepositoryNameStatuses.notChecked,
+        status: RepositoryNameStatus.notChecked,
         fetchStatus: FetchStatus.none,
     },
     fetchStatus: FetchStatus.none,
@@ -34,6 +35,9 @@ export const createRepositoryFormReducer = (
     state: CreateRepositoryFormStore = initialState,
     event: CreateRepositoryFormEvents,
 ): CreateRepositoryFormStore => {
+    const result = { ...state };
+
+    // FIXME переписать на const result = {...state};
     if (event.type === 'create-repository-form/error') {
         return {
             ...state,
@@ -61,7 +65,7 @@ export const createRepositoryFormReducer = (
             repositoryNameStatus: {
                 ...state.repositoryNameStatus,
                 fetchStatus: FetchStatus.loading,
-                status: RepositoryNameStatuses.notChecked,
+                status: RepositoryNameStatus.notChecked,
             },
         };
     }
@@ -82,10 +86,14 @@ export const createRepositoryFormReducer = (
             repositoryNameStatus: {
                 ...state.repositoryNameStatus,
                 fetchStatus: FetchStatus.successed,
-                status: event.data.isFree ? RepositoryNameStatuses.free : RepositoryNameStatuses.busy,
+                status: event.data.isFree ? RepositoryNameStatus.free : RepositoryNameStatus.busy,
             },
         };
     }
 
-    return state;
+    if (event.type === 'create-repository-form/is-repository-name-free/not-checked') {
+        result.repositoryNameStatus.status = RepositoryNameStatus.notChecked;
+    }
+
+    return result;
 };

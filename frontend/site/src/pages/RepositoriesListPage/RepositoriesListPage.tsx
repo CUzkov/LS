@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, FC } from 'react';
 import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
 
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 import { useDispatch, useSelector } from 'store/store';
 import { ItemCard } from 'components/ItemCard';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';

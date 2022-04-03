@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import type { FC } from 'react';
 
 import { cnCreateMapPageTitle, getPaths, cnCreateMapPage, cnCreateMapPageForm } from './CreateMapPage.constants';
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 import { CreateMapForm } from 'components/CreateMapForm';
-import { getUserMaps } from 'constants/routers';
+import { getAllMaps } from 'constants/routers';
 
 import { FetchStatus } from '../../types';
 
@@ -20,7 +20,7 @@ export const CreateMapPage: FC = () => {
 
     useEffect(() => {
         if (fetchStatus === FetchStatus.successed) {
-            navigate(getUserMaps(username));
+            navigate(getAllMaps(username));
             // FIXME очищать fetch статус
         }
     }, [fetchStatus]);

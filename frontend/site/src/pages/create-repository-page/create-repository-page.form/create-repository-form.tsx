@@ -1,68 +1,68 @@
 import React, { useCallback, FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cn from 'classnames';
-import { Form } from 'react-final-form';
+import { Form, FormSpy } from 'react-final-form';
 
 import { FetchStatus } from 'types/index';
 import { getRepository } from 'constants/routers';
-import { checkIsRepositoryNameFree, createRepository } from 'actions/repositories';
-import { useDispatch, useSelector } from 'store/store';
+import { checkIsRepositoryNameFree, createRepository, setRepositoryNameNotChecked } from 'actions/repositories';
+import { useSelector } from 'store/store';
 import { TextField, Button, CheckboxField } from 'small-components/index';
 import { requiredValidate } from 'utils/final-forms';
-import { RepositoryNameStatuses } from 'store/reducers/create-repository-form';
+import { RepositoryNameStatus } from 'store/reducers/create-repository-form';
 
 import Spinner from 'assets/spinner.svg';
 
 import styles from './style.scss';
 
 export const CreateRepositoryForm: FC = () => {
-    const dispatch = useDispatch();
-    const store = useSelector((root) => root.createRepositoryForm);
+    const { repositoryNameStatus, fetchStatus } = useSelector((root) => root.createRepositoryForm);
     const { username } = useSelector((root) => root.user);
     const [lastRepositoryName, setLastRepositoryName] = useState<string>('');
     const navigate = useNavigate();
 
+    const isSubmitDisable =
+        fetchStatus === FetchStatus.loading ||
+        repositoryNameStatus.status === RepositoryNameStatus.notChecked ||
+        repositoryNameStatus.status === RepositoryNameStatus.busy;
+
     const handleSubmit = useCallback(
         (userForm: { title: string; isPrivate: boolean }) => {
-            createRepository(dispatch, userForm).then((repository) => {
+            if (isSubmitDisable) {
+                return;
+            }
+
+            createRepository(userForm).then((repository) => {
                 if (repository) {
                     navigate(getRepository(username, String(repository.id)));
                 }
             });
         },
-        [navigate, username],
+        [navigate, username, isSubmitDisable],
     );
 
     const formValidate = useCallback(
         (values: { title: string; isPrivate: boolean }) => {
             const errors = {};
 
-            if (
-                store.repositoryNameStatus.status === RepositoryNameStatuses.busy &&
-                lastRepositoryName === values.title
-            ) {
+            if (repositoryNameStatus.status === RepositoryNameStatus.busy && lastRepositoryName === values.title) {
                 errors['title'] = 'Репозиторий с таким названием уже существует';
             }
 
             return errors;
         },
-        [store],
+        [repositoryNameStatus, lastRepositoryName],
     );
 
     const handleRepositoryNameBlur = useCallback(
         (event: React.FocusEvent<HTMLInputElement, Element>) => {
             if (event.target.value !== lastRepositoryName) {
-                checkIsRepositoryNameFree(dispatch, { title: event.target.value });
+                checkIsRepositoryNameFree({ title: event.target.value });
                 setLastRepositoryName(event.target.value);
             }
         },
         [lastRepositoryName],
     );
-
-    const isSubmitDisable =
-        store.fetchStatus === FetchStatus.loading ||
-        store.repositoryNameStatus.status === RepositoryNameStatuses.notChecked ||
-        store.repositoryNameStatus.status === RepositoryNameStatuses.busy;
 
     return (
         <div className={styles.createRepositoryFrom}>
@@ -78,14 +78,13 @@ export const CreateRepositoryForm: FC = () => {
                                     type="text"
                                     title="Название репозитория"
                                     validators={[requiredValidate]}
-                                    isDisable={store.fetchStatus === FetchStatus.loading}
+                                    isDisable={fetchStatus === FetchStatus.loading}
                                     onBlur={handleRepositoryNameBlur}
                                 />
                                 <div
                                     className={cn(
                                         styles.repositoryNameSpinner,
-                                        store.repositoryNameStatus.fetchStatus === FetchStatus.loading &&
-                                            styles.loading,
+                                        repositoryNameStatus.fetchStatus === FetchStatus.loading && styles.loading,
                                     )}
                                 >
                                     <Spinner />
@@ -95,7 +94,7 @@ export const CreateRepositoryForm: FC = () => {
                                 <CheckboxField
                                     name="isPrivate"
                                     title="сделать приватным"
-                                    isDisable={store.fetchStatus === FetchStatus.loading}
+                                    isDisable={fetchStatus === FetchStatus.loading}
                                 />
                             </div>
                         </div>
@@ -104,11 +103,21 @@ export const CreateRepositoryForm: FC = () => {
                                 <Button text={'Создать'} type={'submit'} isDisable={isSubmitDisable} />
                             </div>
                         </div>
-                        <div
-                            className={cn(styles.spinner, store.fetchStatus === FetchStatus.loading && styles.loading)}
-                        >
+                        <div className={cn(styles.spinner, fetchStatus === FetchStatus.loading && styles.loading)}>
                             <Spinner />
                         </div>
+                        <FormSpy
+                            subscription={{ values: true }}
+                            children={({ values }) => {
+                                if (
+                                    values.title !== lastRepositoryName &&
+                                    repositoryNameStatus.status !== RepositoryNameStatus.notChecked
+                                ) {
+                                    setRepositoryNameNotChecked();
+                                }
+                                return null;
+                            }}
+                        />
                     </form>
                 )}
             />

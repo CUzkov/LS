@@ -195,12 +195,12 @@ export const RepositoryFns = {
         userId: number,
         pathToFile: string[],
         fileName: string,
-        isDraft = false
+        isDraft = false,
     ): Promise<string> => {
         const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, isDraft);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('')
+            throw errors.cannotCreateDraftRepositpory('');
         }
 
         return (isDraft ? gitDraft : git).getAbsPathToFile([...pathToFile, fileName]);
@@ -219,7 +219,7 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('')
+            throw errors.cannotCreateDraftRepositpory('');
         }
 
         if (!file.originalFilename) {
@@ -253,7 +253,7 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('')
+            throw errors.cannotCreateDraftRepositpory('');
         }
 
         gitDraft.capture();
@@ -280,7 +280,9 @@ export const RepositoryFns = {
 
         return {
             name: fileOrDirName,
-            ...(isDir ? {pathToDir: pathToFileOrDir, status: DirStatus.delete} : {pathToFile: pathToFileOrDir, status: FileStatus.delete}),
+            ...(isDir
+                ? { pathToDir: pathToFileOrDir, status: DirStatus.delete }
+                : { pathToFile: pathToFileOrDir, status: FileStatus.delete }),
         };
     },
     renameFileOrDirInRepository: async (
@@ -293,7 +295,7 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('')
+            throw errors.cannotCreateDraftRepositpory('');
         }
 
         gitDraft.capture();
@@ -311,22 +313,29 @@ export const RepositoryFns = {
 
         await gitDraft.add();
 
+        const fullPathToFileOrDir = path.join(...pathToFile, newFileName);
+
         if (isDir) {
             const statusesEntries = Object.entries(await gitDraft.getNormalizeFileStatuses());
+            const status = gitDraft.getDirWithStatusByFullPathToDir(statusesEntries, fullPathToFileOrDir).status;
+
+            gitDraft.release();
 
             return {
                 name: newFileName,
                 pathToDir: pathToFile,
-                status: gitDraft.getDirWithStatus(statusesEntries, path.join(...pathToFile, newFileName)).status,
+                status,
             };
         }
+
+        const status = await gitDraft.getFileStatusByFullPathToFile(fullPathToFileOrDir);
 
         gitDraft.release();
 
         return {
             name: newFileName,
             pathToFile,
-            status: FileStatus.rename,
+            status,
         };
     },
     getDraftFilesByFullDirPath: async (
@@ -338,7 +347,7 @@ export const RepositoryFns = {
         const [repository, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('')
+            throw errors.cannotCreateDraftRepositpory('');
         }
 
         git.capture();
@@ -360,12 +369,17 @@ export const RepositoryFns = {
                 throw errors.dbError(e.message);
             }
 
-            if (result.rows?.[0]?.path_to_repository !== gitDraft.path) {
+            console.log(result.rows?.[0]?.path_to_repository, gitDraft.path);
+
+            if (result.rows?.[0]?.path_to_draft_repository !== gitDraft.path) {
                 throw errors.dbError('Ошибка создания драфта для репозитория!');
             }
         }
 
         const filesAndDirs = gitDraft.getDraftDirFiles(pathToDir, dirName);
+
+        git.release();
+
         return filesAndDirs;
     },
 };

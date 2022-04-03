@@ -1,13 +1,14 @@
 import React, { FC, useCallback } from 'react';
-import { Form, FormSpy, useField, useForm } from 'react-final-form';
+import { Form, FormSpy } from 'react-final-form';
 
 import { TextField } from 'small-components/Fields/TextField/TextField';
 import { SelectField } from 'small-components/Fields/SelectField/SelectField';
 import { Button } from 'small-components/Button';
 import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
+import { noop } from 'utils/noop';
 import { useDispatch } from 'store/store';
-import { RWA } from 'types/index';
+import { RWA } from 'types';
 
 import styles from './style.scss';
 
@@ -86,7 +87,7 @@ export const RepositoriesPageFilters: FC = () => {
     return (
         <div className={styles.repositoriesPageFilters}>
             <Form
-                onSubmit={() => {}}
+                onSubmit={noop}
                 render={() => (
                     <form className={styles.rwaForm}>
                         <div className={styles.rwaField}>

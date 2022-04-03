@@ -2,7 +2,7 @@ import React from 'react';
 import type { FC } from 'react';
 
 import { paths } from './MainPage.constants';
-import { PageWrapper } from 'pages/PageWrapper';
+import { PageWrapper } from 'pages/page-wrapper';
 
 import styles from './style.scss';
 

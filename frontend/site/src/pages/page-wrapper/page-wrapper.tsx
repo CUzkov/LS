@@ -1,16 +1,16 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import type { FC } from 'react';
 
 import { Menu } from 'components/Menu';
-import { Breadcrumbs } from 'components/Breadcrumbs';
+import { Breadcrumbs } from 'components/breadcrumbs';
 
 import styles from './style.scss';
 
 interface IPageWrapperProps {
     content: ReactElement;
     paths: {
-        title: string;
-        url: string;
+        title: ReactNode;
+        url?: string;
     }[];
 }
 
