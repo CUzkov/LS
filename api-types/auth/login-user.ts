@@ -1,5 +1,3 @@
-export const LOGIN_USER_URL = '/api/auth/login';
-
 export type LoginUserD = {
     username: string;
     password: string;

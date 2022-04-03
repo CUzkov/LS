@@ -4,21 +4,27 @@ import {
     checkIsRepositoryNameFree,
     getRepositoryById,
     downloadFile,
-    getFilesByDirPath,
+    getFilesByFullDirPath,
     addFileToRepository,
-    deleteFileFromRepository,
+    deleteFileOrDirFromRepository,
+    renameFileOrDirFromRepository,
+    getDraftFilesByFullDirPath,
 } from '../handlers/repositories';
 import { Route, Method } from '../types';
-import {
-    REPOSITORIES_BY_FILTERS_URL,
-    CREATE_REPOSITORY_URL,
-    CHECK_IS_REPOSIROTY_NAME_FREE_URL,
-    REPOSITORY_BY_ID_URL,
-    DOWNLOAD_FILE_URL,
-    GET_FILES_BY_DIR_PATH_URL,
-    ADD_FILE_TO_REPOSITORY,
-    DELETE_FILE_FROM_REPOSITORY,
-} from './constants';
+
+const REPOSITORY_BY_ID_URL = '/api/repository/id';
+const CREATE_REPOSITORY_URL = '/api/repository/create';
+const CHECK_IS_REPOSIROTY_NAME_FREE_URL = '/api/repository/free';
+const REPOSITORIES_BY_FILTERS_URL = '/api/repository/filter';
+
+const GET_FILES_BY_DIR_PATH_URL = '/api/repository/files';
+const GET_DRAFT_FILES_BY_FULL_DIR_PATH = '/api/repository/draft/files';
+const DOWNLOAD_FILE_URL = '/api/repository/download'; // draft and no draft
+
+const RENAME_FILE_OR_DIR_IN_REPOSITORY = '/api/repository/draft/rename';
+const DELETE_FILE_OR_DIR_FROM_REPOSITORY = '/api/repository/draft/delete';
+const ADD_FILE_TO_REPOSITORY = '/api/repository/draft/add/file';
+const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
 
 export const REPOSITORIES_ROUTES: Record<string, Route> = {
     [REPOSITORIES_BY_FILTERS_URL]: {
@@ -52,8 +58,8 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
         isNeedAuth: true,
     },
     [GET_FILES_BY_DIR_PATH_URL]: {
-        name: 'getFilesByDirPath',
-        callback: getFilesByDirPath,
+        name: 'getFilesByFullDirPath',
+        callback: getFilesByFullDirPath,
         method: Method.get,
         isNeedAuth: true,
     },
@@ -63,10 +69,22 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
         method: Method.post,
         isNeedAuth: true,
     },
-    [DELETE_FILE_FROM_REPOSITORY]: {
-        name: 'deleteFileFromRepository',
-        callback: deleteFileFromRepository,
+    [DELETE_FILE_OR_DIR_FROM_REPOSITORY]: {
+        name: 'deleteFileOrDirFromRepository',
+        callback: deleteFileOrDirFromRepository,
         method: Method.post,
+        isNeedAuth: true,
+    },
+    [RENAME_FILE_OR_DIR_IN_REPOSITORY]: {
+        name: 'renameFileOrDirFromRepository',
+        callback: renameFileOrDirFromRepository,
+        method: Method.post,
+        isNeedAuth: true,
+    },
+    [GET_DRAFT_FILES_BY_FULL_DIR_PATH]: {
+        name: 'getDraftFilesByFullDirPath',
+        callback: getDraftFilesByFullDirPath,
+        method: Method.get,
         isNeedAuth: true,
     },
 };

@@ -14,13 +14,14 @@ enum DirStatus {
     none = 'none',
 }
 
-export type DeleteFileFromRepositoryD = {
+export type RenameFileInRepositoryD = {
     name: string;
     pathToFile: string;
     repositoryId: number;
+    newName: string;
 };
 
-export type DeleteFileFromRepositoryRD = {
+export type RenameFileInRepositoryRD = {
     name: string;
     pathToFile: string[];
     status: FileStatus;

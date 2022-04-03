@@ -8,6 +8,7 @@ export enum ErrorsTypes {
     repositoryNotFoundOrPermissionDenied = 'repositoryNotFoundOrPermissionDenied',
     fileNameNotPresent = 'fileNameNotPresent',
     deleteFileError = 'deleteFileError',
+    cannotCreateDraftRepositpory = 'cannotCreateDraftRepositpory',
 }
 
 export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
@@ -44,6 +45,11 @@ export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
     [ErrorsTypes.deleteFileError]: (message: string) => ({
         code: Code.internalServerError,
         name: 'Ошибка удаления файла!',
+        message,
+    }),
+    [ErrorsTypes.cannotCreateDraftRepositpory]: (message: string) => ({
+        code: Code.internalServerError,
+        name: 'Ошибка при создании draft-репозитория',
         message,
     }),
 };

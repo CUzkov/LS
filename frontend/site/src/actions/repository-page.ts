@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-repository-by-id';
 import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
 import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
+import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
 import {
     DeleteFileFromRepositoryD,
     DeleteFileFromRepositoryRD,
@@ -11,21 +12,21 @@ import {
 import { getDirKeyByPath } from 'pages/repository-page/repository-page.utils';
 
 import { ajax2 } from '../ajax';
-import { Empty, FileMeta, IServerError } from 'types';
+import { DirMeta, Empty, FileMeta, IServerError } from 'types';
 import { Dispatch, store } from '../store';
-import {
-    REPOSITORY_BY_ID_URL,
-    GET_FILES_BY_DIR_PATH_URL,
-    ADD_FILE_TO_REPOSITORY,
-    DELETE_FILE_FROM_REPOSITORY,
-} from './urls';
+
+const REPOSITORY_BY_ID_URL = '/api/repository/id';
+
+const GET_FILES_BY_DIR_PATH_URL = '/api/repository/files';
+const GET_DRAFT_FILES_BY_FULL_DIR_PATH = '/api/repository/draft/files';
+
+const RENAME_FILE_OR_DIR_IN_REPOSITORY = '/api/repository/draft/rename';
+const DELETE_FILE_OR_DIR_FROM_REPOSITORY = '/api/repository/draft/delete';
+const ADD_FILE_TO_REPOSITORY = '/api/repository/draft/add/file';
+const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
 
 export const getPageRepositoriesById = async (id: number) => {
     const dispath: Dispatch = store.dispatch;
-
-    const {
-        repositoryPage: { repository },
-    } = store.getState();
 
     dispath({ type: 'repository-page/repository/loading' });
 
@@ -34,7 +35,7 @@ export const getPageRepositoriesById = async (id: number) => {
     try {
         response = await ajax2.get<RepositoryByIdRD, RepositoryByIdQP>({
             url: REPOSITORY_BY_ID_URL,
-            queryParams: { id }
+            queryParams: { id },
         });
     } catch (error) {
         const e = (error as AxiosError).response?.data as IServerError;
@@ -59,30 +60,30 @@ export const getPageRepositoriesById = async (id: number) => {
     });
 };
 
-export const getFilesByDirPath = async (pathToDir: string[], dirName: string) => {
+export const getFilesByDirPath = async (pathToDir: string[], dirName: string, isDraft: boolean) => {
     const dispath: Dispatch = store.dispatch;
 
     const {
         repositoryPage: { repository },
     } = store.getState();
 
-    dispath({ type: 'repository-page/files/loading' });
+    dispath({ type: 'repository-page/files-and-dirs/loading' });
 
     let response: FilesByDirPathRD;
 
     try {
         response = await ajax2.get<FilesByDirPathRD, FilesByDirPathQP>({
-            url: GET_FILES_BY_DIR_PATH_URL,
+            url: isDraft ? GET_DRAFT_FILES_BY_FULL_DIR_PATH : GET_FILES_BY_DIR_PATH_URL,
             queryParams: {
                 pathToDir: pathToDir.join('~'),
                 dirName,
-                repositoryId: repository?.id ?? -1
-            }
+                repositoryId: repository?.id ?? -1,
+            },
         });
     } catch (error) {
         const e = (error as AxiosError).response?.data as IServerError;
 
-        dispath({ type: 'repository-page/files/error' });
+        dispath({ type: 'repository-page/files-and-dirs/error' });
 
         if (e?.error) {
             dispath({
@@ -96,7 +97,7 @@ export const getFilesByDirPath = async (pathToDir: string[], dirName: string) =>
         return;
     }
 
-    dispath({ type: 'repository-page/files/success', data: response });
+    dispath({ type: 'repository-page/files-and-dirs/success', data: response });
 };
 
 export const clearChanges = async (dispath: Dispatch) => {};
@@ -136,7 +137,7 @@ export const addFile = async (file: File, isBeDeleted?: boolean) => {
         return;
     }
 
-    dispath({ type: 'repository-page/file/add', data: {file: response, isBeDeleted} });
+    dispath({ type: 'repository-page/file/add', data: { file: response, isBeDeleted } });
 };
 
 export const changeFilesDirPath = (newFullPathToDir: string[]) => {
@@ -145,19 +146,25 @@ export const changeFilesDirPath = (newFullPathToDir: string[]) => {
     dispath({ type: 'repository-page/set-path', data: newFullPathToDir });
 };
 
-export const deleteFile = async (file: FileMeta) => {
+export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
     const dispath: Dispatch = store.dispatch;
 
     const {
         repositoryPage: { repository },
     } = store.getState();
 
+    const isFile = 'pathToFile' in fileOrDir;
+
     let response: DeleteFileFromRepositoryRD;
 
     try {
         response = await ajax2.post<DeleteFileFromRepositoryD, DeleteFileFromRepositoryRD, Empty>({
-            url: DELETE_FILE_FROM_REPOSITORY,
-            data: { name: file.name, pathToFile: file.pathToFile.join('~'), repositoryId: repository?.id ?? -1 },
+            url: DELETE_FILE_OR_DIR_FROM_REPOSITORY,
+            data: {
+                name: fileOrDir.name,
+                pathToFile: (isFile ? fileOrDir.pathToFile : fileOrDir.pathToDir).join('~'),
+                repositoryId: repository?.id ?? -1,
+            },
         });
     } catch (error) {
         const e = (error as AxiosError).response?.data as IServerError;
@@ -165,7 +172,11 @@ export const deleteFile = async (file: FileMeta) => {
         if (e?.error) {
             dispath({
                 type: 'logger/add-log',
-                data: { title: 'Ошибка удаления файла!', description: `Файл ${file.name} не удалён`, type: 'error' },
+                data: {
+                    title: isFile ? 'Ошибка удаления файла!' : 'Ошибка удаления папки!',
+                    description: isFile ? `Файл ${fileOrDir.name} не удалён` : `Папка ${fileOrDir.name} не удалёна`,
+                    type: 'error',
+                },
             });
             return;
         }
@@ -175,4 +186,53 @@ export const deleteFile = async (file: FileMeta) => {
     }
 
     dispath({ type: 'repository-page/file/delete', data: response });
+};
+
+export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: string) => {
+    const dispath: Dispatch = store.dispatch;
+
+    const {
+        repositoryPage: { repository, currentPath },
+    } = store.getState();
+
+    const isFile = 'pathToFile' in fileOrDir;
+
+    let response: RenameFileInRepositoryRD;
+
+    try {
+        response = await ajax2.post<RenameFileInRepositoryD, RenameFileInRepositoryRD, Empty>({
+            url: RENAME_FILE_OR_DIR_IN_REPOSITORY,
+            data: {
+                name: fileOrDir.name,
+                pathToFile: currentPath.join('~'),
+                repositoryId: repository?.id ?? -1,
+                newName,
+            },
+        });
+    } catch (error) {
+        const e = (error as AxiosError).response?.data as IServerError;
+
+        if (e?.error) {
+            dispath({
+                type: 'logger/add-log',
+                data: {
+                    title: `Ошибка переименования ${isFile ? 'файла' : 'папки'}!`,
+                    description: isFile
+                        ? `Файл ${fileOrDir.name} не переименован`
+                        : `Папка ${fileOrDir.name} не переименована`,
+                    type: 'error',
+                },
+            });
+            return;
+        }
+
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        return;
+    }
+
+    if ('pathToFile' in fileOrDir && 'pathToFile' in response) {
+        dispath({ type: 'repository-page/file/rename', data: { oldFile: fileOrDir, newFile: response } });
+    } else if ('pathToDir' in fileOrDir && 'pathToDir' in response) {
+        dispath({ type: 'repository-page/dir/rename', data: { oldDir: fileOrDir, newDir: response } });
+    }
 };

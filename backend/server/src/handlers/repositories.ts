@@ -4,8 +4,10 @@ import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-re
 import { RepositoriesByFilterQP, RepositoriesByFilterRD } from '@api-types/repository/repositories-by-filter';
 import { CreateRepositoryD, CreateRepositoryRD } from '@api-types/repository/create-repository';
 import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
+import { DraftFilesByDirPathQP, DraftFilesByDirPathRD } from '@api-types/repository/get-draft-files-by-full-dir-path';
 import { DownloadFileQP } from '@api-types/repository/download-file';
 import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
+import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
 import {
     DeleteFileFromRepositoryD,
     DeleteFileFromRepositoryRD,
@@ -124,7 +126,7 @@ export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ re
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
 
-    if (!queryParams?.repositoryId || !queryParams.pathToFile || !queryParams.fileName) {
+    if (!queryParams?.repositoryId || !queryParams.fileName) {
         return getBadRequestResponse(
             response,
             'Ошибка параметров',
@@ -136,8 +138,9 @@ export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ re
         const absFullPathToFile = await RepositoryFns.getAbsFullPathToFile(
             queryParams.repositoryId,
             userId,
-            queryParams.pathToFile.split('~'),
+            queryParams.pathToFile?.split('~') ?? '',
             queryParams.fileName,
+            queryParams.isDraft
         );
 
         getFileResponse(response, absFullPathToFile);
@@ -147,7 +150,7 @@ export const downloadFile: ResponseCallback<Empty, DownloadFileQP> = async ({ re
     }
 };
 
-export const getFilesByDirPath: ResponseCallback<Empty, FilesByDirPathQP> = async ({
+export const getFilesByFullDirPath: ResponseCallback<Empty, FilesByDirPathQP> = async ({
     response,
     userId,
     queryParams,
@@ -161,13 +164,40 @@ export const getFilesByDirPath: ResponseCallback<Empty, FilesByDirPathQP> = asyn
     }
 
     try {
-        const files = await RepositoryFns.getFilesByDirPath(
+        const files = await RepositoryFns.getFilesByFullDirPath(
             queryParams.repositoryId,
             userId,
             queryParams.pathToDir.split('~'),
             queryParams.dirName,
         );
         getOkResponse<FilesByDirPathRD>(response, files);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+    }
+};
+
+export const getDraftFilesByFullDirPath: ResponseCallback<Empty, DraftFilesByDirPathQP> = async ({
+    response,
+    userId,
+    queryParams,
+}) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!queryParams?.repositoryId) {
+        return getBadRequestResponse(response, 'Ошибка параметров', 'id является обязательным параметром!');
+    }
+
+    try {
+        const files = await RepositoryFns.getDraftFilesByFullDirPath(
+            queryParams.repositoryId,
+            userId,
+            queryParams.pathToDir.split('~'),
+            queryParams.dirName,
+        );
+        getOkResponse<DraftFilesByDirPathRD>(response, files);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
@@ -197,12 +227,11 @@ export const addFileToRepository: ResponseCallback<Empty, Empty> = async ({ resp
         getOkResponse<AddFileToRepositoryRD>(response, addedFile);
     } catch (error) {
         const e = error as ServerError;
-        console.log(e);
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
     }
 };
 
-export const deleteFileFromRepository: ResponseCallback<DeleteFileFromRepositoryD, Empty> = async ({
+export const deleteFileOrDirFromRepository: ResponseCallback<DeleteFileFromRepositoryD, Empty> = async ({
     response,
     userId,
     data,
@@ -215,18 +244,50 @@ export const deleteFileFromRepository: ResponseCallback<DeleteFileFromRepository
         return getBadRequestResponse(
             response,
             'Ошибка параметров',
-            'repositoryId, name и pathToFile являются обязательными параметрами!',
+            'repositoryId и name являются обязательными параметрами!',
         );
     }
 
     try {
-        const addedFile = await RepositoryFns.deleteFileFromRepository(
+        const addedFile = await RepositoryFns.deleteFileOrDirFromRepository(
             data.repositoryId,
             userId,
-            data.pathToFile?.split('~'),
+            data.pathToFile?.split('~') ?? [],
             data.name,
         );
         getOkResponse<DeleteFileFromRepositoryRD>(response, addedFile);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+    }
+};
+
+export const renameFileOrDirFromRepository: ResponseCallback<RenameFileInRepositoryD, Empty> = async ({
+    response,
+    userId,
+    data,
+}) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!data?.repositoryId || !data?.name || !data?.newName) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'repositoryId, name и newName являются обязательными параметрами!',
+        );
+    }
+
+    try {
+        const addedFile = await RepositoryFns.renameFileOrDirInRepository(
+            data.repositoryId,
+            userId,
+            data.pathToFile?.split('~') ?? [],
+            data.name,
+            data.newName,
+        );
+        getOkResponse<RenameFileInRepositoryRD>(response, addedFile);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);

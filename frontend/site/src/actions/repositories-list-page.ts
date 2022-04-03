@@ -1,9 +1,10 @@
-import { RepositoriesByFilterQP, RepositoriesByFilterRD } from '@api-types/repository';
+import { RepositoriesByFilterQP, RepositoriesByFilterRD } from '@api-types/repository/repositories-by-filter';
 
 import { ajax, ContentType, AjaxType } from '../ajax';
 import { IServerError } from '../types';
 import { Dispatch } from '../store';
-import { REPOSITORIES_BY_FILTERS_URL } from './urls';
+
+const REPOSITORIES_BY_FILTERS_URL = '/api/repository/filter';
 
 export const getPageRepositoriesByFilters = async (dispath: Dispatch, filters: RepositoriesByFilterQP) => {
     dispath({ type: 'repositories-list-page/repositories-list/loading' });

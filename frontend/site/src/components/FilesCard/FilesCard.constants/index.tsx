@@ -21,6 +21,7 @@ export const mapFantomActionToChar: Record<FileStatus, string> = {
     [FileStatus.modify]: 'M',
     [FileStatus.commit]: '',
     [FileStatus.noExists]: '',
+    [FileStatus.rename]: 'R',
 };
 
 export const extensionToIconMap = {
@@ -33,5 +34,5 @@ export const extensionToIconMap = {
     [Extensions.h]: <HIcon />,
     [Extensions.png]: <PngIcon />,
     [Extensions.txt]: <TxtIcon />,
-    [Extensions.jpg]: <JpgIcon />
+    [Extensions.jpg]: <JpgIcon />,
 };

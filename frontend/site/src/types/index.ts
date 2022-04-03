@@ -23,14 +23,27 @@ export enum FileStatus {
     add = 'add',
     modify = 'modify',
     delete = 'delete',
-    noExists = 'noExists'
+    noExists = 'noExists',
+    rename = 'rename',
 }
 
 export type FileMeta = {
     name: string;
     pathToFile: string[];
-    isDir: boolean;
     status: FileStatus;
+};
+
+export enum DirStatus {
+    addOrRename = 'addOrRename',
+    modify = 'modify',
+    delete = 'delete',
+    none = 'none',
+}
+
+export type DirMeta = {
+    status: DirStatus;
+    pathToDir: string[];
+    name: string;
 };
 
 export type Repository = {

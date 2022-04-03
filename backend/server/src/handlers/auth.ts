@@ -1,4 +1,5 @@
-import { LoginUserD, LoginUserRD, CheckAuthRD } from '@api-types/auth';
+import { CheckAuthRD } from '@api-types/auth/check-auth';
+import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
 
 import { ResponseCallback, Empty, ServerError, Code } from '../types';
 import {

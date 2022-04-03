@@ -19,14 +19,15 @@ create table maps (
 );
 
 create table repositories (
-	id 						serial primary key,
-	rubric_id				integer REFERENCES rubrics (id) ON DELETE CASCADE,
-	map_id					integer REFERENCES maps (id) ON DELETE CASCADE,
-	user_id					integer REFERENCES users (id) ON DELETE CASCADE,
+	id 							serial primary key,
+	rubric_id					integer REFERENCES rubrics (id) ON DELETE CASCADE,
+	map_id						integer REFERENCES maps (id) ON DELETE CASCADE,
+	user_id						integer REFERENCES users (id) ON DELETE CASCADE,
 
-	path_to_repository		text not null,
-	is_private				boolean not null,
-	title 					text not null unique
+	path_to_repository			text not null,
+	path_to_draft_repository 	text,
+	is_private					boolean not null,
+	title 						text not null unique
 );
 
 create table users_repositories_relationship (
@@ -392,7 +393,8 @@ create function get_repository_by_id(
 	user_id integer,
 	title text,
 	rubric_id integer,
-	map_id integer
+	map_id integer,
+	path_to_draft_repository text
 ) as
 $BODY$
 	declare
@@ -408,7 +410,8 @@ $BODY$
 				repositories.user_id,
 				repositories.title,
 				repositories.rubric_id,
-				repositories.map_id
+				repositories.map_id,
+				repositories.path_to_draft_repository
 			from repositories
 			inner join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
@@ -520,6 +523,45 @@ $BODY$
 		return query
 			select users_repositories_relationship.id from users_repositories_relationship
 			where users_repositories_relationship.id = users_repositories_relationship_row_id;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Установка path_to_draft_repository для начала редактирования репозитория
+-----------------------------------------------------------------------
+create function set_repository_path_to_draft(
+	id_v integer,
+	path_to_draft_repository_v text
+) returns table(
+	id integer,
+	path_to_repository text,
+	is_private boolean,
+	user_id integer,
+	title text,
+	rubric_id integer,
+	map_id integer,
+	path_to_draft_repository text
+) as
+$BODY$
+	declare
+
+	begin
+		update repositories set path_to_draft_repository = path_to_draft_repository_v
+		where repositories.id = id_v;
+
+		return query 
+			select
+				repositories.id,
+				repositories.path_to_repository,
+				repositories.is_private,
+				repositories.user_id,
+				repositories.title,
+				repositories.rubric_id,
+				repositories.map_id,
+				repositories.path_to_draft_repository
+			from repositories
+			where repositories.id=id_v limit 1;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

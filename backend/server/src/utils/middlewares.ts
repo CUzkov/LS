@@ -55,8 +55,6 @@ export const formDataMiddleware = (
 
     form.parse(request.request, (err, fields, files) => {
         if (err) {
-            console.log(err);
-
             reject(MiddlewareCode.formDataError);
         }
 
@@ -104,14 +102,11 @@ export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
             const promise = new Promise<void>((resolve, reject) =>
                 middleware(middlewareRequest, resolve, reject),
             ).catch((error) => {
-                console.log(error);
                 middlewaresErrors[error as MiddlewareCode](middlewareRequest.response);
                 isError = true;
             });
             await promise;
         } catch (error) {
-            console.log(error);
-
             middlewaresErrors[error as MiddlewareCode](middlewareRequest.response);
             isError = true;
             return;

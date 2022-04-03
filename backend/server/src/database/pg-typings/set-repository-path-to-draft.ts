@@ -1,4 +1,4 @@
-export type GetRepositoryByIdR = {
+export type SetRepositoryPathToDraftR = {
     id: number;
     path_to_repository: string;
     is_private: boolean;
@@ -9,6 +9,6 @@ export type GetRepositoryByIdR = {
     map_id?: number;
 };
 
-export type GetRepositoryByIdQP = [number, number];
+export type SetRepositoryPathToDraftQP = [number, string];
 
-export const getRepositoryByIdQ = 'SELECT * from get_repository_by_id($1, $2)';
+export const setRepositoryPathToDraftQ = 'SELECT * from set_repository_path_to_draft($1, $2)';

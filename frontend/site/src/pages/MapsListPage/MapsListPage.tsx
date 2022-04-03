@@ -8,8 +8,6 @@ import { getMapsListPageAllMaps } from 'actions/maps-list-page';
 import { ItemCard } from 'components/ItemCard';
 import { PageTitle } from 'components/PageTitle';
 
-import './style.scss';
-
 export const MapsListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
     const { maps } = useSelector((root) => root.mapsListPage);

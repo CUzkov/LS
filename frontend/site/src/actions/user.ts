@@ -5,7 +5,9 @@ import { ajax, ContentType, AjaxType } from '../ajax';
 import type { IServerError, Empty } from '../types';
 import type { Dispatch } from '../store';
 import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
-import { CHECK_AUTH_URL, LOGIN_USER_URL } from './urls';
+
+const CHECK_AUTH_URL = '/api/auth/check';
+const LOGIN_USER_URL = '/api/auth/login';
 
 export const loginUser = async (dispath: Dispatch, props: LoginUserD) => {
     dispath({ type: 'login-form/loading' });

@@ -44,16 +44,15 @@ export const RepositoryPage: FC = () => {
                     continue;
                 }
 
-                const duplicateFiles =
-                    files.filter(({ name, isDir }) => (isDir ? undefined : name) === file.name) ?? [];
+                const duplicateFiles = files.filter(({ name }) => name === file.name) ?? [];
 
                 if (duplicateFiles.length) {
                     const isRewrite = await yesNoPopup(
                         context,
                         'Конфликт',
-                        duplicateFiles[0].status === FileStatus.delete ?
-                        `Вы удалили файл с названием ${file.name}. Хотите перезаписать его?` :
-                        `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
+                        duplicateFiles[0].status === FileStatus.delete
+                            ? `Вы удалили файл с названием ${file.name}. Хотите перезаписать его?`
+                            : `Файл ${file.name} уже существует в данной папке, хотите перезаписать его?`,
                         true,
                     );
 
@@ -79,17 +78,17 @@ export const RepositoryPage: FC = () => {
     useEffect(() => {
         if (repository?.id) {
             // query.pathToDir включает в себя dirName
-            getFilesByDirPath([query.fullPathToDir || ''], '');
+            getFilesByDirPath([query.fullPathToDir || ''], '', isEditing);
         }
         changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
-    }, [query.fullPathToDir, repository?.id]);
+    }, [query.fullPathToDir, repository?.id, isEditing]);
 
     const additionalPaths = useMemo(
         () => getDirPathByKey(query.fullPathToDir).map((path) => ({ title: path, url: '' })),
         [query.fullPathToDir],
     );
     const paths = useMemo(
-        () => getPaths(username, repository?.title, String(repository?.id)).concat(additionalPaths),
+        () => getPaths(username, repository?.title, String(repository?.id)).concat(additionalPaths.filter(path => path.title !== '.')),
         [username, repository, additionalPaths],
     );
     const content = useMemo(

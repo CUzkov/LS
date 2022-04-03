@@ -83,7 +83,7 @@ export const ajax2 = {
         url: string;
         queryParams?: QP;
         data?: FormData | D;
-        onUploadProgress?: (e: {}) => void;
+        onUploadProgress?: () => void;
     }) {
         return (
             await axios.post<RD>(getFullUrl(url), data, {

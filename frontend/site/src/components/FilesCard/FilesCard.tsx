@@ -1,65 +1,90 @@
-import React, { createRef, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useRef } from 'react';
 import cn from 'classnames';
+import DirIcon from 'file-icon-vectors/dist/icons/vivid/folder.svg';
 import type { FC } from 'react';
 
 import { useDispatch } from 'store';
-import { FileMeta, FileStatus } from 'types';
+import { DirMeta, DirStatus, FileMeta, FileStatus } from 'types';
 import SpinnerIcon from 'assets/spinner.svg';
+import { useBooleanState } from 'hooks';
 
 import { getIconByExtension, getCharsForFantomActions } from './FilesCard.utils';
 
 import styles from './style.scss';
 
+type RowProps = {
+    title: string;
+    icon: ReactNode;
+    statusChar?: string;
+    actions: ReactNode;
+    className?: string;
+    onClick?: () => void;
+};
+
+const Row = ({ title, className, icon, statusChar, actions, onClick }: RowProps) => {
+    const [isHover, , , toggleHover] = useBooleanState(false);
+    const rowRef = useRef<HTMLDivElement>(null);
+
+    const handleToggleHoverFile = useCallback(
+        (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            const isNoNeedChangeHover = isHover && rowRef.current?.contains(e.relatedTarget as Element);
+
+            if (!isNoNeedChangeHover) {
+                toggleHover();
+            }
+        },
+        [rowRef, isHover],
+    );
+
+    return (
+        <div
+            className={cn(styles.row, className)}
+            onClick={onClick}
+            ref={rowRef}
+            onMouseOver={handleToggleHoverFile}
+            onMouseOut={handleToggleHoverFile}
+        >
+            <div className={styles.title}>
+                <div className={styles.icon}>{icon}</div>
+                {title}
+            </div>
+            <div className={cn(styles.actionChar, statusChar && styles.showActionChar)}>{statusChar}</div>
+            {actions && <div className={cn(styles.actions, isHover && styles.hover)}>{actions}</div>}
+        </div>
+    );
+};
+
 interface FilesCardProps {
     files: FileMeta[];
+    dirs: DirMeta[];
     path: string[];
     isLoading: boolean;
     isLoaded: boolean;
-    actions?: (file: FileMeta) => ReactNode;
+    actionsForFiles: (file: FileMeta) => ReactNode;
+    actionsForDirs: (file: DirMeta) => ReactNode;
     onClickDir: (pathToDir: string[], dirName: string) => void;
     onClickToUpDir: () => void;
 }
 
 export const FilesCard: FC<FilesCardProps> = ({
     files,
+    dirs,
     path,
     isLoading,
     isLoaded,
-    actions = () => <></>,
+    actionsForFiles = () => <></>,
+    actionsForDirs = () => <></>,
     onClickDir,
     onClickToUpDir,
 }: FilesCardProps) => {
-    const [isFileHoverMap, setIsFileHoverMap] = useState<boolean[]>([]);
-    const createDivRef: () => React.RefObject<HTMLDivElement> = createRef;
-    const rowsRefs = useMemo(() => files.map(() => createDivRef()), [files]);
     const dispatch = useDispatch();
-
-    const handleToggleHover = useCallback(
-        (index: number, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-            const isHover = isFileHoverMap[index];
-            const row = rowsRefs[index];
-            const isNoNeedChangeHover = isHover && row.current?.contains(e.relatedTarget as Element);
-
-            if (!isNoNeedChangeHover) {
-                const newHoverMap = [...isFileHoverMap];
-                newHoverMap[index] = !isHover;
-                setIsFileHoverMap(newHoverMap);
-            }
-        },
-        [isFileHoverMap, rowsRefs],
-    );
 
     const handleClickDir = useCallback(
         (pathToDir: string[], dirName: string) => {
             onClickDir(pathToDir, dirName);
-            setIsFileHoverMap(files.map(() => false));
         },
         [dispatch],
     );
-
-    useEffect(() => {
-        setIsFileHoverMap(files.map(() => false));
-    }, [files]);
 
     return (
         <div className={styles.filesCard}>
@@ -68,43 +93,41 @@ export const FilesCard: FC<FilesCardProps> = ({
                     <div className={styles.title}>{'...'}</div>
                 </div>
             ) : null}
-            {isLoaded &&
-                files.map((file, index) => {
-                    const rowTestStyle = cn(
-                        file.status === FileStatus.add && styles.added,
-                        file.status === FileStatus.modify && styles.modify,
-                        file.status === FileStatus.delete && styles.delete,
-                    );
-                    return (
-                        <div
-                            className={cn(styles.row, rowTestStyle)}
-                            key={file.name + index}
-                            ref={rowsRefs[index]}
-                            onMouseOver={(e) => handleToggleHover(index, e)}
-                            onMouseOut={(e) => handleToggleHover(index, e)}
-                            onClick={file.isDir ? () => handleClickDir(file.pathToFile, file.name) : undefined}
-                        >
-                            <div className={styles.title}>
-                                <div className={styles.icon}>{getIconByExtension(file.name, file.isDir)}</div>
-                                {file.name}
-                            </div>
-                            {/* <div
+            {isLoaded && (
+                <>
+                    {dirs.map((dir, index) => (
+                        <Row
+                            title={dir.name}
+                            key={dir.name + index}
+                            icon={<DirIcon />}
+                            onClick={() => handleClickDir(dir.pathToDir, dir.name)}
                             className={cn(
-                                styles.actionChar,
-                                file.actions.length !== 0 && styles.showActionChar,
-                                rowTestStyle,
+                                styles.dir,
+                                dir.status === DirStatus.addOrRename && styles.addOrRename,
+                                dir.status === DirStatus.delete && styles.delete,
+                                dir.status === DirStatus.modify && styles.modify,
                             )}
-                        >
-                            {file.actions.length !== 0 && getCharsForFantomActions(file)}
-                        </div> */}
-                            {actions && (
-                                <div className={cn(styles.actions, isFileHoverMap[index] && styles.hover)}>
-                                    {actions(file)}
-                                </div>
+                            actions={actionsForDirs(dir)}
+                        />
+                    ))}
+                    {files.map((file, index) => (
+                        <Row
+                            title={file.name}
+                            key={file.name + index}
+                            icon={getIconByExtension(file.name)}
+                            className={cn(
+                                styles.file,
+                                file.status === FileStatus.add && styles.added,
+                                file.status === FileStatus.modify && styles.modify,
+                                file.status === FileStatus.rename && styles.rename,
+                                file.status === FileStatus.delete && styles.delete,
                             )}
-                        </div>
-                    );
-                })}
+                            statusChar={getCharsForFantomActions(file)}
+                            actions={actionsForFiles(file)}
+                        />
+                    ))}
+                </>
+            )}
             {isLoading && (
                 <div className={styles.spinner}>
                     <SpinnerIcon />

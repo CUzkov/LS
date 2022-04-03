@@ -14,14 +14,19 @@ enum DirStatus {
     none = 'none',
 }
 
-export type FilesByDirPathQP = {
+export type DraftFilesByDirPathQP = {
     repositoryId: number;
     pathToDir: string;
     dirName: string;
 }
 
-export type FilesByDirPathRD = {
+export type DraftFilesByDirPathRD = {
     files: {
+        name: string;
+        pathToFile: string[];
+        status: FileStatus;
+    }[];
+    deletedFiles: {
         name: string;
         pathToFile: string[];
         status: FileStatus;

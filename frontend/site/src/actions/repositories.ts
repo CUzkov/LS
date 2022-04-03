@@ -7,7 +7,9 @@ import {
 import { ajax, ContentType, AjaxType } from '../ajax';
 import { IServerError, Repository } from '../types';
 import { Dispatch } from '../store';
-import { CREATE_REPOSITORY_URL, CHECK_IS_REPOSIROTY_NAME_FREE_URL } from './urls';
+
+const CHECK_IS_REPOSIROTY_NAME_FREE_URL = '/api/repository/free';
+const CREATE_REPOSITORY_URL = '/api/repository/create';
 
 export const createRepository = async (dispath: Dispatch, props: CreateRepositoryD): Promise<Repository | void> => {
     dispath({ type: 'create-repository-form/loading' });

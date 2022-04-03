@@ -2,16 +2,11 @@ import React, { ReactNode } from 'react';
 
 import { FileMeta } from 'types';
 
-import DirIcon from 'file-icon-vectors/dist/icons/vivid/folder.svg';
 import NoneIcon from 'file-icon-vectors/dist/icons/vivid/blank.svg';
 
 import { extensionToIconMap, mapFantomActionToChar } from '../FilesCard.constants';
 
-export const getIconByExtension = (name: string, isDir = false): ReactNode => {
-    if (isDir) {
-        return <DirIcon />;
-    }
-
+export const getIconByExtension = (name: string): ReactNode => {
     const splitName = name.split('.');
     const ext = splitName?.[splitName.length - 1];
 

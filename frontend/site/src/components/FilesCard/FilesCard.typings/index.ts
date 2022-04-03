@@ -8,5 +8,5 @@ export enum Extensions {
     h = 'h',
     png = 'png',
     txt = 'txt',
-    jpg = 'jpg'
+    jpg = 'jpg',
 }

@@ -20,20 +20,40 @@
 		align-items: center;
 		justify-content: space-between;
 
-		&.added {
-			color: $add-color;
-		}
-
-		&.modify {
-			color: $modify-color;
-		}
-
-		&.delete {
-			color: $delete-color;
-		}
-
 		&:hover {
 			background-color: $default-hover-color;
+		}
+
+		&.file {
+			&.added {
+				color: $add-color;
+			}
+	
+			&.modify {
+				color: $modify-color;
+			}
+	
+			&.delete {
+				color: $delete-color;
+			}
+	
+			&.rename {
+				color: $add-color;
+			}
+		}
+
+		&.dir {
+			&.addOrRename {
+				color: $add-color;
+			}
+	
+			&.modify {
+				color: $modify-color;
+			}
+	
+			&.delete {
+				color: $delete-color;
+			}	
 		}
 	}
 
