@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 
-import { cnUserPage, getPaths, cnUserPageTitle } from './UserPage.constants';
+import { getPaths } from './UserPage.constants';
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 
@@ -13,8 +13,8 @@ export const UserPage: FC = () => {
     const paths = useMemo(() => getPaths(username), [username]);
     const content = useMemo(
         () => (
-            <div className={cnUserPage}>
-                <div className={cnUserPageTitle}>Данные пользователя</div>
+            <div>
+                <div>Данные пользователя</div>
             </div>
         ),
         [],

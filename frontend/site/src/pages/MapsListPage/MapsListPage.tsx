@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 
-import { cnMapsListPage, getPaths, cnMapsListPageItems } from './MapsListPage.constants';
 import { PageWrapper } from 'pages/page-wrapper';
 import { useDispatch, useSelector } from 'store/store';
 import { getMapsListPageAllMaps } from 'actions/maps-list-page';
 import { ItemCard } from 'components/ItemCard';
 import { PageTitle } from 'components/PageTitle';
+
+import {getPaths} from './MapsListPage.constants'
 
 export const MapsListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
@@ -20,9 +21,9 @@ export const MapsListPage: FC = () => {
     const paths = useMemo(() => getPaths(username), [username]);
     const content = useMemo(
         () => (
-            <div className={cnMapsListPage}>
+            <div>
                 <PageTitle title={'Ваши карты'} />
-                <div className={cnMapsListPageItems}>
+                <div>
                     {maps.data.map((map, index) => (
                         <ItemCard title={map.title} key={index} link={''} />
                     ))}

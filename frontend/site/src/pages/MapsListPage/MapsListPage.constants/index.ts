@@ -1,8 +1,4 @@
-import { cn } from 'utils/classname';
 import { getMainPage, getAllMaps, getUserPage } from 'constants/routers';
-
-export const cnMapsListPage = cn('maps-list-page')();
-export const cnMapsListPageItems = cn('maps-list-page')('items');
 
 export const getPaths = (username: string) => [
     {

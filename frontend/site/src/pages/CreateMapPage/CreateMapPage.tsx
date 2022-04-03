@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FC } from 'react';
 
-import { cnCreateMapPageTitle, getPaths, cnCreateMapPage, cnCreateMapPageForm } from './CreateMapPage.constants';
+import { getPaths } from './CreateMapPage.constants';
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 import { CreateMapForm } from 'components/CreateMapForm';
@@ -28,9 +28,9 @@ export const CreateMapPage: FC = () => {
     const paths = useMemo(() => getPaths(username), [username]);
     const content = useMemo(
         () => (
-            <div className={cnCreateMapPage}>
-                <div className={cnCreateMapPageTitle}>Создание новой карты знаний</div>
-                <div className={cnCreateMapPageForm}>
+            <div className={''}>
+                <div className={''}>Создание новой карты знаний</div>
+                <div className={''}>
                     <CreateMapForm />
                 </div>
             </div>

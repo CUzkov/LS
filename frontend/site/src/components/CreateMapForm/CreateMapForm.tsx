@@ -4,13 +4,6 @@ import { Form } from 'react-final-form';
 
 import { createMap } from 'actions/maps';
 import { useDispatch, useSelector } from 'store/store';
-import {
-    cnCreateMapForm,
-    cnCreateMapFormFields,
-    cnCreateMapFormSpinner,
-    cnCreateMapFormButton,
-    cnCreateMapFormField,
-} from './CreateMapForm.constants';
 import { TextField, Button } from 'small-components/index';
 import { requiredValidate } from 'utils/final-forms';
 import type { ICreateMapProps } from './CreateMapForm.typings';
@@ -29,13 +22,13 @@ export const CreateMapForm: FC = () => {
     }, []);
 
     return (
-        <div className={cnCreateMapForm}>
+        <div className={'cnCreateMapForm'}>
             <Form
                 onSubmit={onSubmit}
                 render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
-                        <div className={cnCreateMapFormFields}>
-                            <div className={cnCreateMapFormField}>
+                        <div className={'cnCreateMapFormFields'}>
+                            <div className={'cnCreateMapFormField'}>
                                 <TextField
                                     name="title"
                                     type="text"
@@ -45,7 +38,7 @@ export const CreateMapForm: FC = () => {
                                 />
                             </div>
                         </div>
-                        <div className={cnCreateMapFormButton}>
+                        <div className={'cnCreateMapFormButton'}>
                             <Button
                                 text={'Создать'}
                                 type={'submit'}
@@ -53,9 +46,9 @@ export const CreateMapForm: FC = () => {
                             />
                         </div>
                         <div
-                            className={cnCreateMapFormSpinner({
-                                loading: createMapFormStore.fetchStatus === FetchStatus.loading,
-                            })}
+                            // className={cnCreateMapFormSpinner({
+                            //     loading: createMapFormStore.fetchStatus === FetchStatus.loading,
+                            // })}
                         >
                             <Spinner />
                         </div>
