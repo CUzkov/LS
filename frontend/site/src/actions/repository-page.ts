@@ -353,6 +353,5 @@ export const getAllVersions = async () => {
 
 export const clearRepositoryPage = () => {
     const dispath: Dispatch = store.dispatch;
-
     dispath({type: 'repository-page/clear'})
 }
