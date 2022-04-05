@@ -17,6 +17,7 @@ export type RepositoryPageEvents =
     | { type: 'repository-page/version/success'; data: string[] }
     | { type: 'repository-page/version/loading' }
     | { type: 'repository-page/version/error' }
+    | { type: 'repository-page/clear' }
     | { type: 'repository-page/set-path'; data: string[] };
 
 export type RepositoryPageStore = {
@@ -69,6 +70,8 @@ export const repositoryPageReducer = (
 
     if (event.type === 'repository-page/files-and-dirs/loading') {
         result.filesAndDirsFetchStatus = FetchStatus.loading;
+        result.files = [];
+        result.dirs = [];
     }
 
     if (event.type === 'repository-page/files-and-dirs/error') {
@@ -113,6 +116,7 @@ export const repositoryPageReducer = (
 
     if (event.type === 'repository-page/version/loading') {
         result.versionsFetchStatus = FetchStatus.loading;
+        result.versions = [];
     }
 
     if (event.type === 'repository-page/version/error') {
@@ -122,6 +126,13 @@ export const repositoryPageReducer = (
     if (event.type === 'repository-page/version/success') {
         result.versionsFetchStatus = FetchStatus.successed;
         result.versions = event.data;
+    }
+
+    if (event.type === 'repository-page/clear') {
+        result.repository = undefined;
+        result.files = [];
+        result.dirs = [];
+        result.versions = [];
     }
 
     return result;

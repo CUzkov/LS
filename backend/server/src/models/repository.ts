@@ -380,7 +380,12 @@ export const RepositoryFns = {
 
         return filesAndDirs;
     },
-    addDirToRepository: async (id: number, userId: number, pathToDir: string[], newDirName: string): Promise<DirMeta> => {
+    addDirToRepository: async (
+        id: number,
+        userId: number,
+        pathToDir: string[],
+        newDirName: string,
+    ): Promise<DirMeta> => {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
@@ -393,7 +398,7 @@ export const RepositoryFns = {
             name: newDirName,
             pathToDir,
             status: DirStatus.none,
-        }
+        };
     },
     saveRepositoryVersion: async (id: number, userId: number, versionSummary: string, version: string) => {
         const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
@@ -408,5 +413,5 @@ export const RepositoryFns = {
         const [, git] = await RepositoryFns.getRepositoryById(id, userId);
 
         return await git.getAllVersions();
-    }
+    },
 };

@@ -8,9 +8,12 @@ import { DraftFilesByDirPathQP, DraftFilesByDirPathRD } from '@api-types/reposit
 import { DownloadFileQP } from '@api-types/repository/download-file';
 import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
 import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
-import {AddDirToRepositoryD, AddDirToRepositoryRD} from '@api-types/repository/add-dir-to-repository'
-import {GetAllRepositoryVersionsQP, GetAllRepositoryVersionsRD} from '@api-types/repository/get-all-repository-versions'
-import {SaveRepositoryVersionD} from '@api-types/repository/save-repository-version'
+import { AddDirToRepositoryD, AddDirToRepositoryRD } from '@api-types/repository/add-dir-to-repository';
+import {
+    GetAllRepositoryVersionsQP,
+    GetAllRepositoryVersionsRD,
+} from '@api-types/repository/get-all-repository-versions';
+import { SaveRepositoryVersionD } from '@api-types/repository/save-repository-version';
 import {
     DeleteFileFromRepositoryD,
     DeleteFileFromRepositoryRD,
@@ -20,7 +23,7 @@ import {
     CheckIsRepositoryNameFreeRD,
 } from '@api-types/repository/check-is-repository-name-free';
 
-import { ResponseCallback, Empty, ServerError, Code } from '../types';
+import { ResponseCallback, Empty, ServerError } from '../types';
 import {
     getOkResponse,
     getInternalServerErrorResponse,
@@ -312,7 +315,12 @@ export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = 
     }
 
     try {
-        const addedDir = await RepositoryFns.addDirToRepository(data.repositoryId, userId, data.pathToDir, data.newDirName);
+        const addedDir = await RepositoryFns.addDirToRepository(
+            data.repositoryId,
+            userId,
+            data.pathToDir,
+            data.newDirName,
+        );
         getOkResponse<AddDirToRepositoryRD>(response, addedDir);
     } catch (error) {
         const e = error as ServerError;
@@ -320,7 +328,11 @@ export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = 
     }
 };
 
-export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Empty> = async ({ response, userId, data }) => {
+export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Empty> = async ({
+    response,
+    userId,
+    data,
+}) => {
     if (!userId) {
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
@@ -334,7 +346,12 @@ export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Emp
     }
 
     try {
-        await RepositoryFns.saveRepositoryVersion(data.repositoryId, userId, data.versionSummary, data.version.join('.'));
+        await RepositoryFns.saveRepositoryVersion(
+            data.repositoryId,
+            userId,
+            data.versionSummary,
+            data.version.join('.'),
+        );
         getOkResponse<Empty>(response);
     } catch (error) {
         const e = error as ServerError;
@@ -342,17 +359,17 @@ export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Emp
     }
 };
 
-export const getAllRepositoryVersions: ResponseCallback<Empty, GetAllRepositoryVersionsQP> = async ({ response, userId, queryParams }) => {
+export const getAllRepositoryVersions: ResponseCallback<Empty, GetAllRepositoryVersionsQP> = async ({
+    response,
+    userId,
+    queryParams,
+}) => {
     if (!userId) {
         return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
     }
 
     if (!queryParams?.repositoryId) {
-        return getBadRequestResponse(
-            response,
-            'Ошибка параметров',
-            'repositoryId является обязательным параметром!',
-        );
+        return getBadRequestResponse(response, 'Ошибка параметров', 'repositoryId является обязательным параметром!');
     }
 
     try {

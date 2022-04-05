@@ -36,27 +36,25 @@ export const getPageRepositoriesById = async (id: number) => {
 
     dispath({ type: 'repository-page/repository/loading' });
 
-    let response: RepositoryByIdRD;
+    let response: RepositoryByIdRD | undefined;
 
     try {
         response = await ajax2.get<RepositoryByIdRD, RepositoryByIdQP>({
             url: REPOSITORY_BY_ID_URL,
             queryParams: { id },
         });
-    } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
 
-        dispath({ type: 'repository-page/repository/error' });
-
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: { type: 'error', title: e.error, description: e.description },
-            });
+        if (!response) {
             return;
         }
+    } catch (error) {
+        const e = error as IServerError;
 
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({ type: 'repository-page/repository/error' });
+        dispath({
+            type: 'logger/add-log',
+            data: { type: 'error', title: e.error, description: e.description },
+        });
         return;
     }
 
@@ -79,7 +77,7 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
 
     dispath({ type: 'repository-page/files-and-dirs/loading' });
 
-    let response: FilesByDirPathRD;
+    let response: FilesByDirPathRD | undefined;
 
     try {
         response = await ajax2.get<FilesByDirPathRD, FilesByDirPathQP>({
@@ -90,20 +88,18 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
                 repositoryId: repository?.id ?? -1,
             },
         });
-    } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
 
-        dispath({ type: 'repository-page/files-and-dirs/error' });
-
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: { title: e.error, description: e.description, type: 'error' },
-            });
+        if (!response) {
             return;
         }
+    } catch (error) {
+        const e = error as IServerError;
 
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({ type: 'repository-page/files-and-dirs/error' });
+        dispath({
+            type: 'logger/add-log',
+            data: { title: e.error, description: e.description, type: 'error' },
+        });
         return;
     }
 
@@ -123,25 +119,24 @@ export const addFile = async (file: File, isBeDeleted?: boolean) => {
     fileForm.append('repositoryId', String(repository?.id ?? -1));
     fileForm.append('pathToDir', getDirKeyByPath(currentPath));
 
-    let response: AddFileToRepositoryRD;
+    let response: AddFileToRepositoryRD | undefined;
 
     try {
         response = await ajax2.post<FormData, AddFileToRepositoryRD, Empty>({
             url: ADD_FILE_TO_REPOSITORY,
             data: fileForm,
         });
-    } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
 
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: { title: 'Ошибка загрузки файла!', description: `Файл ${file.name} не загружен`, type: 'error' },
-            });
+        if (!response) {
             return;
         }
+    } catch (error) {
+        const e = error as IServerError;
 
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({
+            type: 'logger/add-log',
+            data: { title: 'Ошибка загрузки файла!', description: `Файл ${file.name} не загружен`, type: 'error' },
+        });
         return;
     }
 
@@ -163,7 +158,7 @@ export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
 
     const isFile = 'pathToFile' in fileOrDir;
 
-    let response: DeleteFileFromRepositoryRD;
+    let response: DeleteFileFromRepositoryRD | undefined;
 
     try {
         response = await ajax2.post<DeleteFileFromRepositoryD, DeleteFileFromRepositoryRD, Empty>({
@@ -174,22 +169,21 @@ export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
                 repositoryId: repository?.id ?? -1,
             },
         });
-    } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
 
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: {
-                    title: isFile ? 'Ошибка удаления файла!' : 'Ошибка удаления папки!',
-                    description: isFile ? `Файл ${fileOrDir.name} не удалён` : `Папка ${fileOrDir.name} не удалёна`,
-                    type: 'error',
-                },
-            });
+        if (!response) {
             return;
         }
+    } catch (error) {
+        const e = error as IServerError;
 
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({
+            type: 'logger/add-log',
+            data: {
+                title: isFile ? 'Ошибка удаления файла!' : 'Ошибка удаления папки!',
+                description: isFile ? `Файл ${fileOrDir.name} не удалён` : `Папка ${fileOrDir.name} не удалёна`,
+                type: 'error',
+            },
+        });
         return;
     }
 
@@ -205,7 +199,7 @@ export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: st
 
     const isFile = 'pathToFile' in fileOrDir;
 
-    let response: RenameFileInRepositoryRD;
+    let response: RenameFileInRepositoryRD | undefined;
 
     try {
         response = await ajax2.post<RenameFileInRepositoryD, RenameFileInRepositoryRD, Empty>({
@@ -217,24 +211,21 @@ export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: st
                 newName,
             },
         });
-    } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
 
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: {
-                    title: `Ошибка переименования ${isFile ? 'файла' : 'папки'}!`,
-                    description: isFile
-                        ? `Файл ${fileOrDir.name} не переименован`
-                        : `Папка ${fileOrDir.name} не переименована`,
-                    type: 'error',
-                },
-            });
+        if (!response) {
             return;
         }
-
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+    } catch (error) {
+        dispath({
+            type: 'logger/add-log',
+            data: {
+                title: `Ошибка переименования ${isFile ? 'файла' : 'папки'}!`,
+                description: isFile
+                    ? `Файл ${fileOrDir.name} не переименован`
+                    : `Папка ${fileOrDir.name} не переименована`,
+                type: 'error',
+            },
+        });
         return;
     }
 
@@ -256,7 +247,7 @@ export const addDirToRepository = async (newDirName: string) => {
         return;
     }
 
-    let response: AddDirToRepositoryRD;
+    let response: AddDirToRepositoryRD | undefined;
 
     try {
         response = await ajax2.post<AddDirToRepositoryD, AddDirToRepositoryRD, Empty>({
@@ -267,22 +258,21 @@ export const addDirToRepository = async (newDirName: string) => {
                 pathToDir: currentPath,
             },
         });
-    } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
 
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: {
-                    title: 'Ошибка создания новой папки!',
-                    description: `Папка ${newDirName} не создана`,
-                    type: 'error',
-                },
-            });
+        if (!response) {
             return;
         }
+    } catch (error) {
+        const e = error as IServerError;
 
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({
+            type: 'logger/add-log',
+            data: {
+                title: 'Ошибка создания новой папки!',
+                description: `Папка ${newDirName} не создана`,
+                type: 'error',
+            },
+        });
         return;
     }
 
@@ -310,17 +300,10 @@ export const saveRepositoryVersion = async (versionSummary: string, version: num
             },
         });
     } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
-
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: { title: 'Ошибка создания новой версии!', description: 'Новая версия не создана', type: 'error' },
-            });
-            return false;
-        }
-
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({
+            type: 'logger/add-log',
+            data: { title: 'Ошибка создания новой версии!', description: 'Новая версия не создана', type: 'error' },
+        });
         return false;
     }
 
@@ -340,7 +323,7 @@ export const getAllVersions = async () => {
 
     dispath({ type: 'repository-page/version/loading' });
 
-    let response: GetAllRepositoryVersionsRD;
+    let response: GetAllRepositoryVersionsRD | undefined;
 
     try {
         response = await ajax2.get<GetAllRepositoryVersionsRD, GetAllRepositoryVersionsQP>({
@@ -349,22 +332,27 @@ export const getAllVersions = async () => {
                 repositoryId: repository.id,
             },
         });
+
+        if (!response) {
+            return;
+        }
     } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
+        const e = error as IServerError;
 
         dispath({ type: 'repository-page/version/error' });
 
-        if (e?.error) {
-            dispath({
-                type: 'logger/add-log',
-                data: { title: e.error, description: e.description, type: 'error' },
-            });
-            return;
-        }
-
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        dispath({
+            type: 'logger/add-log',
+            data: { title: e.error, description: e.description, type: 'error' },
+        });
         return;
     }
 
     dispath({ type: 'repository-page/version/success', data: response });
 };
+
+export const clearRepositoryPage = () => {
+    const dispath: Dispatch = store.dispatch;
+
+    dispath({type: 'repository-page/clear'})
+}

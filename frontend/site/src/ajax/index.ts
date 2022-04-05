@@ -1,6 +1,8 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { getFullUrl } from 'constants/host';
+import { store, Dispatch } from 'store';
+import { IServerError } from 'types';
 
 export enum AjaxType {
     get,
@@ -67,12 +69,32 @@ export const ajax = async <T, D>({ type, url, contentType, data, queryParams }: 
 
 export const ajax2 = {
     async get<RD, QP>({ url, queryParams }: { url: string; queryParams?: QP }) {
-        return (
-            await axios.get<RD>(getFullUrl(url), {
+        const dispath: Dispatch = store.dispatch;
+
+        let response: AxiosResponse<RD>;
+
+        try {
+            response = await axios.get<RD>(getFullUrl(url), {
                 withCredentials: true,
                 params: queryParams,
-            })
-        ).data;
+            });
+        } catch (error) {
+            const e = (error as AxiosError).response?.data as IServerError;
+ 
+            if ((error as AxiosError).response?.status === 401) {
+                dispath({type: 'user/none'});
+                return;
+            }
+
+            if (e?.error) {
+                throw e;
+            }
+
+            dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+            return;
+        }
+
+        return response.data;
     },
     async post<D, RD, QP>({
         url,
@@ -85,13 +107,32 @@ export const ajax2 = {
         data?: FormData | D;
         onUploadProgress?: () => void;
     }) {
-        return (
-            await axios.post<RD>(getFullUrl(url), data, {
+        const dispath: Dispatch = store.dispatch;
+        let response: AxiosResponse<RD>;
+
+        try {
+            response = await axios.post<RD>(getFullUrl(url), data, {
                 withCredentials: true,
                 params: queryParams,
                 headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {},
                 onUploadProgress,
-            })
-        ).data;
+            });
+        } catch (error) {
+            const e = (error as AxiosError).response?.data as IServerError;
+ 
+            if ((error as AxiosError).response?.status === 401) {
+                dispath({type: 'user/none'});
+                return;
+            }
+
+            if (e?.error) {
+                throw e;
+            }
+
+            dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+            return;
+        }
+
+        return response.data;
     },
 };

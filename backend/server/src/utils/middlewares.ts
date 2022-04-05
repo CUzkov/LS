@@ -3,7 +3,7 @@ import { ServerResponse } from 'http';
 import { IncomingForm } from 'formidable';
 
 import { MiddlewareRequest } from '../types';
-import { getBadRequestResponse } from './server-utils';
+import { getUnauthorizedResponse } from './server-utils';
 import { redis } from '../database';
 
 enum MiddlewareCode {
@@ -14,11 +14,11 @@ enum MiddlewareCode {
 
 const middlewaresErrors = {
     [MiddlewareCode.noCookies]: (response: ServerResponse) =>
-        getBadRequestResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
+        getUnauthorizedResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
     [MiddlewareCode.noAuth]: (response: ServerResponse) =>
-        getBadRequestResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
+        getUnauthorizedResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
     [MiddlewareCode.formDataError]: (response: ServerResponse) =>
-        getBadRequestResponse(response, 'Ошибка чтения формы', ''),
+        getUnauthorizedResponse(response, 'Ошибка чтения формы', ''),
 };
 
 export const dataMiddleware = (request: MiddlewareRequest, resolve: () => void) => {

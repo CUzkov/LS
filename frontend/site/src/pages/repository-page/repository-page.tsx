@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { getPageRepositoriesById, getFilesByPath, addFile, changeFilesDirPath } from 'actions/repository-page';
+import { getPageRepositoriesById, getFilesByPath, addFile, changeFilesDirPath, clearRepositoryPage } from 'actions/repository-page';
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { FetchStatus, FileStatus } from 'types';
 import { yesNoPopup } from 'constants/popups';
@@ -86,6 +86,10 @@ export const RepositoryPage: FC = () => {
         }
         changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
     }, [repository?.id]);
+
+    useEffect(() => {
+        return () => clearRepositoryPage();
+    }, [])
 
     const additionalPaths = useMemo(
         () => getDirPathByKey(query.fullPathToDir).map((path) => ({ title: path, url: '' })),

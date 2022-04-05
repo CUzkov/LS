@@ -1,6 +1,6 @@
 import { FetchStatus } from '../../types';
 
-export interface IUserStoreD {
+type UserSuccesAction = {
     userId?: number;
     username?: string;
     email?: string;
@@ -9,7 +9,7 @@ export interface IUserStoreD {
 
 export type UserEvents =
     | { type: 'user/error' }
-    | { type: 'user/success'; data: IUserStoreD }
+    | { type: 'user/success'; data: UserSuccesAction }
     | { type: 'user/loading' }
     | { type: 'user/none' };
 
@@ -30,18 +30,14 @@ const initialState: UserStore = {
 };
 
 export const userReducer = (state: UserStore = initialState, event: UserEvents): UserStore => {
+    const result = {...state};
+
     if (event.type === 'user/error') {
-        return {
-            ...state,
-            fetchStatus: FetchStatus.error,
-        };
+        result.fetchStatus = FetchStatus.error;
     }
 
     if (event.type === 'user/loading') {
-        return {
-            ...state,
-            fetchStatus: FetchStatus.loading,
-        };
+        result.fetchStatus = FetchStatus.loading;
     }
 
     if (event.type === 'user/none') {
@@ -59,5 +55,5 @@ export const userReducer = (state: UserStore = initialState, event: UserEvents):
         };
     }
 
-    return state;
+    return result;
 };

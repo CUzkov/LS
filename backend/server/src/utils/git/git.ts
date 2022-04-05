@@ -1,6 +1,6 @@
 import path from 'path';
 import fsSync from 'fs';
-import fse from 'fs-extra'
+import fse from 'fs-extra';
 import simpleGit, { SimpleGit } from 'simple-git';
 
 const fsAsync = fsSync.promises;
@@ -312,9 +312,9 @@ export class Git {
         const absFullPathToDir = git.getAbsPathToFile([]);
         const absFullPathToDirDraft = this.getAbsPathToFile([]);
 
-        await fse.remove(absFullPathToDir)
-        await fse.mkdir(absFullPathToDir)
-        await fse.copy(absFullPathToDirDraft, absFullPathToDir, {recursive: true});
+        await fse.remove(absFullPathToDir);
+        await fse.mkdir(absFullPathToDir);
+        await fse.copy(absFullPathToDirDraft, absFullPathToDir, { recursive: true });
 
         git.release();
         this.release();
