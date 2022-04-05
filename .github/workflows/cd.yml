@@ -26,3 +26,4 @@ jobs:
 
       - name: Stop the server
         run: ssh docs-hub 'echo 123123'
+
