@@ -7,11 +7,12 @@ import { FilesCard as FilesCardBase } from 'components/FilesCard';
 import { getDownloadLink } from 'utils/urls';
 import { DirMeta, DirStatus, FetchStatus, FileMeta, FileStatus } from 'types';
 import { textInputPopup } from 'constants/popups';
-import { MovablePopupManagerContext } from 'components/MovablePopupManager';
-import { deleteFileOrDir, renameFileOrDir } from 'actions/repository-page';
+import { MovablePopupManagerContext } from 'components/movable-popup-manager';
+import { deleteFileOrDir, renameFileOrDir, getFilesByPath, changeFilesDirPath } from 'actions/repository-page';
 
 import { queryParamConfig } from '../repository-page.constants';
 import DownloadIcon from '../repository-page.assets/download.svg';
+import { getDirPathByKey } from '../repository-page.utils';
 
 import styles from './style.scss';
 
@@ -88,7 +89,10 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
 
     const handleClickDir = useCallback(
         (pathToDir: string[], dirName: string) => {
+            const newPath = [...pathToDir, dirName];
             setQuery({ fullPathToDir: [...pathToDir, dirName].join('~') });
+            getFilesByPath(newPath, '', isEditing);
+            changeFilesDirPath(newPath);
         },
         [dispatch],
     );
@@ -100,6 +104,8 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
         const pathToDir = newPath.join('~');
 
         setQuery({ fullPathToDir: pathToDir || undefined });
+        getFilesByPath(newPath, '', isEditing);
+        changeFilesDirPath(newPath);
     }, [currentPath]);
 
     const handleDeleteButtonClick = useCallback((file: FileMeta | DirMeta, e: React.MouseEvent<HTMLButtonElement>) => {

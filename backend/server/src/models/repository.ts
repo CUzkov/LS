@@ -8,7 +8,7 @@ const fsAsync = fsSync.promises;
 
 import { UserFns } from './';
 import { pg } from '../database';
-import { Git, FileMeta, FileStatus, DirMeta, DirStatus } from '../lib/git';
+import { Git, FileMeta, FileStatus, DirMeta, DirStatus } from '../utils/git';
 import { errors } from '../constants/errors';
 
 import {
@@ -369,8 +369,6 @@ export const RepositoryFns = {
                 throw errors.dbError(e.message);
             }
 
-            console.log(result.rows?.[0]?.path_to_repository, gitDraft.path);
-
             if (result.rows?.[0]?.path_to_draft_repository !== gitDraft.path) {
                 throw errors.dbError('Ошибка создания драфта для репозитория!');
             }
@@ -382,4 +380,33 @@ export const RepositoryFns = {
 
         return filesAndDirs;
     },
+    addDirToRepository: async (id: number, userId: number, pathToDir: string[], newDirName: string): Promise<DirMeta> => {
+        const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (!gitDraft) {
+            throw errors.cannotCreateDraftRepositpory('');
+        }
+
+        gitDraft.addDir(pathToDir, newDirName);
+
+        return {
+            name: newDirName,
+            pathToDir,
+            status: DirStatus.none,
+        }
+    },
+    saveRepositoryVersion: async (id: number, userId: number, versionSummary: string, version: string) => {
+        const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (!gitDraft) {
+            throw errors.cannotCreateDraftRepositpory('');
+        }
+
+        await gitDraft.saveVersion(git, versionSummary, version);
+    },
+    getAllRepositoryVersions: async (id: number, userId: number): Promise<string[]> => {
+        const [, git] = await RepositoryFns.getRepositoryById(id, userId);
+
+        return await git.getAllVersions();
+    }
 };

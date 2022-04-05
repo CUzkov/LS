@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { StringParam } from 'use-query-params';
+import { StringParam, BooleanParam } from 'use-query-params';
 
 import { getMainPage, getAllRepositories, getUserPage, getRepository } from 'constants/routers';
 
@@ -24,4 +24,5 @@ export const getPaths = (username: string, entityName: ReactNode, entityValue = 
 
 export const queryParamConfig = {
     fullPathToDir: StringParam,
+    isEditing: BooleanParam,
 };

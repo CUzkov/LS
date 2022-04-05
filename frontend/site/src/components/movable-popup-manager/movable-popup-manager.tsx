@@ -5,12 +5,12 @@ import type { FC } from 'react';
 
 import { noop } from 'utils/noop';
 
-import { Popup } from './Popup';
+import { Popup } from './movable-popup-manger.popup';
 import {
     IAddPopup,
     MovablePopupManagerContext as MovablePopupManagerContextType,
     Popup as PopupType,
-} from './MovablePopup.types';
+} from './movable-popup.types';
 
 import styles from './style.scss';
 

@@ -7,7 +7,7 @@ import styles from './style.scss';
 
 interface IMovablePopupProps {
     children: ReactNode;
-    title: string;
+    title: ReactNode;
     zIndex: number;
     innerRef: RefObject<HTMLDivElement>;
     isRequired: boolean;

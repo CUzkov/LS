@@ -7,7 +7,7 @@ import { getMapsListPageAllMaps } from 'actions/maps-list-page';
 import { ItemCard } from 'components/ItemCard';
 import { PageTitle } from 'components/PageTitle';
 
-import {getPaths} from './MapsListPage.constants'
+import { getPaths } from './MapsListPage.constants';
 
 export const MapsListPage: FC = () => {
     const { username } = useSelector((root) => root.user);

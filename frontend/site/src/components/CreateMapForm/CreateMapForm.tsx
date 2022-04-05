@@ -46,9 +46,9 @@ export const CreateMapForm: FC = () => {
                             />
                         </div>
                         <div
-                            // className={cnCreateMapFormSpinner({
-                            //     loading: createMapFormStore.fetchStatus === FetchStatus.loading,
-                            // })}
+                        // className={cnCreateMapFormSpinner({
+                        //     loading: createMapFormStore.fetchStatus === FetchStatus.loading,
+                        // })}
                         >
                             <Spinner />
                         </div>

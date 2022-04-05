@@ -1,12 +1,13 @@
 import React from 'react';
 import { Form } from 'react-final-form';
 
-import { MovablePopupManagerContext } from 'components/MovablePopupManager/MovablePopup.types';
+import { MovablePopupManagerContext } from 'components/movable-popup-manager/movable-popup.types';
 import { requiredValidate } from 'utils/final-forms';
 import { TextField } from 'small-components/Fields';
+import { Button } from 'small-components';
+import CrossIcon from 'assets/cross.svg';
 
 import styles from './popups.scss';
-import { Button } from 'small-components';
 
 let ids = 0;
 
@@ -97,7 +98,20 @@ export const textInputPopup = (
                 </div>
             ),
             isRequired,
-            title: 'Ввод',
+            title: (
+                <div className={styles.textInputPopupHeader}>
+                    <div className={styles.textInputPopupText}>{'Ввод'}</div>
+                    <div
+                        className={styles.textInputPopupCross}
+                        onClick={() => {
+                            resolve('');
+                            context.removePopup(id);
+                        }}
+                    >
+                        <CrossIcon />
+                    </div>
+                </div>
+            ),
         });
     });
 };

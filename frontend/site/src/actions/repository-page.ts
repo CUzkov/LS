@@ -4,6 +4,12 @@ import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-re
 import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
 import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
 import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
+import { AddDirToRepositoryD, AddDirToRepositoryRD } from '@api-types/repository/add-dir-to-repository';
+import { SaveRepositoryVersionD } from '@api-types/repository/save-repository-version';
+import {
+    GetAllRepositoryVersionsQP,
+    GetAllRepositoryVersionsRD,
+} from '@api-types/repository/get-all-repository-versions';
 import {
     DeleteFileFromRepositoryD,
     DeleteFileFromRepositoryRD,
@@ -16,14 +22,14 @@ import { DirMeta, Empty, FileMeta, IServerError } from 'types';
 import { Dispatch, store } from '../store';
 
 const REPOSITORY_BY_ID_URL = '/api/repository/id';
-
 const GET_FILES_BY_FULL_DIR_PATH_URL = '/api/repository/files';
 const GET_DRAFT_FILES_BY_FULL_DIR_PATH = '/api/repository/draft/files';
-
 const RENAME_FILE_OR_DIR_IN_REPOSITORY = '/api/repository/draft/rename';
 const DELETE_FILE_OR_DIR_FROM_REPOSITORY = '/api/repository/draft/delete';
 const ADD_FILE_TO_REPOSITORY = '/api/repository/draft/add/file';
 const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
+const SAVE_REPOSITORY_VERSION = '/api/repository/version/save';
+const GET_ALL_REPOSITORY_VERSIONS = '/api/repository/version/all';
 
 export const getPageRepositoriesById = async (id: number) => {
     const dispath: Dispatch = store.dispatch;
@@ -145,7 +151,7 @@ export const addFile = async (file: File, isBeDeleted?: boolean) => {
 export const changeFilesDirPath = (newFullPathToDir: string[]) => {
     const dispath: Dispatch = store.dispatch;
 
-    dispath({ type: 'repository-page/set-path', data: newFullPathToDir });
+    dispath({ type: 'repository-page/set-path', data: newFullPathToDir.filter((path) => path !== '.') });
 };
 
 export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
@@ -237,4 +243,128 @@ export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: st
     } else if ('pathToDir' in fileOrDir && 'pathToDir' in response) {
         dispath({ type: 'repository-page/dir/rename', data: { oldDir: fileOrDir, newDir: response } });
     }
+};
+
+export const addDirToRepository = async (newDirName: string) => {
+    const dispath: Dispatch = store.dispatch;
+
+    const {
+        repositoryPage: { currentPath, repository },
+    } = store.getState();
+
+    if (!repository?.id) {
+        return;
+    }
+
+    let response: AddDirToRepositoryRD;
+
+    try {
+        response = await ajax2.post<AddDirToRepositoryD, AddDirToRepositoryRD, Empty>({
+            url: ADD_DIR_TO_REPOSITORY,
+            data: {
+                newDirName,
+                repositoryId: repository.id,
+                pathToDir: currentPath,
+            },
+        });
+    } catch (error) {
+        const e = (error as AxiosError).response?.data as IServerError;
+
+        if (e?.error) {
+            dispath({
+                type: 'logger/add-log',
+                data: {
+                    title: 'Ошибка создания новой папки!',
+                    description: `Папка ${newDirName} не создана`,
+                    type: 'error',
+                },
+            });
+            return;
+        }
+
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        return;
+    }
+
+    dispath({ type: 'repository-page/dir/add', data: response });
+};
+
+export const saveRepositoryVersion = async (versionSummary: string, version: number[]): Promise<boolean> => {
+    const dispath: Dispatch = store.dispatch;
+
+    const {
+        repositoryPage: { repository },
+    } = store.getState();
+
+    if (!repository?.id) {
+        return false;
+    }
+
+    try {
+        await ajax2.post<SaveRepositoryVersionD, Empty, Empty>({
+            url: SAVE_REPOSITORY_VERSION,
+            data: {
+                repositoryId: repository.id,
+                version,
+                versionSummary,
+            },
+        });
+    } catch (error) {
+        const e = (error as AxiosError).response?.data as IServerError;
+
+        if (e?.error) {
+            dispath({
+                type: 'logger/add-log',
+                data: { title: 'Ошибка создания новой версии!', description: 'Новая версия не создана', type: 'error' },
+            });
+            return false;
+        }
+
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        return false;
+    }
+
+    return true;
+};
+
+export const getAllVersions = async () => {
+    const dispath: Dispatch = store.dispatch;
+
+    const {
+        repositoryPage: { repository },
+    } = store.getState();
+
+    if (!repository?.id) {
+        return;
+    }
+
+    dispath({ type: 'repository-page/version/loading' });
+
+    let response: GetAllRepositoryVersionsRD;
+
+    try {
+        response = await ajax2.get<GetAllRepositoryVersionsRD, GetAllRepositoryVersionsQP>({
+            url: GET_ALL_REPOSITORY_VERSIONS,
+            queryParams: {
+                repositoryId: repository.id,
+            },
+        });
+    } catch (error) {
+        const e = (error as AxiosError).response?.data as IServerError;
+
+        dispath({ type: 'repository-page/version/error' });
+
+        if (e?.error) {
+            dispath({
+                type: 'logger/add-log',
+                data: { title: e.error, description: e.description, type: 'error' },
+            });
+            return;
+        }
+
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        return;
+    }
+
+    dispath({ type: 'repository-page/version/success', data: response });
 };

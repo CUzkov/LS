@@ -113,3 +113,11 @@ export const getDownloadResponse = async (response: ServerResponse, pathToFile: 
     const filestream = fs.createReadStream(pathToFile);
     filestream.pipe(response);
 };
+
+export const normalizeErrorCode = (code: string | number | undefined) => {
+    if (!code || typeof code === 'string') {
+        return Code.internalServerError;
+    } 
+
+    return Object.values(Code).includes(code) ? code : Code.internalServerError;
+}

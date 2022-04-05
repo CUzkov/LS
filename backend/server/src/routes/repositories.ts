@@ -9,6 +9,9 @@ import {
     deleteFileOrDirFromRepository,
     renameFileOrDirFromRepository,
     getDraftFilesByFullDirPath,
+    addDirToRepository,
+    saveRepositoryVersion,
+    getAllRepositoryVersions,
 } from '../handlers/repositories';
 import { Route, Method } from '../types';
 
@@ -25,6 +28,9 @@ const RENAME_FILE_OR_DIR_IN_REPOSITORY = '/api/repository/draft/rename';
 const DELETE_FILE_OR_DIR_FROM_REPOSITORY = '/api/repository/draft/delete';
 const ADD_FILE_TO_REPOSITORY = '/api/repository/draft/add/file';
 const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
+
+const SAVE_REPOSITORY_VERSION = '/api/repository/version/save';
+const GET_ALL_REPOSITORY_VERSIONS = '/api/repository/version/all';
 
 export const REPOSITORIES_ROUTES: Record<string, Route> = {
     [REPOSITORIES_BY_FILTERS_URL]: {
@@ -84,6 +90,24 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
     [GET_DRAFT_FILES_BY_FULL_DIR_PATH]: {
         name: 'getDraftFilesByFullDirPath',
         callback: getDraftFilesByFullDirPath,
+        method: Method.get,
+        isNeedAuth: true,
+    },
+    [ADD_DIR_TO_REPOSITORY]: {
+        name: 'addDirToRepository',
+        callback: addDirToRepository,
+        method: Method.post,
+        isNeedAuth: true,
+    },
+    [SAVE_REPOSITORY_VERSION]: {
+        name: 'saveRepositoryVersion',
+        callback: saveRepositoryVersion,
+        method: Method.post,
+        isNeedAuth: true,
+    },
+    [GET_ALL_REPOSITORY_VERSIONS]: {
+        name: 'getAllRepositoryVersions',
+        callback: getAllRepositoryVersions,
         method: Method.get,
         isNeedAuth: true,
     },

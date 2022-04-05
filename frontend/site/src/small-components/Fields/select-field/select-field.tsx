@@ -27,7 +27,7 @@ export const SelectField: FC<SelectFieldProps> = ({
     validators = [],
 }: SelectFieldProps): ReactElement => {
     const form = useForm();
-
+    const selectRef = useRef(null);
     const [isExpand, , closeSelect, toggleSelect] = useBooleanState(false);
 
     const handleClickOption = useCallback(
@@ -38,7 +38,13 @@ export const SelectField: FC<SelectFieldProps> = ({
         [form, name, closeSelect, options],
     );
 
-    const selectRef = useRef(null);
+    const handleToggleSelect = useCallback(() => {
+        if (!options.length) {
+            return;
+        }
+
+        toggleSelect();
+    }, [options, toggleSelect]);
 
     useOutsideClick(selectRef, closeSelect);
 
@@ -57,7 +63,7 @@ export const SelectField: FC<SelectFieldProps> = ({
                             </option>
                         ))}
                     </select>
-                    <div className={styles.button} onClick={toggleSelect}>
+                    <div className={styles.button} onClick={handleToggleSelect}>
                         {options.map(
                             (option) =>
                                 option.value === input.value && (

@@ -3,14 +3,14 @@ import { ReactNode } from 'react';
 export type Popup = {
     id: string;
     content: ReactNode;
-    title: string;
+    title: ReactNode;
     priority: number;
     isRequired: boolean;
 };
 
 export interface IAddPopup {
     id: string;
-    title: string;
+    title: ReactNode;
     content: ReactNode;
     isRequired: boolean;
 }

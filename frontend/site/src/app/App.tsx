@@ -14,7 +14,7 @@ import {
     getRepositoryTemplate,
 } from 'constants/routers';
 import { Logger } from 'components/Logger';
-import { MovablePopupManager } from 'components/MovablePopupManager';
+import { MovablePopupManager } from 'components/movable-popup-manager';
 
 import {
     LoginPage,

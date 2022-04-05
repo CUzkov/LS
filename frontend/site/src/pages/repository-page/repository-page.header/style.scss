@@ -29,6 +29,7 @@
     width: min-content;
     border-radius: 22px;
     white-space: nowrap;
+    pointer-events: none;
 
     svg {
         margin-right: 10px;
@@ -38,6 +39,7 @@
     &.editing {
         opacity: 1;
         background-color: transparent;
+        pointer-events: all;
     }
 
     &:hover {
@@ -47,4 +49,41 @@
 
 .actions {
     display: flex;
+    align-items: center;
+}
+
+.versionsWrapper {
+    position: relative;
+    margin-right: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+
+    .versions {
+        width: 150px;
+    }
+
+    .versionsSpinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity .3s;
+    
+        svg {
+            height: 15px;
+            width: 15px;
+        }
+    
+        &.loading {
+            opacity: 1;
+        }
+    }
+    
+    &.show {
+        opacity: 1;
+        pointer-events: all;
+    }
 }

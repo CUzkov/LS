@@ -9,6 +9,7 @@ export enum ErrorsTypes {
     fileNameNotPresent = 'fileNameNotPresent',
     deleteFileError = 'deleteFileError',
     cannotCreateDraftRepositpory = 'cannotCreateDraftRepositpory',
+    cannotCreateNewDir = 'cannotCreateNewDir',
 }
 
 export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
@@ -50,6 +51,11 @@ export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
     [ErrorsTypes.cannotCreateDraftRepositpory]: (message: string) => ({
         code: Code.internalServerError,
         name: 'Ошибка при создании draft-репозитория',
+        message,
+    }),
+    [ErrorsTypes.cannotCreateNewDir]: (message: string) => ({
+        code: Code.internalServerError,
+        name: 'Ошибка при новой папки',
         message,
     }),
 };

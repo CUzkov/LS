@@ -5,8 +5,7 @@ import { useParams } from 'react-router-dom';
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 import { getPageRepositoriesById, getFilesByPath, addFile, changeFilesDirPath } from 'actions/repository-page';
-import { useBooleanState } from 'hooks';
-import { MovablePopupManagerContext } from 'components/MovablePopupManager';
+import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { FetchStatus, FileStatus } from 'types';
 import { yesNoPopup } from 'constants/popups';
 import Spinner from 'assets/spinner.svg';
@@ -22,14 +21,12 @@ import styles from './style.scss';
 export const RepositoryPage: FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const context = useContext(MovablePopupManagerContext);
-
     const { username } = useSelector((root) => root.user);
     const { repository, files, currentPath, repositoryFetchStatus } = useSelector((root) => root.repositoryPage);
     const isRepositoryLoading = repositoryFetchStatus === FetchStatus.loading;
     const { id } = useParams();
-
-    const [isEditing, , , toggleEditing] = useBooleanState(false);
-    const [query] = useQueryParams(queryParamConfig);
+    const [query, setQuery] = useQueryParams(queryParamConfig);
+    const isEditing = query.isEditing ?? false;
 
     const handleChangeInput = useCallback(
         async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +43,7 @@ export const RepositoryPage: FC = () => {
                     continue;
                 }
 
+                // @FIXME добавить поиск дубликатов в удалённых файлах
                 const duplicateFiles = files.filter(({ name }) => name === file.name) ?? [];
 
                 if (duplicateFiles.length) {
@@ -71,6 +69,10 @@ export const RepositoryPage: FC = () => {
         [files, currentPath, repository],
     );
 
+    const handleToggleEditing = useCallback(() => {
+        setQuery({ isEditing: !query.isEditing });
+    }, [query.isEditing]);
+
     useEffect(() => {
         if (id) {
             getPageRepositoriesById(Number(id));
@@ -83,7 +85,7 @@ export const RepositoryPage: FC = () => {
             getFilesByPath([query.fullPathToDir || ''], '', isEditing);
         }
         changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
-    }, [query.fullPathToDir, repository?.id, isEditing]);
+    }, [repository?.id]);
 
     const additionalPaths = useMemo(
         () => getDirPathByKey(query.fullPathToDir).map((path) => ({ title: path, url: '' })),
@@ -110,14 +112,14 @@ export const RepositoryPage: FC = () => {
     const content = useMemo(
         () => (
             <div className={styles.repositoryPage}>
-                <RepositoryPageHeader isEditing={isEditing} inputRef={inputRef} toggleEditing={toggleEditing} />
+                <RepositoryPageHeader isEditing={isEditing} inputRef={inputRef} toggleEditing={handleToggleEditing} />
                 <div style={{ pointerEvents: 'all' }}>
                     <RepositoryPageFilesCard isEditing={isEditing} isRepositoryLoading={isRepositoryLoading} />
                 </div>
                 <input type="file" ref={inputRef} multiple className={styles.fileInput} onChange={handleChangeInput} />
             </div>
         ),
-        [repository, files, toggleEditing, isEditing, currentPath],
+        [repository, files, handleToggleEditing, isEditing, currentPath],
     );
 
     return <PageWrapper content={content} paths={paths} />;

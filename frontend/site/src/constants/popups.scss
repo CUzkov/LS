@@ -20,3 +20,18 @@
     }
 }
 
+.textInputPopupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .textInputPopupText {
+        font-size: 14px;
+        width: min-content;
+        white-space: pre;
+    }
+
+    .textInputPopupCross {
+        cursor: pointer;
+    }
+}

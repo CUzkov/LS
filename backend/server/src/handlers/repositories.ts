@@ -8,6 +8,9 @@ import { DraftFilesByDirPathQP, DraftFilesByDirPathRD } from '@api-types/reposit
 import { DownloadFileQP } from '@api-types/repository/download-file';
 import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
 import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
+import {AddDirToRepositoryD, AddDirToRepositoryRD} from '@api-types/repository/add-dir-to-repository'
+import {GetAllRepositoryVersionsQP, GetAllRepositoryVersionsRD} from '@api-types/repository/get-all-repository-versions'
+import {SaveRepositoryVersionD} from '@api-types/repository/save-repository-version'
 import {
     DeleteFileFromRepositoryD,
     DeleteFileFromRepositoryRD,
@@ -24,6 +27,7 @@ import {
     getBadRequestResponse,
     getServerErrorResponse,
     getDownloadResponse,
+    normalizeErrorCode,
 } from '../utils/server-utils';
 import { RepositoryFns } from '../models';
 import { formatTitleToPath, isCorrectPath } from '../utils/paths';
@@ -46,7 +50,7 @@ export const getRepositoriesByFilter: ResponseCallback<Empty, RepositoriesByFilt
         getOkResponse<RepositoriesByFilterRD>(response, repositories);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -67,7 +71,7 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
         getOkResponse<CreateRepositoryRD>(response, repository);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -95,7 +99,7 @@ export const checkIsRepositoryNameFree: ResponseCallback<CheckIsRepositoryNameFr
         getOkResponse<CheckIsRepositoryNameFreeRD>(response, isFree);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -117,7 +121,7 @@ export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = asyn
         getOkResponse<RepositoryByIdRD>(response, repository);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -146,7 +150,7 @@ export const downloadFileOrDir: ResponseCallback<Empty, DownloadFileQP> = async 
         getDownloadResponse(response, absFullPathToFile);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -173,7 +177,7 @@ export const getFilesByFullDirPath: ResponseCallback<Empty, FilesByDirPathQP> = 
         getOkResponse<FilesByDirPathRD>(response, files);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -200,7 +204,7 @@ export const getDraftFilesByFullDirPath: ResponseCallback<Empty, DraftFilesByDir
         getOkResponse<DraftFilesByDirPathRD>(response, files);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -227,7 +231,7 @@ export const addFileToRepository: ResponseCallback<Empty, Empty> = async ({ resp
         getOkResponse<AddFileToRepositoryRD>(response, addedFile);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -258,7 +262,7 @@ export const deleteFileOrDirFromRepository: ResponseCallback<DeleteFileFromRepos
         getOkResponse<DeleteFileFromRepositoryRD>(response, addedFile);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };
 
@@ -290,6 +294,72 @@ export const renameFileOrDirFromRepository: ResponseCallback<RenameFileInReposit
         getOkResponse<RenameFileInRepositoryRD>(response, addedFile);
     } catch (error) {
         const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+    }
+};
+
+export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = async ({ response, userId, data }) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!data?.repositoryId || !data.newDirName || !data.pathToDir) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'newDirName, pathToDir и repositoryId являются обязательными параметрами!',
+        );
+    }
+
+    try {
+        const addedDir = await RepositoryFns.addDirToRepository(data.repositoryId, userId, data.pathToDir, data.newDirName);
+        getOkResponse<AddDirToRepositoryRD>(response, addedDir);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+    }
+};
+
+export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Empty> = async ({ response, userId, data }) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!data?.repositoryId || !data.version) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'version и repositoryId являются обязательными параметрами!',
+        );
+    }
+
+    try {
+        await RepositoryFns.saveRepositoryVersion(data.repositoryId, userId, data.versionSummary, data.version.join('.'));
+        getOkResponse<Empty>(response);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+    }
+};
+
+export const getAllRepositoryVersions: ResponseCallback<Empty, GetAllRepositoryVersionsQP> = async ({ response, userId, queryParams }) => {
+    if (!userId) {
+        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+    }
+
+    if (!queryParams?.repositoryId) {
+        return getBadRequestResponse(
+            response,
+            'Ошибка параметров',
+            'repositoryId является обязательным параметром!',
+        );
+    }
+
+    try {
+        const versions = await RepositoryFns.getAllRepositoryVersions(queryParams.repositoryId, userId);
+        getOkResponse<GetAllRepositoryVersionsRD>(response, versions);
+    } catch (error) {
+        const e = error as ServerError;
+        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
     }
 };

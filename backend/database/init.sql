@@ -98,27 +98,6 @@ values ('cuzkov', 'users@gmail.com', 'Gurkina12', true),
 ('cuzkov3', 'users3@gmail.com', 'Gurkina12', false),
 ('cuzkov4', 'users4@gmail.com', 'Gurkina12', false);
 
-insert into repositories (user_id, path_to_repository, title, is_private)
-values (1, 'users@gmail.com', 'Gurkina12', false),
-(1, 'users1@gmail.com', 'Gurkina123', false),
-(1, 'users2@gmail.com', 'Gurkina1234', false),
-(2, 'users3@gmail.com', 'Gurkina12456', false),
-(2, 'users4@gmail.com', 'Gurkina123456', false);
-
-insert into maps (user_id, title)
-values (1, 'Gurkina12'),
-(1, 'Gurkina123'),
-(1, 'Gurkina1234'),
-(2, 'Gurkina12456'),
-(2, 'Gurkina123456');
-
-insert into users_repositories_relationship (user_id, repository_id, relationship)
-values (1, 1, B'111'),
-(1, 2, B'111'),
-(1, 3, B'111'),
-(2, 4, B'111'),
-(2, 5, B'111');
-
 -----------------------------------------------------------------------
 -- Создание нового пользователя
 -----------------------------------------------------------------------

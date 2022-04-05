@@ -1,5 +1,6 @@
 import path from 'path';
 import fsSync from 'fs';
+import fse from 'fs-extra'
 import simpleGit, { SimpleGit } from 'simple-git';
 
 const fsAsync = fsSync.promises;
@@ -85,8 +86,6 @@ export class Git {
         pathToDir: string[] = [],
         dirName: string,
     ): Promise<{ files: FileMeta[]; dirs: DirMeta[]; deletedFiles: FileMeta[] }> {
-        await this.add();
-
         const files: FileMeta[] = [];
         const dirs: DirMeta[] = [];
 
@@ -277,8 +276,9 @@ export class Git {
         fullPathToDir: string,
     ): DirMeta {
         let status: DirStatus;
+        const sep = path.sep;
         const currDirStatuses = statusesEntries.filter(
-            ([path, { status }]) => status !== FileStatus.delete && path.startsWith(fullPathToDir),
+            ([path, { status }]) => status !== FileStatus.delete && path.startsWith(fullPathToDir + sep),
         );
 
         if (!currDirStatuses.length) {
@@ -296,5 +296,41 @@ export class Git {
             pathToDir: path.dirname(fullPathToDir).split(path.sep),
             status,
         };
+    }
+
+    // внешние ручки для использования
+
+    // коммитит изменения в драфт-репозитории и переносит их в обычный
+    async saveVersion(git: Git, commitMessage: string, version: string) {
+        git.capture();
+        this.capture();
+
+        await this.add();
+        await this.gitCore.commit(commitMessage);
+        await this.gitCore.addTag(version);
+
+        const absFullPathToDir = git.getAbsPathToFile([]);
+        const absFullPathToDirDraft = this.getAbsPathToFile([]);
+
+        await fse.remove(absFullPathToDir)
+        await fse.mkdir(absFullPathToDir)
+        await fse.copy(absFullPathToDirDraft, absFullPathToDir, {recursive: true});
+
+        git.release();
+        this.release();
+    }
+
+    async getAllVersions(): Promise<string[]> {
+        const tags = await this.gitCore.tags();
+        return tags.all.reverse();
+    }
+
+    async addDir(pathToDir: string[], newDirName: string) {
+        try {
+            await fsAsync.mkdir(this.getAbsPathToFile([...pathToDir, newDirName]));
+        } catch (error) {
+            const e = error as Error;
+            errors.cannotCreateNewDir(e.message);
+        }
     }
 }
