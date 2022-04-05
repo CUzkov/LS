@@ -25,4 +25,4 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Stop the server
-        run: ssh docs-hub 'echo 123123'
+        run: ssh ${{ secrets.SSH_HOST }} 'echo 123123'
