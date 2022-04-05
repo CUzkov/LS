@@ -13,7 +13,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/docs-hub.key
           chmod 600 ~/.ssh/docs-hub.key
           cat >>~/.ssh/config <<END
-          Host staging
+          Host docs-hub
             HostName $SSH_HOST
             User $SSH_USER
             IdentityFile ~/.ssh/docs-hub.key
@@ -25,4 +25,4 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Stop the server
-        run: ssh ${{ secrets.SSH_HOST }} 'echo 123123'
+        run: ssh docs-hub 'echo 123123'
