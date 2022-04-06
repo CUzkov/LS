@@ -1,3 +1,3 @@
 export const getFullUrl = (url: string) => {
-    return `${url}`;
+    return `http://localhost:8000${url}`;
 };

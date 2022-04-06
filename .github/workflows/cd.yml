@@ -27,5 +27,20 @@ jobs:
       - name: Fetching new version
         run: ssh docs-hub 'cd ./app && rm ./LS -R -f && git clone https://github.com/CUzkov/LS.git'
 
-      - name: Rebuild and run docker containers
-        run: ssh docs-hub 'cd ./app/LS && ./restart_db.sh'
+      - name: Rebuild postgres
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build database'
+
+      - name: Rebuild redis
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build redis'
+
+      - name: Rebuild server
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build server'
+
+      - name: Rebuild spa
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build spa'
+
+      - name: Replace containers
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose up'
+
+      - name: Clear unused images & containers
+        run: ssh docs-hub 'cd ./app/LS && sudo docker system prune -f'
