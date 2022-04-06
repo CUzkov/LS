@@ -81,7 +81,7 @@ export const authMiddleware = async (
     const timeNow = new Date().getTime();
     const timeExpired = (await redis.get(userId)) || '1';
 
-    if (Number(0) > timeNow) {
+    if (Number(timeExpired) > timeNow) {
         request.userId = Number(userId);
         request.isAuth = true;
         resolve();
