@@ -9,7 +9,7 @@ import {
     getServerErrorResponse,
 } from '../utils/server-utils';
 import { User, UserFns } from '../models';
-// import { redis } from '../database';
+import { redis } from '../database';
 
 const UNIX_MOUNTH = 60 * 60 * 24 * 30;
 
@@ -34,7 +34,7 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
     const newTime = String(new Date().getTime() + UNIX_MOUNTH);
     const userId = user.id;
 
-    // redis.set(String(userId), newTime);
+    redis.set(String(userId), newTime);
     cookies?.set('user_id', String(userId));
     cookies?.set('expired', newTime);
 

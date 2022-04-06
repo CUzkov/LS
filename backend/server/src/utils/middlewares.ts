@@ -4,7 +4,7 @@ import { IncomingForm } from 'formidable';
 
 import { MiddlewareRequest } from '../types';
 import { getUnauthorizedResponse } from './server-utils';
-// import { redis } from '../database';
+import { redis } from '../database';
 
 enum MiddlewareCode {
     noCookies = 'noCookies',
@@ -79,7 +79,7 @@ export const authMiddleware = async (
 
     const userId = request.cookies.get('user_id') ?? '';
     const timeNow = new Date().getTime();
-    // const timeExpired = (await redis.get(userId)) || '1';
+    const timeExpired = (await redis.get(userId)) || '1';
 
     if (Number(0) > timeNow) {
         request.userId = Number(userId);

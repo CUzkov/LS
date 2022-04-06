@@ -18,8 +18,6 @@ const requestListener = async (request: IncomingMessage, response: ServerRespons
     response.setHeader('Access-Control-Allow-Credentials', 'true');
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    return getBadRequestResponse(response, 'Ошибка роутера', 'Не найден соответствующий роутер');
-
     // preflight request
     if (request.method === Method.options) {
         return getOkResponse(response);
@@ -33,7 +31,7 @@ const requestListener = async (request: IncomingMessage, response: ServerRespons
         return getBadRequestResponse(response, 'Ошибка роутера', 'Не найден соответствующий роутер');
     }
 
-    // middlewares({ request, response, callback, queryParams: url.query });
+    middlewares({ request, response, callback, queryParams: url.query });
 };
 
 const server = createServer(requestListener);
