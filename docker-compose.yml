@@ -26,10 +26,11 @@ services:
       retries: 5
     
   server:
+    restart: on-failure:5 
     build:
       context: .  
       dockerfile: ./backend/server/Dockerfile
-    network_mode: "host"
     depends_on:
       - database
       - redis
+    network_mode: host

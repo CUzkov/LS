@@ -2,10 +2,9 @@ FROM node:16
 
 WORKDIR /usr/src/app
 COPY . .
-RUN ls -la
 RUN cd ./backend/server && npm install
 RUN cd ./backend/server && npm run build
 
 EXPOSE 8000
 
-CMD ["node", "./LS/backend/server/build/index.js"]
+CMD ["node", "/usr/src/app/backend/server/build/backend/server/src/index.js"]

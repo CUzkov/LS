@@ -2,7 +2,7 @@ import { config as getDotEnv } from 'dotenv';
 
 getDotEnv();
 
-const defaultHost = 'localhost';
+const defaultHost = '127.0.0.1';
 const defaultPort = 8000;
 
 export const port = Number(process.env.PORT ?? defaultPort);
