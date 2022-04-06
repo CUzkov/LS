@@ -3,11 +3,12 @@ FROM node:16 as build-stage
 WORKDIR /app
 
 ADD ./frontend/site/public /app/build
-ADD ./frontend/site /app
+ADD . /app
 
-RUN npm i
-RUN npm rebuild node-sass
-RUN npm run build
+RUN cd ./frontend/site && npm i
+RUN cd ./frontend/site && npm rebuild node-sass
+RUN cd ./frontend/site && npm run build
+RUN cd ./frontend/site/build && mv * ../../../build
 
 FROM nginx:1.19.6
 
