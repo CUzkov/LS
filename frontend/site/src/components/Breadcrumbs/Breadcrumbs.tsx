@@ -11,6 +11,7 @@ interface IBreadcrumbsProps {
     }[];
 }
 
+
 export const Breadcrumbs: FC<IBreadcrumbsProps> = ({ paths }) => {
     return (
         <div className={styles.breadcrumbs}>
