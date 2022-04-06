@@ -1,4 +1,2 @@
-
-
 docker-compose rm -f
-docker-compose up --build database redis
+docker-compose up --build database redis server

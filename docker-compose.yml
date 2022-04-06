@@ -1,21 +1,35 @@
-version: '3.3'
+version: '3.8'
 
 services:
   redis:
     build: ./backend/redis
     ports:
       - 6379:6379
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6379"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   
   database:
     build: ./backend/database
-    # network_mode: host
     ports:
       - 5432:5432
     environment:
       - POSTGRES_USER=ls
       - POSTGRES_PASSWORD=ls
       - POSTGRES_DB=ls
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5432"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     
-  # server:
-  #   build: ./backend/server
-  #   network_mode: host
+  server:
+    build:
+      context: .  
+      dockerfile: ./backend/server/Dockerfile
+    network_mode: "host"
+    depends_on:
+      - database
+      - redis

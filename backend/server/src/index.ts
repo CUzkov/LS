@@ -31,7 +31,7 @@ const requestListener = async (request: IncomingMessage, response: ServerRespons
         return getBadRequestResponse(response, 'Ошибка роутера', 'Не найден соответствующий роутер');
     }
 
-    await middlewares({ request, response, callback, queryParams: url.query });
+    middlewares({ request, response, callback, queryParams: url.query });
 };
 
 const server = createServer(requestListener);

@@ -1,5 +1,5 @@
 {
-    "references": [{ "path": "../../api-types" }],
+    // "references": [{ "path": "../../api-types" }],
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
