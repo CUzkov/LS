@@ -8,4 +8,4 @@ RUN cd ./backend/server && npm run build
 
 EXPOSE 8000
 
-CMD ["node", "./backend/server/build/index.js"]
+CMD ["node", "./LS/backend/server/build/index.js"]
