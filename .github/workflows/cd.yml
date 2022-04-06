@@ -28,4 +28,4 @@ jobs:
         run: ssh docs-hub 'cd ./app && git clone https://github.com/CUzkov/LS.git'
 
       - name: Building nodejs server
-        run: ssh docs-hub 'cd ./LS && ./restart_db.sh'
+        run: ssh docs-hub 'cd ./app/LS && ./restart_db.sh'
