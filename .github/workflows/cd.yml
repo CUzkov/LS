@@ -27,5 +27,5 @@ jobs:
       - name: Fetching new version
         run: ssh docs-hub 'cd ./app && rm ./LS -R -f && git clone https://github.com/CUzkov/LS.git'
 
-      - name: Building nodejs server
+      - name: Rebuild and run docker containers
         run: ssh docs-hub 'cd ./app/LS && ./restart_db.sh'
