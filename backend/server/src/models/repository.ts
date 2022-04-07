@@ -1,14 +1,10 @@
 import { QueryResult } from 'pg';
 import { File } from 'formidable';
-import path from 'path';
-import fsSync from 'fs';
 import fse from 'fs-extra';
-
-const fsAsync = fsSync.promises;
 
 import { UserFns } from './';
 import { pg } from '../database';
-import { Git, FileMeta, FileStatus, DirMeta, DirStatus } from '../utils/git';
+import { Git, FileMeta, DirMeta, DirStatus } from '../utils/git';
 import { errors } from '../constants/errors';
 
 import {
@@ -180,13 +176,13 @@ export const RepositoryFns = {
             git,
             isNeedDraft
                 ? new Git(
-                      {
-                          email: user.email,
-                          username: user.username,
-                      },
-                      repository.title,
-                      true,
-                  )
+                    {
+                        email: user.email,
+                        username: user.username,
+                    },
+                    repository.title,
+                    true,
+                  ) 
                 : undefined,
         ];
     },
@@ -242,34 +238,9 @@ export const RepositoryFns = {
             throw errors.cannotCreateDraftRepositpory('');
         }
 
-        gitDraft.capture();
+        const deletedFileOfDir = await gitDraft.deleteFileOrDir(pathToFileOrDir, fileOrDirName)
 
-        const absFullPathToFile = gitDraft.getAbsPathToFile([...pathToFileOrDir, fileOrDirName]);
-
-        const fileStats = await fsAsync.stat(absFullPathToFile);
-
-        const isDir = fileStats.isDirectory();
-
-        try {
-            if (isDir) {
-                await fsAsync.rm(absFullPathToFile, { recursive: true, force: true });
-            } else {
-                await fsAsync.unlink(absFullPathToFile);
-            }
-        } catch (error) {
-            throw errors.deleteFileError('');
-        }
-
-        await gitDraft.add();
-
-        gitDraft.release();
-
-        return {
-            name: fileOrDirName,
-            ...(isDir
-                ? { pathToDir: pathToFileOrDir, status: DirStatus.delete }
-                : { pathToFile: pathToFileOrDir, status: FileStatus.delete }),
-        };
+        return deletedFileOfDir;
     },
     renameFileOrDirInRepository: async (
         id: number,
@@ -284,45 +255,9 @@ export const RepositoryFns = {
             throw errors.cannotCreateDraftRepositpory('');
         }
 
-        gitDraft.capture();
+        const renamedFileOrDir = await gitDraft.renameFileOrDir(pathToFile, fileName, newFileName);
 
-        const absFullPathToFile = gitDraft.getDraftAbsPathToFile([...pathToFile, fileName]);
-        const absFullPathToFileNew = gitDraft.getDraftAbsPathToFile([...pathToFile, newFileName]);
-
-        const isDir = (await fsAsync.stat(absFullPathToFile)).isDirectory();
-
-        try {
-            await fsAsync.rename(absFullPathToFile, absFullPathToFileNew);
-        } catch (error) {
-            throw errors.deleteFileError('');
-        }
-
-        await gitDraft.add();
-
-        const fullPathToFileOrDir = path.join(...pathToFile, newFileName);
-
-        if (isDir) {
-            const statusesEntries = Object.entries(await gitDraft.getNormalizeFileStatuses());
-            const status = gitDraft.getDirWithStatusByFullPathToDir(statusesEntries, fullPathToFileOrDir).status;
-
-            gitDraft.release();
-
-            return {
-                name: newFileName,
-                pathToDir: pathToFile,
-                status,
-            };
-        }
-
-        const status = await gitDraft.getFileStatusByFullPathToFile(fullPathToFileOrDir);
-
-        gitDraft.release();
-
-        return {
-            name: newFileName,
-            pathToFile,
-            status,
-        };
+        return renamedFileOrDir;
     },
     getDraftFilesByFullDirPath: async (
         id: number,
@@ -336,7 +271,7 @@ export const RepositoryFns = {
             throw errors.cannotCreateDraftRepositpory('');
         }
 
-        git.capture();
+        git._capture();
 
         if (!repository?.path_to_draft_repository) {
             await fse.copy(git.path, gitDraft.path);
@@ -362,7 +297,7 @@ export const RepositoryFns = {
 
         const filesAndDirs = gitDraft.getDraftDirFiles(pathToDir, dirName);
 
-        git.release();
+        git._release();
 
         return filesAndDirs;
     },
