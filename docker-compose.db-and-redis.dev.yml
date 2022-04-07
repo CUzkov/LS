@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  redis:
+    build: ./backend/redis
+    restart: unless-stopped
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ${REDIS_VOLUME_PATH}:/data
+  
+  database:
+    build: ./backend/database
+    restart: unless-stopped
+    volumes:
+      - ${PG_VOLUME_PATH}:/var/lib/postgresql/data
+    ports:
+      - ${PG_PORT}:5432
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DB}

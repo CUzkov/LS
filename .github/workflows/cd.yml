@@ -28,19 +28,19 @@ jobs:
         run: ssh docs-hub 'cd ./app && rm ./LS -R -f && git clone https://github.com/CUzkov/LS.git'
 
       - name: Rebuild postgres
-        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build database'
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose -f ./docker-compose.prod.yml --env-file ./.env.prod build database'
 
       - name: Rebuild redis
-        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build redis'
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose -f ./docker-compose.prod.yml --env-file ./.env.prod build redis'
 
       - name: Rebuild server
-        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build server'
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose -f ./docker-compose.prod.yml --env-file ./.env.prod build server'
 
       - name: Rebuild spa
-        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose build spa'
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose -f ./docker-compose.prod.yml --env-file ./.env.prod build spa'
 
       - name: Replace containers
-        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose up'
+        run: ssh docs-hub 'cd ./app/LS && sudo docker-compose -f ./docker-compose.prod.yml --env-file ./.env.prod up -d'
 
       - name: Clear unused images & containers
         run: ssh docs-hub 'cd ./app/LS && sudo docker system prune -f'

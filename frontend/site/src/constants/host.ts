@@ -1,3 +1,5 @@
+import {isProduction} from 'env'
+
 export const getFullUrl = (url: string) => {
-    return `http://localhost:8000${url}`;
+    return isProduction ? url : `http://localhost:8000${url}`;
 };

@@ -1,11 +1,20 @@
 import { config as getDotEnv } from 'dotenv';
 
-getDotEnv();
+if (!process.env.PROD_ENV) {
+    getDotEnv({
+        path: '../../.env.dev',
+     });
+}
 
-const defaultHost = '127.0.0.1';
-const defaultPort = 8000;
+export const port = Number(process.env.BACKEND_PORT) || -1;
+export const host = process.env.BACKEND_HOST ?? '';
 
-export const port = Number(process.env.PORT ?? defaultPort);
-export const host = process.env.HOST ?? defaultHost;
+export const redisPort = Number(process.env.REDIS_PORT) ?? -1;
+export const redisHost = process.env.REDIS_HOST ?? '';
 
-export const baseGitPath = process.env.GIT_PATH ?? '/repositories';
+export const pgPort = Number(process.env.PG_PORT) ?? -1;
+export const pgHost = process.env.PG_HOST ?? '';
+export const pgPassword = process.env.PG_PASSWORD ?? '';
+export const pgUsername = process.env.PG_USER ?? '';
+
+export const baseGitPath = process.env.PATH_TO_REPOSITORIES ?? '';
