@@ -176,13 +176,13 @@ export const RepositoryFns = {
             git,
             isNeedDraft
                 ? new Git(
-                    {
-                        email: user.email,
-                        username: user.username,
-                    },
-                    repository.title,
-                    true,
-                  ) 
+                      {
+                          email: user.email,
+                          username: user.username,
+                      },
+                      repository.title,
+                      true,
+                  )
                 : undefined,
         ];
     },
@@ -238,7 +238,7 @@ export const RepositoryFns = {
             throw errors.cannotCreateDraftRepositpory('');
         }
 
-        const deletedFileOfDir = await gitDraft.deleteFileOrDir(pathToFileOrDir, fileOrDirName)
+        const deletedFileOfDir = await gitDraft.deleteFileOrDir(pathToFileOrDir, fileOrDirName);
 
         return deletedFileOfDir;
     },

@@ -227,7 +227,7 @@ export class Git {
     }
 
     async addFile(pathToFile: string[], fileName: string, absFullPathToFileTmp: string): Promise<FileMeta> {
-        await this._capture()
+        await this._capture();
 
         const absFullPathToFile = path.join(this._getDraftAbsPathToFile(pathToFile), fileName);
 
@@ -243,7 +243,7 @@ export class Git {
             name: fileName,
             pathToFile,
             status,
-        }
+        };
     }
 
     async deleteFileOrDir(pathToFileOrDir: string[], fileOrDirName: string): Promise<FileMeta | DirMeta> {
@@ -253,7 +253,7 @@ export class Git {
         const isDir = (await fse.stat(absFullPathToFile)).isDirectory();
 
         try {
-            await fse.remove(absFullPathToFile)
+            await fse.remove(absFullPathToFile);
         } catch (error) {
             throw errors.deleteFileError('');
         }
@@ -267,7 +267,7 @@ export class Git {
             ...(isDir
                 ? { pathToDir: pathToFileOrDir, status: DirStatus.delete }
                 : { pathToFile: pathToFileOrDir, status: FileStatus.delete }),
-        }
+        };
     }
 
     async renameFileOrDir(pathToFileOrDir: string[], fileOrDirName: string, newFileOrDirName: string) {
@@ -309,7 +309,7 @@ export class Git {
             name: newFileOrDirName,
             pathToFile: pathToFileOrDir,
             status,
-        }
+        };
     }
 
     async getDirFiles(pathToDir: string[] = [], dirName: string): Promise<{ files: FileMeta[]; dirs: DirMeta[] }> {

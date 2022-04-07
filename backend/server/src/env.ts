@@ -3,7 +3,7 @@ import { config as getDotEnv } from 'dotenv';
 if (!process.env.PROD_ENV) {
     getDotEnv({
         path: '../../.env.dev',
-     });
+    });
 }
 
 export const port = Number(process.env.BACKEND_PORT) || -1;
