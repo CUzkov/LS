@@ -62,7 +62,7 @@ const webpackConfig = (): Configuration => ({
     plugins: [
         // DefinePlugin allows you to create global constants which can be configured at compile time
         new DefinePlugin({
-            'process.env.PROD_ENV': JSON.stringify(process.env.PROD_ENV || false),
+            PROD_ENV: JSON.stringify(process.env.PROD_ENV),
         }),
     ],
 });

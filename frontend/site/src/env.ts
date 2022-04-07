@@ -1,3 +1,3 @@
-export const isProduction = Boolean(process.env.PROD_ENV);
+export const isProduction = Boolean(PROD_ENV);
 
-console.log(process.env.PROD_ENV)
+console.log(PROD_ENV)
