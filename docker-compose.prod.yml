@@ -44,6 +44,7 @@ services:
       PG_USER: ${PG_USER}
       PG_DB: ${PG_DB}
       PG_PASSWORD: ${PG_PASSWORD}
+      GIT_DISCOVERY_ACROSS_FILESYSTEM: 1
 
   spa:
     build:
