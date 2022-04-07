@@ -35,7 +35,7 @@ export const LoginForm: FC = () => {
             user.username = userForm['email-username'];
         }
 
-        loginUser(dispatch, user);
+        loginUser(user);
     }, []);
 
     const formValidate = useCallback(() => {

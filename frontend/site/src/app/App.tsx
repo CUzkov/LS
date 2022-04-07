@@ -2,7 +2,7 @@ import React, { useEffect, FC } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 import { checkAuth } from 'actions/user';
-import { useDispatch, useSelector } from 'store/store';
+import { useSelector } from 'store/store';
 import { Header } from 'components/Header';
 import {
     getMainPage,
@@ -31,13 +31,12 @@ import { FetchStatus } from 'types';
 import styles from './style.scss';
 
 export const App: FC = () => {
-    const dispatch = useDispatch();
     const userStore = useSelector((root) => root.user);
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
     useEffect(() => {
-        checkAuth(dispatch);
+        checkAuth();
     }, []);
 
     useEffect(() => {

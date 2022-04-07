@@ -6,7 +6,7 @@ import {
     CheckIsRepositoryNameFreeRD,
 } from '@api-types/repository/check-is-repository-name-free';
 
-import { ajax2, ContentType, AjaxType } from '../ajax';
+import { ajax } from '../ajax';
 import { Empty, IServerError, Repository } from '../types';
 import { Dispatch, store } from '../store';
 
@@ -18,13 +18,17 @@ export const createRepository = async (props: CreateRepositoryD): Promise<Reposi
 
     dispath({ type: 'create-repository-form/loading' });
 
-    let response: CreateRepositoryRD;
+    let response: CreateRepositoryRD | undefined;
 
     try {
-        response = await ajax2.post<CreateRepositoryD, CreateRepositoryRD, Empty>({
+        response = await ajax.post<CreateRepositoryD, CreateRepositoryRD, Empty>({
             url: CREATE_REPOSITORY_URL,
             data: props,
         });
+
+        if (!response) {
+            return;
+        }
     } catch (error) {
         const e = (error as AxiosError).response?.data as IServerError;
 
@@ -53,13 +57,17 @@ export const checkIsRepositoryNameFree = async (props: { title: string }) => {
 
     dispath({ type: 'create-repository-form/is-repository-name-free/loading' });
 
-    let response: CheckIsRepositoryNameFreeRD;
+    let response: CheckIsRepositoryNameFreeRD | undefined;
 
     try {
-        response = await ajax2.post<CheckIsRepositoryNameFreeD, CheckIsRepositoryNameFreeRD, Empty>({
+        response = await ajax.post<CheckIsRepositoryNameFreeD, CheckIsRepositoryNameFreeRD, Empty>({
             url: CHECK_IS_REPOSIROTY_NAME_FREE_URL,
             data: props,
         });
+
+        if (!response) {
+            return;
+        }
     } catch (error) {
         const e = (error as AxiosError).response?.data as IServerError;
 

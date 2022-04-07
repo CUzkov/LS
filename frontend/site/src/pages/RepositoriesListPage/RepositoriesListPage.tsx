@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, FC } from 'react';
 import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
 
 import { PageWrapper } from 'pages/page-wrapper';
-import { useDispatch, useSelector } from 'store/store';
+import { useSelector } from 'store/store';
 import { ItemCard } from 'components/ItemCard';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { RepositoriesPageFilters } from 'components/RepositoriesPageFilters';
@@ -16,7 +16,6 @@ import styles from './style.scss';
 export const RepositoriesListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
     const { repositories } = useSelector((root) => root.repositoriesListPage);
-    const dispatch = useDispatch();
 
     const [query] = useQueryParams({
         by_user: NumberParam,
@@ -26,7 +25,7 @@ export const RepositoriesListPage: FC = () => {
     });
 
     useEffect(() => {
-        getPageRepositoriesByFilters(dispatch, {
+        getPageRepositoriesByFilters({
             by_user: query.by_user || -1,
             is_rw: Boolean(query.is_rw),
             is_rwa: Boolean(query.is_rwa),

@@ -17,7 +17,7 @@ import {
 
 import { getDirKeyByPath } from 'pages/repository-page/repository-page.utils';
 
-import { ajax2 } from '../ajax';
+import { ajax } from '../ajax';
 import { DirMeta, Empty, FileMeta, IServerError } from 'types';
 import { Dispatch, store } from '../store';
 
@@ -39,7 +39,7 @@ export const getPageRepositoriesById = async (id: number) => {
     let response: RepositoryByIdRD | undefined;
 
     try {
-        response = await ajax2.get<RepositoryByIdRD, RepositoryByIdQP>({
+        response = await ajax.get<RepositoryByIdRD, RepositoryByIdQP>({
             url: REPOSITORY_BY_ID_URL,
             queryParams: { id },
         });
@@ -80,7 +80,7 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
     let response: FilesByDirPathRD | undefined;
 
     try {
-        response = await ajax2.get<FilesByDirPathRD, FilesByDirPathQP>({
+        response = await ajax.get<FilesByDirPathRD, FilesByDirPathQP>({
             url: isDraft ? GET_DRAFT_FILES_BY_FULL_DIR_PATH : GET_FILES_BY_FULL_DIR_PATH_URL,
             queryParams: {
                 pathToDir: pathToDir.join('~'),
@@ -122,7 +122,7 @@ export const addFile = async (file: File, isBeDeleted?: boolean) => {
     let response: AddFileToRepositoryRD | undefined;
 
     try {
-        response = await ajax2.post<FormData, AddFileToRepositoryRD, Empty>({
+        response = await ajax.post<FormData, AddFileToRepositoryRD, Empty>({
             url: ADD_FILE_TO_REPOSITORY,
             data: fileForm,
         });
@@ -131,8 +131,6 @@ export const addFile = async (file: File, isBeDeleted?: boolean) => {
             return;
         }
     } catch (error) {
-        const e = error as IServerError;
-
         dispath({
             type: 'logger/add-log',
             data: { title: 'Ошибка загрузки файла!', description: `Файл ${file.name} не загружен`, type: 'error' },
@@ -161,7 +159,7 @@ export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
     let response: DeleteFileFromRepositoryRD | undefined;
 
     try {
-        response = await ajax2.post<DeleteFileFromRepositoryD, DeleteFileFromRepositoryRD, Empty>({
+        response = await ajax.post<DeleteFileFromRepositoryD, DeleteFileFromRepositoryRD, Empty>({
             url: DELETE_FILE_OR_DIR_FROM_REPOSITORY,
             data: {
                 name: fileOrDir.name,
@@ -174,8 +172,6 @@ export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
             return;
         }
     } catch (error) {
-        const e = error as IServerError;
-
         dispath({
             type: 'logger/add-log',
             data: {
@@ -202,7 +198,7 @@ export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: st
     let response: RenameFileInRepositoryRD | undefined;
 
     try {
-        response = await ajax2.post<RenameFileInRepositoryD, RenameFileInRepositoryRD, Empty>({
+        response = await ajax.post<RenameFileInRepositoryD, RenameFileInRepositoryRD, Empty>({
             url: RENAME_FILE_OR_DIR_IN_REPOSITORY,
             data: {
                 name: fileOrDir.name,
@@ -250,7 +246,7 @@ export const addDirToRepository = async (newDirName: string) => {
     let response: AddDirToRepositoryRD | undefined;
 
     try {
-        response = await ajax2.post<AddDirToRepositoryD, AddDirToRepositoryRD, Empty>({
+        response = await ajax.post<AddDirToRepositoryD, AddDirToRepositoryRD, Empty>({
             url: ADD_DIR_TO_REPOSITORY,
             data: {
                 newDirName,
@@ -263,8 +259,6 @@ export const addDirToRepository = async (newDirName: string) => {
             return;
         }
     } catch (error) {
-        const e = error as IServerError;
-
         dispath({
             type: 'logger/add-log',
             data: {
@@ -291,7 +285,7 @@ export const saveRepositoryVersion = async (versionSummary: string, version: num
     }
 
     try {
-        await ajax2.post<SaveRepositoryVersionD, Empty, Empty>({
+        await ajax.post<SaveRepositoryVersionD, Empty, Empty>({
             url: SAVE_REPOSITORY_VERSION,
             data: {
                 repositoryId: repository.id,
@@ -326,7 +320,7 @@ export const getAllVersions = async () => {
     let response: GetAllRepositoryVersionsRD | undefined;
 
     try {
-        response = await ajax2.get<GetAllRepositoryVersionsRD, GetAllRepositoryVersionsQP>({
+        response = await ajax.get<GetAllRepositoryVersionsRD, GetAllRepositoryVersionsQP>({
             url: GET_ALL_REPOSITORY_VERSIONS,
             queryParams: {
                 repositoryId: repository.id,

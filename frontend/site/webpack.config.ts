@@ -55,9 +55,6 @@ const webpackConfig = (): Configuration => ({
     devServer: {
         port: 3000,
         historyApiFallback: true,
-        proxy: {
-            '/api/**': 'http://localhost:8000',
-        },
     },
     plugins: [
         // DefinePlugin allows you to create global constants which can be configured at compile time

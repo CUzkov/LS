@@ -1,40 +1,43 @@
 import { CheckAuthRD } from '@api-types/auth/check-auth';
 import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
 
-import { ajax, ContentType, AjaxType } from '../ajax';
-import type { IServerError, Empty } from '../types';
-import type { Dispatch } from '../store';
+import { ajax } from '../ajax';
+import { IServerError, Empty } from '../types';
+import { Dispatch, store } from '../store';
 import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
 
 const CHECK_AUTH_URL = '/api/auth/check';
 const LOGIN_USER_URL = '/api/auth/login';
 
-export const loginUser = async (dispath: Dispatch, props: LoginUserD) => {
+export const loginUser = async (props: LoginUserD) => {
+    const dispath: Dispatch = store.dispatch;
+
     dispath({ type: 'login-form/loading' });
 
-    let response: LoginUserRD | IServerError;
+    let response: LoginUserRD | undefined;
 
     try {
-        response = await ajax<LoginUserRD | IServerError, LoginUserD>({
-            type: AjaxType.post,
-            contentType: ContentType.JSON,
+        response = await ajax.post<LoginUserD, LoginUserRD, Empty>({
             url: LOGIN_USER_URL,
             data: props,
         });
-    } catch (error) {
-        dispath({ type: 'login-form/error', data: { error: '' } });
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
-        return;
-    }
 
-    if ('error' in response) {
-        if (response.error === NO_SUCH_USER || response.error === INCORRECT_PASSWORD) {
-            dispath({ type: 'login-form/error', data: { error: response.error } });
+        if (!response) {
             return;
         }
+    } catch (error) {
+        const e = error as IServerError;
 
-        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Неизвестная ошибка :(', description: '' } });
-        dispath({ type: 'login-form/error', data: { error: '' } });
+        if (e?.error) {
+            if (e.error === NO_SUCH_USER || e.error === INCORRECT_PASSWORD) {
+                dispath({ type: 'login-form/error', data: { error: e.error } });
+                return;
+            }
+
+            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.error, description: e.description } });
+        }
+
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
         return;
     }
 
@@ -50,24 +53,33 @@ export const loginUser = async (dispath: Dispatch, props: LoginUserD) => {
     });
 };
 
-export const checkAuth = async (dispath: Dispatch) => {
+export const checkAuth = async () => {
+    const dispath: Dispatch = store.dispatch;
+
     dispath({ type: 'user/loading' });
 
-    let response: CheckAuthRD | IServerError;
+    let response: CheckAuthRD | undefined;
 
     try {
-        response = await ajax<CheckAuthRD | IServerError, Empty>({
-            type: AjaxType.get,
-            contentType: ContentType.JSON,
+        response = await ajax.get<CheckAuthRD, Empty>({
             url: CHECK_AUTH_URL,
         });
-    } catch (error) {
-        dispath({ type: 'user/none' });
-        return;
-    }
 
-    if ('error' in response) {
+        if (!response) {
+            return;
+        }
+    } catch (error) {
+        const e = error as IServerError;
+        
         dispath({ type: 'user/none' });
+
+        if (e?.error) {
+            dispath({
+                type: 'logger/add-log',
+                data: { type: 'error', title: e.error, description: e.description },
+            });
+        }
+
         return;
     }
 
