@@ -333,4 +333,24 @@ export class Git {
             errors.cannotCreateNewDir(e.message);
         }
     }
+
+    async addFile(pathToFile: string[], fileName: string, absFullPathToFileTmp: string): Promise<FileMeta> {
+        await this.capture()
+
+        const absFullPathToFile = path.join(this.getDraftAbsPathToFile(pathToFile), fileName);
+
+        await fse.move(absFullPathToFileTmp, absFullPathToFile);
+
+        await this.add();
+
+        const status = await this.getFileStatusByFullPathToFile(path.join(...pathToFile, fileName));
+
+        this.release();
+
+        return {
+            name: fileName,
+            pathToFile,
+            status,
+        }
+    }
 }

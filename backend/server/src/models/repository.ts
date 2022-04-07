@@ -226,23 +226,9 @@ export const RepositoryFns = {
             throw errors.fileNameNotPresent('');
         }
 
-        await gitDraft.capture();
+        const addedFile = await gitDraft.addFile(pathToFile, file.originalFilename, file.filepath);
 
-        const absFullPathToFile = path.join(gitDraft.getDraftAbsPathToFile(pathToFile), file.originalFilename);
-
-        await fsAsync.rename(file.filepath, absFullPathToFile);
-
-        await gitDraft.add();
-
-        const status = await gitDraft.getFileStatusByFullPathToFile(path.join(...pathToFile, file.originalFilename));
-
-        gitDraft.release();
-
-        return {
-            name: file.originalFilename,
-            pathToFile,
-            status,
-        };
+        return addedFile;
     },
     deleteFileOrDirFromRepository: async (
         id: number,
