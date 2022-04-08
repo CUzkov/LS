@@ -1,8 +1,12 @@
 export type RepositoryByIdQP = {
     id: number;
+    version?: string;
 }
 
 export type RepositoryByIdRD = {
-    title: string;
-    id: number;
+    repository: {
+        title: string;
+        id: number;
+    },
+    version: string;
 };

@@ -64,6 +64,8 @@ export const RepositoryFns = {
             newRepository.title,
         );
 
+        await git.init();
+
         let result: QueryResult<CreateRepositoryR>;
 
         try {
@@ -112,7 +114,7 @@ export const RepositoryFns = {
     getRepositoryByFilters: async (
         { by_user, title, is_rw, is_rwa }: RepositoryFilters,
         userId: number,
-    ): Promise<Repository[]> => {
+    ): Promise<{ repository: Repository; version: string }[]> => {
         let result: QueryResult<GetRepositoryByFiltersR>;
 
         try {
@@ -130,22 +132,40 @@ export const RepositoryFns = {
             throw errors.dbError(e.message);
         }
 
-        return result.rows.map((row) => ({
-            id: row.id,
-            path_to_repository: row.path_to_repository,
-            is_private: row.is_private,
-            user_id: row.user_id,
-            title: row.title,
-            rubric_id: row.rubric_id,
-            map_id: row.map_id,
-            rootFiles: [],
-        }));
+        const user = await UserFns.getUserById(userId);
+
+        const resultPromises = result.rows.map(async (row) => {
+            const git = new Git(
+                {
+                    email: user.email,
+                    username: user.username,
+                },
+                row.title,
+            );
+
+            return {
+                repository: {
+                    id: row.id,
+                    path_to_repository: row.path_to_repository,
+                    is_private: row.is_private,
+                    user_id: row.user_id,
+                    title: row.title,
+                    rubric_id: row.rubric_id,
+                    map_id: row.map_id,
+                    rootFiles: [],
+                },
+                version: await git.getCurrentVersion(),
+            };
+        });
+
+        return await Promise.all(resultPromises);
     },
     getRepositoryById: async (
         id: number,
         userId: number,
         isNeedDraft = false,
-    ): Promise<[Repository, Git, Git | undefined]> => {
+        version?: string,
+    ): Promise<[Repository, Git, Git | undefined, Git | undefined]> => {
         const user = await UserFns.getUserById(userId);
         let result: QueryResult<GetRepositoryByIdR>;
 
@@ -171,20 +191,36 @@ export const RepositoryFns = {
             repository.title,
         );
 
-        return [
-            repository,
-            git,
-            isNeedDraft
-                ? new Git(
-                      {
-                          email: user.email,
-                          username: user.username,
-                      },
-                      repository.title,
-                      true,
-                  )
-                : undefined,
-        ];
+        await git.init();
+
+        const gitDraft = isNeedDraft
+            ? new Git(
+                  {
+                      email: user.email,
+                      username: user.username,
+                  },
+                  repository.title,
+                  true,
+              )
+            : undefined;
+
+        await gitDraft?.init();
+
+        const gitVersion = version
+            ? new Git(
+                  {
+                      email: user.email,
+                      username: user.username,
+                  },
+                  repository.title,
+                  false,
+                  { git, version },
+              )
+            : undefined;
+
+        await gitVersion?.init();
+
+        return [repository, git, gitDraft, gitVersion];
     },
     getAbsFullPathToFile: async (
         id: number,
@@ -206,9 +242,15 @@ export const RepositoryFns = {
         userId: number,
         pathToDir: string[] = [],
         dirName = '',
+        version?: string,
     ): Promise<{ files: FileMeta[]; dirs: DirMeta[] }> => {
-        const [, git] = await RepositoryFns.getRepositoryById(id, userId);
-        const filesAndDirs = git.getDirFiles(pathToDir, dirName);
+        const [, git, , gitByVersion] = await RepositoryFns.getRepositoryById(id, userId, false, version);
+
+        if (version && !gitByVersion) {
+            throw errors.cannotCheckoutToVersion('');
+        }
+
+        const filesAndDirs = (version ? gitByVersion ?? git : git).getDirFiles(pathToDir, dirName);
         return filesAndDirs;
     },
     addFileToRepository: async (id: number, userId: number, pathToFile: string[], file: File): Promise<FileMeta> => {
@@ -271,7 +313,7 @@ export const RepositoryFns = {
             throw errors.cannotCreateDraftRepositpory('');
         }
 
-        git._capture();
+        await git._capture();
 
         if (!repository?.path_to_draft_repository) {
             await fse.copy(git.path, gitDraft.path);
@@ -321,14 +363,23 @@ export const RepositoryFns = {
             status: DirStatus.none,
         };
     },
-    saveRepositoryVersion: async (id: number, userId: number, versionSummary: string, version: string) => {
+    saveRepositoryVersion: async (
+        id: number,
+        userId: number,
+        versionSummary: string,
+        version: [number, number, number],
+    ) => {
         const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
             throw errors.cannotCreateDraftRepositpory('');
         }
 
-        await gitDraft.saveVersion(git, versionSummary, version);
+        const formattedVersion = await gitDraft.saveVersion(git, versionSummary, version);
+
+        return {
+            version: formattedVersion,
+        };
     },
     getAllRepositoryVersions: async (id: number, userId: number): Promise<string[]> => {
         const [, git] = await RepositoryFns.getRepositoryById(id, userId);

@@ -7,7 +7,6 @@ import { Button } from 'small-components/Button';
 import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { noop } from 'utils/noop';
-import { useDispatch } from 'store/store';
 import { RWA } from 'types';
 
 import styles from './style.scss';
@@ -40,8 +39,6 @@ const options = [
 ];
 
 export const RepositoriesPageFilters: FC = () => {
-    const dispatch = useDispatch();
-
     const [query, setQuery] = useQueryParams({
         by_user: NumberParam,
         is_rw: BooleanParam,
@@ -51,7 +48,7 @@ export const RepositoriesPageFilters: FC = () => {
 
     const handleSubmitTitleForm = useCallback(
         (values: { title: string }) => {
-            getPageRepositoriesByFilters(dispatch, {
+            getPageRepositoriesByFilters({
                 by_user: -1,
                 is_rw: !!query.is_rw,
                 is_rwa: !!query.is_rwa,
@@ -68,7 +65,7 @@ export const RepositoriesPageFilters: FC = () => {
             const isRw = value === RWA.rw;
             const isRwa = value === RWA.rwa;
 
-            getPageRepositoriesByFilters(dispatch, {
+            getPageRepositoriesByFilters({
                 by_user: -1,
                 is_rw: isRw,
                 is_rwa: isRwa,

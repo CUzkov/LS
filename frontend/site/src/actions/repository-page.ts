@@ -1,11 +1,9 @@
-import { AxiosError } from 'axios';
-
 import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-repository-by-id';
 import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
 import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
 import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
 import { AddDirToRepositoryD, AddDirToRepositoryRD } from '@api-types/repository/add-dir-to-repository';
-import { SaveRepositoryVersionD } from '@api-types/repository/save-repository-version';
+import { SaveRepositoryVersionD, SaveRepositoryVersionRD } from '@api-types/repository/save-repository-version';
 import {
     GetAllRepositoryVersionsQP,
     GetAllRepositoryVersionsRD,
@@ -31,7 +29,7 @@ const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
 const SAVE_REPOSITORY_VERSION = '/api/repository/version/save';
 const GET_ALL_REPOSITORY_VERSIONS = '/api/repository/version/all';
 
-export const getPageRepositoriesById = async (id: number) => {
+export const getPageRepositoriesById = async (id: number, version?: string) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'repository-page/repository/loading' });
@@ -41,7 +39,7 @@ export const getPageRepositoriesById = async (id: number) => {
     try {
         response = await ajax.get<RepositoryByIdRD, RepositoryByIdQP>({
             url: REPOSITORY_BY_ID_URL,
-            queryParams: { id },
+            queryParams: { id, version },
         });
 
         if (!response) {
@@ -64,11 +62,11 @@ export const getPageRepositoriesById = async (id: number) => {
     });
 };
 
-export const getFilesByPath = async (pathToDir: string[], dirName: string, isDraft: boolean) => {
+export const getFilesByPath = async (pathToDir: string[], dirName: string, isDraft: boolean, version?: string) => {
     const dispath: Dispatch = store.dispatch;
 
     const {
-        repositoryPage: { repository },
+        repositoryPage: { repository, repositoryVersion },
     } = store.getState();
 
     if (!repository?.id) {
@@ -86,6 +84,7 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
                 pathToDir: pathToDir.join('~'),
                 dirName,
                 repositoryId: repository?.id ?? -1,
+                version: version ?? repositoryVersion,
             },
         });
 
@@ -273,7 +272,10 @@ export const addDirToRepository = async (newDirName: string) => {
     dispath({ type: 'repository-page/dir/add', data: response });
 };
 
-export const saveRepositoryVersion = async (versionSummary: string, version: number[]): Promise<boolean> => {
+export const saveRepositoryVersion = async (
+    versionSummary: string,
+    version: [number, number, number],
+): Promise<string | undefined> => {
     const dispath: Dispatch = store.dispatch;
 
     const {
@@ -281,11 +283,13 @@ export const saveRepositoryVersion = async (versionSummary: string, version: num
     } = store.getState();
 
     if (!repository?.id) {
-        return false;
+        return;
     }
 
+    let response: SaveRepositoryVersionRD | undefined;
+
     try {
-        await ajax.post<SaveRepositoryVersionD, Empty, Empty>({
+        response = await ajax.post<SaveRepositoryVersionD, SaveRepositoryVersionRD, Empty>({
             url: SAVE_REPOSITORY_VERSION,
             data: {
                 repositoryId: repository.id,
@@ -293,15 +297,19 @@ export const saveRepositoryVersion = async (versionSummary: string, version: num
                 versionSummary,
             },
         });
+
+        if (!response) {
+            return;
+        }
     } catch (error) {
         dispath({
             type: 'logger/add-log',
             data: { title: 'Ошибка создания новой версии!', description: 'Новая версия не создана', type: 'error' },
         });
-        return false;
+        return;
     }
 
-    return true;
+    return response.version;
 };
 
 export const getAllVersions = async () => {
@@ -347,5 +355,11 @@ export const getAllVersions = async () => {
 
 export const clearRepositoryPage = () => {
     const dispath: Dispatch = store.dispatch;
-    dispath({type: 'repository-page/clear'})
-}
+    dispath({ type: 'repository-page/clear' });
+};
+
+export const setRepositoryVersion = (version: string) => {
+    const dispath: Dispatch = store.dispatch;
+
+    dispath({ type: 'repository-page/repository/version', data: version });
+};

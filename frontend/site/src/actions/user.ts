@@ -70,7 +70,7 @@ export const checkAuth = async () => {
         }
     } catch (error) {
         const e = error as IServerError;
-        
+
         dispath({ type: 'user/none' });
 
         if (e?.error) {

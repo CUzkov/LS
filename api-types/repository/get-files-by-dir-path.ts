@@ -18,6 +18,7 @@ export type FilesByDirPathQP = {
     repositoryId: number;
     pathToDir: string;
     dirName: string;
+    version?: string;
 }
 
 export type FilesByDirPathRD = {

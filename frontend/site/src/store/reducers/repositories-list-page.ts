@@ -1,28 +1,18 @@
 import { FetchStatus, Repository } from '../../types';
 
-export interface IRepositoriesListPageD {
-    repositories?: {
-        data: Repository[];
-    };
-}
-
 export type RepositoriesListPageEvents =
-    | { type: 'repositories-list-page/repositories-list/success'; data: IRepositoriesListPageD }
+    | { type: 'repositories-list-page/repositories-list/success'; data: { repository: Repository; version: string }[] }
     | { type: 'repositories-list-page/repositories-list/loading' }
     | { type: 'repositories-list-page/repositories-list/error' };
 
 export type RepositoriesListPageStore = {
-    repositories: {
-        data: Repository[];
-        fetchStatus: FetchStatus;
-    };
+    repositories: { repository: Repository; version: string }[];
+    fetchStatus: FetchStatus;
 };
 
 const initialState: RepositoriesListPageStore = {
-    repositories: {
-        data: [],
-        fetchStatus: FetchStatus.loading,
-    },
+    repositories: [],
+    fetchStatus: FetchStatus.none,
 };
 
 export const repositoriesListPageReducer = (
@@ -32,10 +22,8 @@ export const repositoriesListPageReducer = (
     if (event.type === 'repositories-list-page/repositories-list/success') {
         const result = { ...state };
 
-        result.repositories = {
-            data: event.data.repositories?.data ?? [],
-            fetchStatus: FetchStatus.successed,
-        };
+        result.repositories = event.data ?? [];
+        result.fetchStatus = FetchStatus.successed;
 
         return result;
     }
@@ -43,7 +31,7 @@ export const repositoriesListPageReducer = (
     if (event.type === 'repositories-list-page/repositories-list/loading') {
         const result = { ...state };
 
-        result.repositories.fetchStatus = FetchStatus.loading;
+        result.fetchStatus = FetchStatus.loading;
 
         return result;
     }
@@ -51,7 +39,7 @@ export const repositoriesListPageReducer = (
     if (event.type === 'repositories-list-page/repositories-list/error') {
         const result = { ...state };
 
-        result.repositories.fetchStatus = FetchStatus.error;
+        result.fetchStatus = FetchStatus.error;
 
         return result;
     }

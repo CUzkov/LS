@@ -6,6 +6,9 @@ export type RepositoriesByFilterQP = {
 }
 
 export type RepositoriesByFilterRD = {
-    title: string;
-    id: number;
+    repository: {
+        title: string;
+        id: number;
+    },
+    version: string;
 }[];

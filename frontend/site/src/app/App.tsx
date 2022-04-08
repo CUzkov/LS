@@ -13,7 +13,7 @@ import {
     getAllRepositories,
     getRepositoryTemplate,
 } from 'constants/routers';
-import { Logger } from 'components/Logger';
+import { Logger } from 'components/logger';
 import { MovablePopupManager } from 'components/movable-popup-manager';
 
 import {

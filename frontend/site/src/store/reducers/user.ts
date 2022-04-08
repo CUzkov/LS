@@ -5,7 +5,7 @@ type UserSuccesAction = {
     username?: string;
     email?: string;
     isAdmin?: boolean;
-}
+};
 
 export type UserEvents =
     | { type: 'user/error' }
@@ -30,7 +30,7 @@ const initialState: UserStore = {
 };
 
 export const userReducer = (state: UserStore = initialState, event: UserEvents): UserStore => {
-    const result = {...state};
+    const result = { ...state };
 
     if (event.type === 'user/error') {
         result.fetchStatus = FetchStatus.error;

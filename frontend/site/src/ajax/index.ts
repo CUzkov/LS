@@ -35,9 +35,9 @@ export const ajax = {
             });
         } catch (error) {
             const e = (error as AxiosError).response?.data as IServerError;
- 
+
             if ((error as AxiosError).response?.status === 401) {
-                dispath({type: 'user/none'});
+                dispath({ type: 'user/none' });
                 return;
             }
 
@@ -69,14 +69,17 @@ export const ajax = {
             response = await axios.post<RD>(getFullUrl(url), data, {
                 withCredentials: true,
                 params: queryParams,
-                headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {'Content-Type': 'application/json'},
+                headers:
+                    data instanceof FormData
+                        ? { 'Content-Type': 'multipart/form-data' }
+                        : { 'Content-Type': 'application/json' },
                 onUploadProgress,
             });
         } catch (error) {
             const e = (error as AxiosError).response?.data as IServerError;
- 
+
             if ((error as AxiosError).response?.status === 401) {
-                dispath({type: 'user/none'});
+                dispath({ type: 'user/none' });
                 return;
             }
 

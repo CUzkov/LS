@@ -9,6 +9,7 @@ export enum ErrorsTypes {
     fileNameNotPresent = 'fileNameNotPresent',
     deleteFileError = 'deleteFileError',
     cannotCreateDraftRepositpory = 'cannotCreateDraftRepositpory',
+    cannotCheckoutToVersion = 'cannotCheckoutToVersion',
     cannotCreateNewDir = 'cannotCreateNewDir',
 }
 
@@ -56,6 +57,11 @@ export const errors: Record<ErrorsTypes, (message: string) => ServerError> = {
     [ErrorsTypes.cannotCreateNewDir]: (message: string) => ({
         code: Code.internalServerError,
         name: 'Ошибка при новой папки',
+        message,
+    }),
+    [ErrorsTypes.cannotCheckoutToVersion]: (message: string) => ({
+        code: Code.badRequest,
+        name: 'Ошибка переключения версии репозитория',
         message,
     }),
 };

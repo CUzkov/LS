@@ -25,4 +25,5 @@ export const getPaths = (username: string, entityName: ReactNode, entityValue = 
 export const queryParamConfig = {
     fullPathToDir: StringParam,
     isEditing: BooleanParam,
+    version: StringParam,
 };

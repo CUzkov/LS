@@ -132,7 +132,7 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
                     {popups.map(({ content, title, priority, isRequired }, index) => (
                         <Popup
                             title={title}
-                            key={title + index}
+                            key={new Date().getTime() + index}
                             innerRef={popupsRefs[index]}
                             onMouseMove={(mouseX: number, mouseY: number, e: MouseEvent) =>
                                 handleMouseMove(index, mouseX, mouseY, e)

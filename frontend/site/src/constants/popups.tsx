@@ -2,7 +2,7 @@ import React from 'react';
 import { Form } from 'react-final-form';
 
 import { MovablePopupManagerContext } from 'components/movable-popup-manager/movable-popup.types';
-import { requiredValidate } from 'utils/final-forms';
+import { requiredValidate, Validator } from 'utils/final-forms';
 import { TextField } from 'small-components/Fields';
 import { Button } from 'small-components';
 import CrossIcon from 'assets/cross.svg';
@@ -54,6 +54,7 @@ export const textInputPopup = (
     text: string,
     defaultValue: string,
     isRequired = true,
+    validators?: Validator[],
 ) => {
     const id = String(++ids);
     const fieldName = 'field';
@@ -75,7 +76,7 @@ export const textInputPopup = (
                             return (
                                 <>
                                     <TextField
-                                        validators={[requiredValidate]}
+                                        validators={[requiredValidate, ...(validators ? validators : [])]}
                                         type="text"
                                         name={fieldName}
                                         defaultValue={defaultValue}

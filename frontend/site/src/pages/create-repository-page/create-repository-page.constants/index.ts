@@ -1,4 +1,3 @@
-import { cn } from 'utils/classname';
 import { getMainPage, getUserPage, getRepositoryCreate } from 'constants/routers';
 
 export const getPaths = (username: string) => [

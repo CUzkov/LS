@@ -24,7 +24,7 @@ export const getPageRepositoriesByFilters = async (filters: RepositoriesByFilter
         }
     } catch (error) {
         const e = error as IServerError;
-        
+
         dispath({ type: 'repositories-list-page/repositories-list/error' });
 
         if (e?.error) {
@@ -38,10 +38,6 @@ export const getPageRepositoriesByFilters = async (filters: RepositoriesByFilter
 
     dispath({
         type: 'repositories-list-page/repositories-list/success',
-        data: {
-            repositories: {
-                data: response,
-            },
-        },
+        data: response,
     });
 };

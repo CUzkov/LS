@@ -4,7 +4,13 @@ import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { getPageRepositoriesById, getFilesByPath, addFile, changeFilesDirPath, clearRepositoryPage } from 'actions/repository-page';
+import {
+    getPageRepositoriesById,
+    getFilesByPath,
+    addFile,
+    changeFilesDirPath,
+    clearRepositoryPage,
+} from 'actions/repository-page';
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { FetchStatus, FileStatus } from 'types';
 import { yesNoPopup } from 'constants/popups';
@@ -22,7 +28,9 @@ export const RepositoryPage: FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const context = useContext(MovablePopupManagerContext);
     const { username } = useSelector((root) => root.user);
-    const { repository, files, currentPath, repositoryFetchStatus } = useSelector((root) => root.repositoryPage);
+    const { repository, files, currentPath, repositoryFetchStatus, repositoryVersion } = useSelector(
+        (root) => root.repositoryPage,
+    );
     const isRepositoryLoading = repositoryFetchStatus === FetchStatus.loading;
     const { id } = useParams();
     const [query, setQuery] = useQueryParams(queryParamConfig);
@@ -75,21 +83,22 @@ export const RepositoryPage: FC = () => {
 
     useEffect(() => {
         if (id) {
-            getPageRepositoriesById(Number(id));
+            getPageRepositoriesById(Number(id), query.version ?? undefined);
         }
     }, [id]);
 
     useEffect(() => {
         if (repository?.id) {
             // query.pathToDir включает в себя dirName
-            getFilesByPath([query.fullPathToDir || ''], '', isEditing);
+            getFilesByPath([query.fullPathToDir || ''], '', isEditing, query.version ?? undefined);
+            setQuery({ version: repositoryVersion });
         }
         changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
     }, [repository?.id]);
 
     useEffect(() => {
         return () => clearRepositoryPage();
-    }, [])
+    }, []);
 
     const additionalPaths = useMemo(
         () => getDirPathByKey(query.fullPathToDir).map((path) => ({ title: path, url: '' })),

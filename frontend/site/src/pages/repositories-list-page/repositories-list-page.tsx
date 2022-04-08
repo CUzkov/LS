@@ -9,7 +9,7 @@ import { RepositoriesPageFilters } from 'components/RepositoriesPageFilters';
 import { getRepository } from 'constants/routers';
 import { PageTitle } from 'components/PageTitle';
 
-import { getPaths } from './RepositoriesListPage.constants';
+import { getPaths } from './repositories-list-page.constants';
 
 import styles from './style.scss';
 
@@ -39,7 +39,7 @@ export const RepositoriesListPage: FC = () => {
             <div className={styles.repositoriesListPage}>
                 <PageTitle title={'Репозитории'} rightChild={<RepositoriesPageFilters />} />
                 <div>
-                    {repositories.data.map((repository, index) => (
+                    {repositories.map(({ repository }, index) => (
                         <ItemCard
                             title={repository.title}
                             key={index}

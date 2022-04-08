@@ -49,19 +49,26 @@ export class Git {
     readonly repositoryName: string;
     readonly path: string;
     readonly gitCore: SimpleGit;
+    readonly version?: string;
+    readonly pathToOriginalVersion?: string;
 
-    constructor(user: GitUser, repositoryName: string, isDraft?: boolean) {
+    constructor(user: GitUser, repositoryName: string, isDraft?: boolean, versionOf?: { version: string; git: Git }) {
         this.user = {
             email: user.email,
             username: user.username,
         };
         this.repositoryName = repositoryName;
 
-        this.path = path.join(baseGitPath, isDraft ? 'draft' : '', this.user.username, this.repositoryName);
-
-        if (!fsSync.existsSync(this.path)) {
-            fsSync.mkdirSync(this.path, { recursive: true });
+        if (isDraft) {
+            this.path = path.join(baseGitPath, 'draft', this.user.username, this.repositoryName);
+        } else if (versionOf) {
+            this.version = versionOf.version;
+            this.path = path.join(baseGitPath, 'version-of', this.user.username, this.repositoryName, this.version);
+        } else {
+            this.path = path.join(baseGitPath, this.user.username, this.repositoryName);
         }
+
+        fse.ensureDirSync(this.path);
 
         this.gitCore = simpleGit({
             baseDir: this.path,
@@ -69,7 +76,22 @@ export class Git {
             maxConcurrentProcesses: 1,
         });
 
-        this.gitCore.init();
+        if (versionOf) {
+            this.pathToOriginalVersion = versionOf?.git.path ?? '';
+            fse.copySync(this.pathToOriginalVersion ?? '', this.path);
+        }
+    }
+
+    async init() {
+        await this._capture();
+
+        if (this.version) {
+            await this.gitCore.checkout(this.version ?? '');
+        } else {
+            await this.gitCore.init();
+        }
+
+        this._release();
     }
 
     async _capture() {
@@ -84,6 +106,10 @@ export class Git {
 
     async _add() {
         await this.gitCore.add('.');
+    }
+
+    _getFormattedVersion(version: [number, number, number]) {
+        return `v${version.join('.')}`;
     }
 
     _getFileStatus(index?: string): FileStatus {
@@ -193,13 +219,15 @@ export class Git {
     // внешние ручки для использования
 
     // коммитит изменения в драфт-репозитории и переносит их в обычный
-    async saveVersion(git: Git, commitMessage: string, version: string) {
-        git._capture();
-        this._capture();
+    async saveVersion(git: Git, commitMessage: string, version: [number, number, number]): Promise<string> {
+        await git._capture();
+        await this._capture();
+
+        const formattedVersion = this._getFormattedVersion(version);
 
         await this._add();
         await this.gitCore.commit(commitMessage);
-        await this.gitCore.addTag(version);
+        await this.gitCore.addTag(formattedVersion);
 
         const absFullPathToDir = git.getAbsPathToFile([]);
         const absFullPathToDirDraft = this.getAbsPathToFile([]);
@@ -210,6 +238,8 @@ export class Git {
 
         git._release();
         this._release();
+
+        return formattedVersion;
     }
 
     async getAllVersions(): Promise<string[]> {
@@ -218,12 +248,16 @@ export class Git {
     }
 
     async addDir(pathToDir: string[], newDirName: string) {
+        await this._capture();
+
         try {
             await fsAsync.mkdir(this.getAbsPathToFile([...pathToDir, newDirName]));
         } catch (error) {
             const e = error as Error;
             errors.cannotCreateNewDir(e.message);
         }
+
+        this._release();
     }
 
     async addFile(pathToFile: string[], fileName: string, absFullPathToFileTmp: string): Promise<FileMeta> {
@@ -247,7 +281,7 @@ export class Git {
     }
 
     async deleteFileOrDir(pathToFileOrDir: string[], fileOrDirName: string): Promise<FileMeta | DirMeta> {
-        this._capture();
+        await this._capture();
 
         const absFullPathToFile = this.getAbsPathToFile([...pathToFileOrDir, fileOrDirName]);
         const isDir = (await fse.stat(absFullPathToFile)).isDirectory();
@@ -271,7 +305,7 @@ export class Git {
     }
 
     async renameFileOrDir(pathToFileOrDir: string[], fileOrDirName: string, newFileOrDirName: string) {
-        this._capture();
+        await this._capture();
 
         const absFullPathToFile = this._getDraftAbsPathToFile([...pathToFileOrDir, fileOrDirName]);
         const absFullPathToFileNew = this._getDraftAbsPathToFile([...pathToFileOrDir, newFileOrDirName]);
@@ -313,8 +347,6 @@ export class Git {
     }
 
     async getDirFiles(pathToDir: string[] = [], dirName: string): Promise<{ files: FileMeta[]; dirs: DirMeta[] }> {
-        await this._add();
-
         const files: FileMeta[] = [];
         const dirs: DirMeta[] = [];
 
@@ -418,5 +450,15 @@ export class Git {
 
     getAbsPathToFile(pathToFile: string[]): string {
         return path.join(this.path, ...pathToFile);
+    }
+
+    async getCurrentVersion(): Promise<string> {
+        if (!this.version) {
+            const tags = await this.gitCore.tags();
+
+            return tags.latest ?? '';
+        }
+
+        return this.version;
     }
 }

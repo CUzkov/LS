@@ -13,7 +13,7 @@ import {
     GetAllRepositoryVersionsQP,
     GetAllRepositoryVersionsRD,
 } from '@api-types/repository/get-all-repository-versions';
-import { SaveRepositoryVersionD } from '@api-types/repository/save-repository-version';
+import { SaveRepositoryVersionD, SaveRepositoryVersionRD } from '@api-types/repository/save-repository-version';
 import {
     DeleteFileFromRepositoryD,
     DeleteFileFromRepositoryRD,
@@ -71,7 +71,10 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
             { ...data, title: formatTitleToPath(data.title) },
             userId,
         );
-        getOkResponse<CreateRepositoryRD>(response, repository);
+        getOkResponse<CreateRepositoryRD>(response, {
+            repository,
+            version: '',
+        });
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
@@ -120,8 +123,11 @@ export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = asyn
     }
 
     try {
-        const [repository] = await RepositoryFns.getRepositoryById(queryParams.id, userId);
-        getOkResponse<RepositoryByIdRD>(response, repository);
+        const [repository, git] = await RepositoryFns.getRepositoryById(queryParams.id, userId);
+        getOkResponse<RepositoryByIdRD>(response, {
+            repository,
+            version: queryParams?.version || (await git.getCurrentVersion()),
+        });
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
@@ -176,6 +182,7 @@ export const getFilesByFullDirPath: ResponseCallback<Empty, FilesByDirPathQP> = 
             userId,
             queryParams.pathToDir.split('~'),
             queryParams.dirName,
+            queryParams.version,
         );
         getOkResponse<FilesByDirPathRD>(response, files);
     } catch (error) {
@@ -328,7 +335,7 @@ export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = 
     }
 };
 
-export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Empty> = async ({
+export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, SaveRepositoryVersionRD> = async ({
     response,
     userId,
     data,
@@ -346,13 +353,13 @@ export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Emp
     }
 
     try {
-        await RepositoryFns.saveRepositoryVersion(
+        const version = await RepositoryFns.saveRepositoryVersion(
             data.repositoryId,
             userId,
             data.versionSummary,
-            data.version.join('.'),
+            data.version,
         );
-        getOkResponse<Empty>(response);
+        getOkResponse<SaveRepositoryVersionRD>(response, version);
     } catch (error) {
         const e = error as ServerError;
         getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));

@@ -1,5 +1,4 @@
 import React, { FC, RefObject, useCallback, useContext, useEffect } from 'react';
-import { Form } from 'react-final-form';
 import { useQueryParams } from 'use-query-params';
 import cn from 'classnames';
 
@@ -11,21 +10,20 @@ import {
     getAllVersions,
     getFilesByPath,
     saveRepositoryVersion,
+    setRepositoryVersion,
 } from 'actions/repository-page';
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
-import { SelectField } from 'small-components/Fields';
 import { textInputPopup } from 'constants/popups';
-import SpinnerIcon from 'assets/spinner.svg';
-import { noop } from 'utils/noop';
+import { repositoryVersionValidator } from 'utils/final-forms';
 
 import EditIcon from '../repository-page.assets/edit.svg';
 import AddFolderIcon from '../repository-page.assets/add-folder.svg';
 import AddFileIcon from '../repository-page.assets/add-file.svg';
 import SaveVersionIcon from '../repository-page.assets/save-version.svg';
 import { queryParamConfig } from '../repository-page.constants';
+import { RepositoryPageVersionFrom } from '../repository-page.version-form';
 
 import styles from './style.scss';
-import { FetchStatus } from 'types';
 
 type RepositoryPageHeaderProps = {
     isEditing: boolean;
@@ -34,12 +32,9 @@ type RepositoryPageHeaderProps = {
 };
 
 export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing, inputRef, toggleEditing }) => {
-    const { repository, versions, versionsFetchStatus } = useSelector((root) => root.repositoryPage);
+    const { repository } = useSelector((root) => root.repositoryPage);
     const [, setQuery] = useQueryParams(queryParamConfig);
     const context = useContext(MovablePopupManagerContext);
-    const isShowVersionSpinner =
-        versionsFetchStatus === FetchStatus.loading || versionsFetchStatus === FetchStatus.error;
-    const isShowVersions = (isShowVersionSpinner || !!versions.length) && !isEditing;
 
     const handleToggleEditing = useCallback(() => {
         toggleEditing();
@@ -79,19 +74,30 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
             return;
         }
 
-        const version = await textInputPopup(context, 'Введите версию', '', true);
+        const version = await textInputPopup(context, 'Введите версию', '', true, [repositoryVersionValidator]);
 
         if (!version) {
             return;
         }
 
-        await saveRepositoryVersion(versionSummary, version.split('.').map(Number));
+        const versionArray = version.split('.').map(Number);
+
+        const formattedVersion = await saveRepositoryVersion(versionSummary, [
+            versionArray[0],
+            versionArray[1],
+            versionArray[2],
+        ]);
+
+        if (!formattedVersion) {
+            return;
+        }
 
         toggleEditing();
-        setQuery({ fullPathToDir: undefined, isEditing: undefined });
+        setQuery({ fullPathToDir: undefined, isEditing: undefined, version: formattedVersion });
         getAllVersions();
-        getFilesByPath([], '', false);
+        getFilesByPath([], '', false, formattedVersion);
         changeFilesDirPath([]);
+        setRepositoryVersion(formattedVersion);
     }, []);
 
     useEffect(() => {
@@ -105,27 +111,7 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
             title={repository?.title}
             rightChild={
                 <div className={styles.actions}>
-                    <div
-                        className={cn(
-                            styles.versionsWrapper,
-                            isShowVersionSpinner && styles.loading,
-                            isShowVersions && styles.show,
-                        )}
-                    >
-                        <Form onSubmit={noop}>
-                            {() => (
-                                <form className={styles.versions}>
-                                    <SelectField
-                                        name="version"
-                                        options={versions.map((version) => ({ title: version, value: version }))}
-                                    />
-                                </form>
-                            )}
-                        </Form>
-                        <div className={cn(styles.versionsSpinner, isShowVersionSpinner && styles.loading)}>
-                            <SpinnerIcon />
-                        </div>
-                    </div>
+                    <RepositoryPageVersionFrom isEditing={isEditing} />
                     <div
                         className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
                         onClick={handleSaveVersion}

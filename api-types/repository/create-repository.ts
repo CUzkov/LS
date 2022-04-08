@@ -4,6 +4,9 @@ export type CreateRepositoryD = {
 }
 
 export type CreateRepositoryRD = {
-    title: string;
-    id: number;
+    repository: {
+        title: string;
+        id: number;
+    },
+    version: string;
 }

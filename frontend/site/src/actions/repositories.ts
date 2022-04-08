@@ -49,7 +49,7 @@ export const createRepository = async (props: CreateRepositoryD): Promise<Reposi
         data: { title: 'Репозиторий создан', description: 'Успешное создание нового репозитория', type: 'success' },
     });
 
-    return response;
+    return response.repository;
 };
 
 export const checkIsRepositoryNameFree = async (props: { title: string }) => {

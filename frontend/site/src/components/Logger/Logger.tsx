@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { useDispatch, useSelector } from 'store/store';
 import { deleteLog } from 'actions/logger';
 
-import { Log } from './Log';
+import { Log } from './log';
 
 import styles from './style.scss';
 

@@ -3,9 +3,10 @@ import { DirMeta, FetchStatus, FileMeta, Repository } from '../../types';
 const sortFiles = (a: FileMeta | DirMeta, b: FileMeta | DirMeta) => (a.name > b.name ? 1 : -1);
 
 export type RepositoryPageEvents =
-    | { type: 'repository-page/repository/success'; data: Repository }
+    | { type: 'repository-page/repository/success'; data: { repository: Repository; version: string } }
     | { type: 'repository-page/repository/loading' }
     | { type: 'repository-page/repository/error' }
+    | { type: 'repository-page/repository/version'; data: string }
     | { type: 'repository-page/files-and-dirs/success'; data: { files: FileMeta[]; dirs: DirMeta[] } }
     | { type: 'repository-page/files-and-dirs/loading' }
     | { type: 'repository-page/files-and-dirs/error' }
@@ -22,6 +23,7 @@ export type RepositoryPageEvents =
 
 export type RepositoryPageStore = {
     repository?: Repository;
+    repositoryVersion?: string;
     repositoryFetchStatus: FetchStatus;
     files: FileMeta[];
     dirs: DirMeta[];
@@ -49,7 +51,8 @@ export const repositoryPageReducer = (
     const result = { ...state };
 
     if (event.type === 'repository-page/repository/success') {
-        result.repository = event.data;
+        result.repository = event.data.repository;
+        result.repositoryVersion = event.data.version;
         result.repositoryFetchStatus = FetchStatus.successed;
     }
 
@@ -133,6 +136,11 @@ export const repositoryPageReducer = (
         result.files = [];
         result.dirs = [];
         result.versions = [];
+        result.repositoryVersion = undefined;
+    }
+
+    if (event.type === 'repository-page/repository/version') {
+        result.repositoryVersion = event.data;
     }
 
     return result;

@@ -12,20 +12,10 @@ export const emailValidate = (email: string): string | undefined => {
     return re.test(String(email).toLowerCase()) ? undefined : 'Неверный формат почты';
 };
 
-// export const passwordValidate = (password: string): string | undefined => {
-//     const re = /(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])/g;
-//     return re.test(String(password)) ? undefined : 'store.getState().mainLoc.demo_pass_not_valid_ch';
-// };
-
-// export const passwordLengthValidator = (password: string): string | undefined => {
-//     const re = /[0-9a-zA-Z!@#$%^&*]{6,}/g;
-//     return re.test(String(password)) ? undefined : 'store.getState().mainLoc.demo_pass_not_valid_length';
-// };
-
-// export const maxLengthValidator = (: string): string | undefined => {
-//     const re = /^.{0,5000}$/;
-//     return re.test(legalEntity) ? undefined : 'store.getState().mainLoc.demo_comment_not_valid_length';
-// };
+export const repositoryVersionValidator = (version: string): string | undefined => {
+    const re = /^[0-9]+.[0-9]+.[0-9]+$/;
+    return re.test(version) ? undefined : 'Недопустимый формат версии. Пример: 1.0.3';
+};
 
 export type Validator = ((email: string) => string | undefined) | ((password: string) => string | undefined);
 

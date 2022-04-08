@@ -1,5 +1,4 @@
 {
-    "references": [{ "path": "../../api-types" }],
 	"compilerOptions": {
 		"module": "commonjs",
 		"moduleResolution": "node",
@@ -13,6 +12,7 @@
 		"resolveJsonModule": true,
 		"downlevelIteration": true,
 		"strictNullChecks": true,
+		"outDir": "tsc-build",
 		"paths": {
 			"*": ["./src/*"],
 			"components/*": [
