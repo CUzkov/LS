@@ -4,9 +4,9 @@ import type { FC } from 'react';
 
 import type { Log as ILog } from 'store/reducers/logger';
 
-import OkIcon from './Log.assets/ok.svg';
-import ErrorIcon from './Log.assets/error.svg';
-import CrossIcon from './Log.assets/cross.svg';
+import OkIcon from './log.assets/ok.svg';
+import ErrorIcon from './log.assets/error.svg';
+import CrossIcon from './log.assets/cross.svg';
 
 import styles from './style.scss';
 
