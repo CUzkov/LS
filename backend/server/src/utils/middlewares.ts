@@ -2,9 +2,10 @@ import Cookies from 'cookies';
 import { ServerResponse } from 'http';
 import { IncomingForm } from 'formidable';
 
-import { MiddlewareRequest } from '../types';
-import { getUnauthorizedResponse } from './server-utils';
+import { Code, MiddlewareRequest } from '../types';
+import { getServerErrorResponse } from './server-utils';
 import { redis } from '../database';
+import { ServerError, errorNames } from './server-error';
 
 enum MiddlewareCode {
     noCookies = 'noCookies',
@@ -14,11 +15,14 @@ enum MiddlewareCode {
 
 const middlewaresErrors = {
     [MiddlewareCode.noCookies]: (response: ServerResponse) =>
-        getUnauthorizedResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
+        getServerErrorResponse(response, new ServerError({ name: errorNames.unauthorized, code: Code.unauthorized })),
     [MiddlewareCode.noAuth]: (response: ServerResponse) =>
-        getUnauthorizedResponse(response, 'Ошибка авторизации', 'Вы не авторизованы!'),
+        getServerErrorResponse(response, new ServerError({ name: errorNames.unauthorized, code: Code.unauthorized })),
     [MiddlewareCode.formDataError]: (response: ServerResponse) =>
-        getUnauthorizedResponse(response, 'Ошибка чтения формы', ''),
+        getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.formReadError, code: Code.internalServerError }),
+        ),
 };
 
 export const dataMiddleware = (request: MiddlewareRequest, resolve: () => void) => {

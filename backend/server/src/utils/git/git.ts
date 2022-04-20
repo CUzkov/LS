@@ -6,8 +6,9 @@ import simpleGit, { SimpleGit } from 'simple-git';
 const fsAsync = fsSync.promises;
 
 import { baseGitPath } from '../../env';
-import { errors } from '../../constants/errors';
 import { Mutex } from '../mutex';
+import { ServerError, errorNames } from '../server-error';
+import { Code } from '../../types';
 
 export enum FileStatus {
     commit = 'commit',
@@ -254,7 +255,7 @@ export class Git {
             await fsAsync.mkdir(this.getAbsPathToFile([...pathToDir, newDirName]));
         } catch (error) {
             const e = error as Error;
-            errors.cannotCreateNewDir(e.message);
+            throw new ServerError({ name: errorNames.cannotCreateNewDir, code: Code.badRequest, message: e.message });
         }
 
         this._release();
@@ -289,7 +290,8 @@ export class Git {
         try {
             await fse.remove(absFullPathToFile);
         } catch (error) {
-            throw errors.deleteFileError('');
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.deleteFileError, code: Code.badRequest, message: e.message });
         }
 
         await this._add();
@@ -315,7 +317,8 @@ export class Git {
         try {
             await fse.rename(absFullPathToFile, absFullPathToFileNew);
         } catch (error) {
-            throw errors.deleteFileError('');
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.renameFileOrDir, code: Code.badRequest, message: e.message });
         }
 
         await this._add();
@@ -357,8 +360,8 @@ export class Git {
         try {
             currDirFiles = await fsAsync.readdir(absFullPathToDir);
         } catch (error) {
-            const e = error as { message: string };
-            throw errors.readFileError(e.message);
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.deleteFileError, code: Code.badRequest, message: e.message });
         }
 
         const dirPromises = currDirFiles.map(async (currFileName) => {
@@ -407,8 +410,8 @@ export class Git {
         try {
             currDirFiles = await fsAsync.readdir(absFullPathToDir);
         } catch (error) {
-            const e = error as { message: string };
-            throw errors.readFileError(e.message);
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.readFileError, code: Code.badRequest, message: e.message });
         }
 
         const statuses = await this._getNormalizeFileStatuses();

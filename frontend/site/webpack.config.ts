@@ -1,12 +1,12 @@
 import path from 'path';
-import { Configuration, DefinePlugin } from 'webpack';
+import { DefinePlugin } from 'webpack';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const srcPath = (subdir: string) => {
     return path.join(__dirname, 'src', subdir);
 };
 
-const webpackConfig = (): Configuration => ({
+const webpackConfig = () => ({
     entry: './src/index.tsx',
     ...(process.env.production || !process.env.development ? {} : { devtool: 'eval-source-map' }),
 

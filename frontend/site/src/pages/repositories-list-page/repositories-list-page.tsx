@@ -8,6 +8,8 @@ import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { RepositoriesPageFilters } from 'components/RepositoriesPageFilters';
 import { getRepository } from 'constants/routers';
 import { PageTitle } from 'components/PageTitle';
+import { FetchStatus } from 'types';
+import SpinnerIcon from 'assets/spinner.svg';
 
 import { getPaths } from './repositories-list-page.constants';
 
@@ -15,7 +17,7 @@ import styles from './style.scss';
 
 export const RepositoriesListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
-    const { repositories } = useSelector((root) => root.repositoriesListPage);
+    const { repositories, fetchStatus } = useSelector((root) => root.repositoriesListPage);
 
     const [query] = useQueryParams({
         by_user: NumberParam,
@@ -38,18 +40,24 @@ export const RepositoriesListPage: FC = () => {
         () => (
             <div className={styles.repositoriesListPage}>
                 <PageTitle title={'Репозитории'} rightChild={<RepositoriesPageFilters />} />
-                <div>
-                    {repositories.map(({ repository }, index) => (
-                        <ItemCard
-                            title={repository.title}
-                            key={index}
-                            link={getRepository(username, String(repository.id))}
-                        />
-                    ))}
+                <div className={styles.repositories}>
+                    {fetchStatus === FetchStatus.successed &&
+                        repositories.map(({ repository }, index) => (
+                            <ItemCard
+                                title={repository.title}
+                                key={index}
+                                link={getRepository(username, String(repository.id))}
+                            />
+                        ))}
+                    {fetchStatus === FetchStatus.loading && (
+                        <div className={styles.spinner}>
+                            <SpinnerIcon />
+                        </div>
+                    )}
                 </div>
             </div>
         ),
-        [repositories],
+        [repositories, fetchStatus],
     );
 
     return <PageWrapper content={content} paths={paths} />;

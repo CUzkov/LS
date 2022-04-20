@@ -1,0 +1,22 @@
+@import '../../index.scss';
+
+.mapPage {
+    width: calc(100% - 65px);
+    box-sizing: border-box;
+    border-top: 1px solid $default-dark-border;
+    margin: 5px 10px 0 55px;
+
+    .graph {
+        height: calc(100vh - 224px);
+    }
+}
+
+.breadcrumbsSpinner {
+    height: 15px;
+    width: 15px;
+
+    svg {
+        height: 15px;
+        width: 15px;
+    }
+}

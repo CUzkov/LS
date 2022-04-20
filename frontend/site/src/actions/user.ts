@@ -4,7 +4,6 @@ import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
 import { ajax } from '../ajax';
 import { IServerError, Empty } from '../types';
 import { Dispatch, store } from '../store';
-import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
 
 const CHECK_AUTH_URL = '/api/auth/check';
 const LOGIN_USER_URL = '/api/auth/login';
@@ -28,13 +27,22 @@ export const loginUser = async (props: LoginUserD) => {
     } catch (error) {
         const e = error as IServerError;
 
-        if (e?.error) {
-            if (e.error === NO_SUCH_USER || e.error === INCORRECT_PASSWORD) {
-                dispath({ type: 'login-form/error', data: { error: e.error } });
-                return;
+        if (e?.name) {
+            if (e.fieldError?.fieldName) {
+                if (e.fieldError.fieldName === 'password') {
+                    dispath({ type: 'login-form/error', data: { field: 'passwordError', error: e.fieldError.error } });
+                    return;
+                } else if (e.fieldError.fieldName === 'emailOrUsername') {
+                    dispath({
+                        type: 'login-form/error',
+                        data: { field: 'loginOrEmailError', error: e.fieldError.error },
+                    });
+                    return;
+                }
             }
 
-            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.error, description: e.description } });
+            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.name, description: e.description } });
+            return;
         }
 
         dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
@@ -73,10 +81,10 @@ export const checkAuth = async () => {
 
         dispath({ type: 'user/none' });
 
-        if (e?.error) {
+        if (e?.name) {
             dispath({
                 type: 'logger/add-log',
-                data: { type: 'error', title: e.error, description: e.description },
+                data: { type: 'error', title: e.name, description: e.description },
             });
         }
 

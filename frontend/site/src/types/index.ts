@@ -1,6 +1,10 @@
 export interface IServerError {
-    error: string;
+    name: string;
     description: string;
+    fieldError?: {
+        fieldName: string;
+        error: string;
+    };
 }
 
 export type Empty = Record<string, never>;
@@ -56,3 +60,14 @@ export const enum RWA {
     rw = 'rw',
     rwa = 'rwa',
 }
+
+export enum GroupType {
+    map = 'map',
+    rubric = 'rubric'
+}
+
+export type Group = {
+    id: number;
+    title: string;
+    type: GroupType;
+};

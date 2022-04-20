@@ -1,6 +1,5 @@
 import { QueryResult } from 'pg';
 
-import { errors } from '../constants/errors';
 import { pg } from '../database';
 
 import { getUserByIdQ, GetUserByIdQP, GetUserByIdR } from '../database/pg-typings/get-user-by-id';
@@ -10,6 +9,8 @@ import {
     GetUserByUsernameQP,
     GetUserByUsernameR,
 } from '../database/pg-typings/get-user-by-username';
+import { ServerError, errorNames } from '../utils/server-error';
+import { Code } from '../types';
 
 export type User = {
     id: number;
@@ -29,11 +30,11 @@ export const UserFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         if (!result.rowCount) {
-            throw errors.noSuchUser404('');
+            throw new ServerError({ name: errorNames.noSuchUser404, code: Code.badRequest });
         }
 
         return result.rows[0];
@@ -47,11 +48,11 @@ export const UserFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         if (!result.rowCount) {
-            throw errors.noSuchUser404('');
+            throw new ServerError({ name: errorNames.noSuchUser404, code: Code.badRequest });
         }
 
         return result.rows[0];
@@ -65,11 +66,11 @@ export const UserFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         if (!result.rowCount) {
-            throw errors.noSuchUser404('Такой пользователь не найден!');
+            throw new ServerError({ name: errorNames.noSuchUser404, code: Code.badRequest });
         }
 
         return result.rows[0];

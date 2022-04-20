@@ -6,7 +6,7 @@ import { getMainPage, getAllRepositories, getUserPage, getRepository } from 'con
 export const getPaths = (username: string, entityName: ReactNode, entityValue = '') => [
     {
         title: 'Главная',
-        url: getMainPage,
+        url: getMainPage(),
     },
     {
         title: username,

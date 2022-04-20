@@ -1,0 +1,58 @@
+@import '../../../index.scss';
+
+.createMapFrom {
+    form {
+        position: relative;
+    }
+
+    .field {
+        width: 300px;
+        display: flex;
+    }
+
+    .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
+
+        &.loading {
+            opacity: 1;
+        }
+    }
+
+    .submitButtonWrapper {
+        display: flex;
+        justify-content: flex-end;
+
+        .submitButton {
+            width: 300px;
+        }
+    }
+
+    .groupTypeFieldTitle {
+        font-size: 17px;
+        margin-bottom: 10px;
+    }
+
+    .mapTitleSpinner {
+        width: 35px;
+        height: 35px;
+        margin-top: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
+
+        svg {
+            height: 35px;
+            width: 35px;
+        }
+
+        &.loading {
+            opacity: 1;
+        }
+    }
+}

@@ -5,42 +5,31 @@ import cn from 'classnames';
 import { useDispatch, useSelector } from 'store/store';
 import { FilesCard as FilesCardBase } from 'components/FilesCard';
 import { getDownloadLink } from 'utils/urls';
-import { DirMeta, DirStatus, FetchStatus, FileMeta, FileStatus } from 'types';
+import { DirMeta, FetchStatus, FileMeta } from 'types';
 import { textInputPopup } from 'constants/popups';
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { deleteFileOrDir, renameFileOrDir, getFilesByPath, changeFilesDirPath } from 'actions/repository-page';
 
 import { queryParamConfig } from '../repository-page.constants';
 import DownloadIcon from '../repository-page.assets/download.svg';
-import { getDirPathByKey } from '../repository-page.utils';
 
 import styles from './style.scss';
 
 type ActionsProps = {
     isEditing: boolean;
-    isRenameDisable: boolean;
-    isDownloadDisable: boolean;
     downloadName: string;
     downloadLink: string;
     onClickDelete: (e: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
     onClickRename: (e: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
 };
 
-const Actions = ({
-    isEditing,
-    isRenameDisable,
-    isDownloadDisable,
-    downloadName,
-    downloadLink,
-    onClickDelete,
-    onClickRename,
-}: ActionsProps) => {
+const Actions = ({ isEditing, downloadName, downloadLink, onClickDelete, onClickRename }: ActionsProps) => {
     return (
         <div className={styles.actions}>
             {isEditing && (
                 <>
                     <button
-                        className={cn(styles.actionIcon, styles.textButton, isRenameDisable && styles.disable)}
+                        className={cn(styles.actionIcon, styles.textButton)}
                         onClick={(e) => {
                             e.stopPropagation();
                             onClickRename(e);
@@ -59,13 +48,7 @@ const Actions = ({
                     </button>
                 </>
             )}
-            <a
-                href={downloadLink}
-                target="_blank"
-                download={downloadName}
-                onClick={(e) => e.stopPropagation()}
-                className={cn(styles.downloadIconWrapper, isDownloadDisable && styles.disable)}
-            >
+            <a href={downloadLink} target="_blank" download={downloadName} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.actionIcon}>
                     <DownloadIcon />
                 </button>
@@ -145,9 +128,7 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
                             isEditing,
                         )}
                         downloadName={file.name}
-                        isDownloadDisable={file.status === FileStatus.delete}
                         isEditing={isEditing}
-                        isRenameDisable={file.status === FileStatus.delete}
                         onClickDelete={(e) => handleDeleteButtonClick(file, e)}
                         onClickRename={(e) => handleFileRenameButtonClick(file, e)}
                     />
@@ -161,9 +142,7 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
                             isEditing,
                         )}
                         downloadName={`${dir.name}.zip`}
-                        isDownloadDisable={dir.status === DirStatus.delete}
                         isEditing={isEditing}
-                        isRenameDisable={dir.status === DirStatus.delete}
                         onClickDelete={(e) => handleDeleteButtonClick(dir, e)}
                         onClickRename={(e) => handleDirRenameButtonClick(dir, e)}
                     />

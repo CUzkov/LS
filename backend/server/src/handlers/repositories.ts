@@ -23,15 +23,9 @@ import {
     CheckIsRepositoryNameFreeRD,
 } from '@api-types/repository/check-is-repository-name-free';
 
-import { ResponseCallback, Empty, ServerError } from '../types';
-import {
-    getOkResponse,
-    getInternalServerErrorResponse,
-    getBadRequestResponse,
-    getServerErrorResponse,
-    getDownloadResponse,
-    normalizeErrorCode,
-} from '../utils/server-utils';
+import { ResponseCallback, Empty, Code } from '../types';
+import { getOkResponse, getServerErrorResponse, getDownloadResponse } from '../utils/server-utils';
+import { ServerError, errorNames } from '../utils/server-error';
 import { RepositoryFns } from '../models';
 import { formatTitleToPath, isCorrectPath } from '../utils/paths';
 
@@ -41,7 +35,10 @@ export const getRepositoriesByFilter: ResponseCallback<Empty, RepositoriesByFilt
     queryParams,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!queryParams) {
@@ -52,18 +49,32 @@ export const getRepositoriesByFilter: ResponseCallback<Empty, RepositoriesByFilt
         const repositories = await RepositoryFns.getRepositoryByFilters(queryParams, userId);
         getOkResponse<RepositoriesByFilterRD>(response, repositories);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
 export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = async ({ response, userId, data }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (data?.isPrivate === undefined || !data?.title) {
-        return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'isPrivate и title являются обязательными полями!',
+            }),
+        );
     }
 
     try {
@@ -76,8 +87,12 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
             version: '',
         });
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -87,25 +102,46 @@ export const checkIsRepositoryNameFree: ResponseCallback<CheckIsRepositoryNameFr
     data,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!data?.title) {
-        return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'title является обязательным полем!',
+            }),
+        );
     }
 
     const title = formatTitleToPath(data.title);
 
     if (!isCorrectPath(title)) {
-        return getBadRequestResponse(response, 'Ошибка данных', 'Недопустимые символы в названии репозитория!', true);
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.fieldValidationError,
+                code: Code.badRequest,
+                fieldError: { error: 'недопустимые символы в названии', fieldName: 'title' },
+            }),
+        );
     }
 
     try {
         const isFree = await RepositoryFns.checkIsRepositoryNameFree(title, userId);
         getOkResponse<CheckIsRepositoryNameFreeRD>(response, isFree);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -115,11 +151,21 @@ export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = asyn
     queryParams,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!queryParams?.id) {
-        return getBadRequestResponse(response, 'Ошибка параметров', 'Id является обязательным параметром!');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.queryParamsError,
+                code: Code.badRequest,
+                message: 'id является обязательным параметром!',
+            }),
+        );
     }
 
     try {
@@ -129,21 +175,31 @@ export const getRepositoryById: ResponseCallback<Empty, RepositoryByIdQP> = asyn
             version: queryParams?.version || (await git.getCurrentVersion()),
         });
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
 export const downloadFileOrDir: ResponseCallback<Empty, DownloadFileQP> = async ({ response, userId, queryParams }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!queryParams?.repositoryId || !queryParams.fileName) {
-        return getBadRequestResponse(
+        return getServerErrorResponse(
             response,
-            'Ошибка параметров',
-            'repositoryId и pathToFile являются обязательными параметрами!',
+            new ServerError({
+                name: errorNames.queryParamsError,
+                code: Code.badRequest,
+                message: 'repositoryId и pathToFile являются обязательными параметрами!',
+            }),
         );
     }
 
@@ -158,8 +214,12 @@ export const downloadFileOrDir: ResponseCallback<Empty, DownloadFileQP> = async 
 
         getDownloadResponse(response, absFullPathToFile);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -169,11 +229,21 @@ export const getFilesByFullDirPath: ResponseCallback<Empty, FilesByDirPathQP> = 
     queryParams,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!queryParams?.repositoryId) {
-        return getBadRequestResponse(response, 'Ошибка параметров', 'id является обязательным параметром!');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.queryParamsError,
+                code: Code.badRequest,
+                message: 'id является обязательным параметром!',
+            }),
+        );
     }
 
     try {
@@ -186,8 +256,12 @@ export const getFilesByFullDirPath: ResponseCallback<Empty, FilesByDirPathQP> = 
         );
         getOkResponse<FilesByDirPathRD>(response, files);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -197,11 +271,21 @@ export const getDraftFilesByFullDirPath: ResponseCallback<Empty, DraftFilesByDir
     queryParams,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!queryParams?.repositoryId) {
-        return getBadRequestResponse(response, 'Ошибка параметров', 'id является обязательным параметром!');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.queryParamsError,
+                code: Code.badRequest,
+                message: 'id является обязательным параметром!',
+            }),
+        );
     }
 
     try {
@@ -213,21 +297,31 @@ export const getDraftFilesByFullDirPath: ResponseCallback<Empty, DraftFilesByDir
         );
         getOkResponse<DraftFilesByDirPathRD>(response, files);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
 export const addFileToRepository: ResponseCallback<Empty, Empty> = async ({ response, userId, formData }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!formData?.fields?.repositoryId || !formData.files?.file) {
-        return getBadRequestResponse(
+        return getServerErrorResponse(
             response,
-            'Ошибка параметров',
-            'file и repositoryId являются обязательными параметрами!',
+            new ServerError({
+                name: errorNames.formDataError,
+                code: Code.badRequest,
+                message: 'file и repositoryId являются обязательными параметрами!',
+            }),
         );
     }
 
@@ -240,8 +334,12 @@ export const addFileToRepository: ResponseCallback<Empty, Empty> = async ({ resp
         );
         getOkResponse<AddFileToRepositoryRD>(response, addedFile);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -251,14 +349,20 @@ export const deleteFileOrDirFromRepository: ResponseCallback<DeleteFileFromRepos
     data,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!data?.repositoryId || !data?.name) {
-        return getBadRequestResponse(
+        return getServerErrorResponse(
             response,
-            'Ошибка параметров',
-            'repositoryId и name являются обязательными параметрами!',
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'repositoryId и name являются обязательными параметрами!',
+            }),
         );
     }
 
@@ -271,8 +375,12 @@ export const deleteFileOrDirFromRepository: ResponseCallback<DeleteFileFromRepos
         );
         getOkResponse<DeleteFileFromRepositoryRD>(response, addedFile);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -282,14 +390,20 @@ export const renameFileOrDirFromRepository: ResponseCallback<RenameFileInReposit
     data,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!data?.repositoryId || !data?.name || !data?.newName) {
-        return getBadRequestResponse(
+        return getServerErrorResponse(
             response,
-            'Ошибка параметров',
-            'repositoryId, name и newName являются обязательными параметрами!',
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'repositoryId, name и newName являются обязательными параметрами!',
+            }),
         );
     }
 
@@ -303,21 +417,31 @@ export const renameFileOrDirFromRepository: ResponseCallback<RenameFileInReposit
         );
         getOkResponse<RenameFileInRepositoryRD>(response, addedFile);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
 export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = async ({ response, userId, data }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!data?.repositoryId || !data.newDirName || !data.pathToDir) {
-        return getBadRequestResponse(
+        return getServerErrorResponse(
             response,
-            'Ошибка параметров',
-            'newDirName, pathToDir и repositoryId являются обязательными параметрами!',
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'newDirName, pathToDir и repositoryId являются обязательными параметрами!',
+            }),
         );
     }
 
@@ -330,8 +454,12 @@ export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = 
         );
         getOkResponse<AddDirToRepositoryRD>(response, addedDir);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -341,14 +469,20 @@ export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Sav
     data,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!data?.repositoryId || !data.version) {
-        return getBadRequestResponse(
+        return getServerErrorResponse(
             response,
-            'Ошибка параметров',
-            'version и repositoryId являются обязательными параметрами!',
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'version и repositoryId являются обязательными параметрами!',
+            }),
         );
     }
 
@@ -361,8 +495,12 @@ export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, Sav
         );
         getOkResponse<SaveRepositoryVersionRD>(response, version);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
 
@@ -372,18 +510,32 @@ export const getAllRepositoryVersions: ResponseCallback<Empty, GetAllRepositoryV
     queryParams,
 }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     if (!queryParams?.repositoryId) {
-        return getBadRequestResponse(response, 'Ошибка параметров', 'repositoryId является обязательным параметром!');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.queryParamsError,
+                code: Code.badRequest,
+                message: 'repositoryId является обязательным параметром!',
+            }),
+        );
     }
 
     try {
         const versions = await RepositoryFns.getAllRepositoryVersions(queryParams.repositoryId, userId);
         getOkResponse<GetAllRepositoryVersionsRD>(response, versions);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, normalizeErrorCode(e.code));
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };

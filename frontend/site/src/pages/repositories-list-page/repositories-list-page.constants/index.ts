@@ -3,7 +3,7 @@ import { getMainPage, getAllRepositories, getUserPage } from 'constants/routers'
 export const getPaths = (username: string) => [
     {
         title: 'Главная',
-        url: getMainPage,
+        url: getMainPage(),
     },
     {
         title: username,

@@ -32,11 +32,6 @@
             line-height: 34px;
             user-select: none;
         }
-
-        &.disable {
-            pointer-events: none;
-            cursor: default;
-        }
     }
 
     .spinner {
@@ -45,12 +40,5 @@
         left: 50%;
         transform: translate(-50%, -50%);
         pointer-events: none;
-    }
-
-    .downloadIconWrapper {
-        &.disable {
-            pointer-events: none;
-            cursor: default;
-        }
     }
 }

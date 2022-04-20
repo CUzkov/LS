@@ -1,21 +1,24 @@
 import { CheckAuthRD } from '@api-types/auth/check-auth';
 import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
 
-import { ResponseCallback, Empty, ServerError, Code } from '../types';
-import {
-    getOkResponse,
-    getBadRequestResponse,
-    getInternalServerErrorResponse,
-    getServerErrorResponse,
-} from '../utils/server-utils';
+import { ResponseCallback, Empty, Code } from '../types';
+import { getOkResponse, getServerErrorResponse } from '../utils/server-utils';
 import { User, UserFns } from '../models';
 import { redis } from '../database';
+import { ServerError, errorNames } from '../utils/server-error';
 
 const UNIX_MOUNTH = 60 * 60 * 24 * 30;
 
 export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response, data, cookies }) => {
     if ((!data?.email && !data?.username) || !data?.password) {
-        return getBadRequestResponse(response, 'Ошибка сериализации', 'Необходимые поля отсутствуют');
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'email или username и password являются обязательными полями!',
+            }),
+        );
     }
 
     let user: User;
@@ -23,12 +26,33 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
     try {
         user = data?.email ? await UserFns.getUserByEmail(data.email) : await UserFns.getUserByUsername(data.username);
     } catch (error) {
-        const e = error as ServerError;
-        return getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        if (error instanceof ServerError) {
+            if (error.name === errorNames.noSuchUser404) {
+                error.fieldError = {
+                    error: 'такого пользователя не существует',
+                    fieldName: 'emailOrUsername',
+                };
+            }
+
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 
     if (data.password !== user.u_password) {
-        return getBadRequestResponse(response, 'Ошибка', 'Неверный пароль', true);
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.incorrectPassword,
+                code: Code.badRequest,
+                fieldError: {
+                    error: 'неверный пароль',
+                    fieldName: 'password',
+                },
+            }),
+        );
     }
 
     const newTime = String(new Date().getTime() + UNIX_MOUNTH);
@@ -48,14 +72,21 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
 
 export const checkAuth: ResponseCallback<Empty, Empty> = async ({ response, userId }) => {
     if (!userId) {
-        return getInternalServerErrorResponse(response, 'Ошибка сервера', 'userId не представлен');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
     }
 
     try {
         const user = await UserFns.getUserById(userId);
         getOkResponse<CheckAuthRD>(response, user);
     } catch (error) {
-        const e = error as ServerError;
-        getServerErrorResponse(response, e.name, e.message, e.code ?? Code.internalServerError);
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };

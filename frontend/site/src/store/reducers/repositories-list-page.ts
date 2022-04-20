@@ -19,30 +19,20 @@ export const repositoriesListPageReducer = (
     state: RepositoriesListPageStore = initialState,
     event: RepositoriesListPageEvents,
 ): RepositoriesListPageStore => {
-    if (event.type === 'repositories-list-page/repositories-list/success') {
-        const result = { ...state };
+    const result = { ...state };
 
+    if (event.type === 'repositories-list-page/repositories-list/success') {
         result.repositories = event.data ?? [];
         result.fetchStatus = FetchStatus.successed;
-
-        return result;
     }
 
     if (event.type === 'repositories-list-page/repositories-list/loading') {
-        const result = { ...state };
-
         result.fetchStatus = FetchStatus.loading;
-
-        return result;
     }
 
     if (event.type === 'repositories-list-page/repositories-list/error') {
-        const result = { ...state };
-
         result.fetchStatus = FetchStatus.error;
-
-        return result;
     }
 
-    return state;
+    return result;
 };

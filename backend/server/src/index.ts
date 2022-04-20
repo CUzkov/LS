@@ -1,15 +1,17 @@
 import { createServer, ServerResponse, IncomingMessage } from 'http';
 import Url from 'url';
 
-import { AUTH_ROUTES, REPOSITORIES_ROUTES } from './routes';
+import { AUTH_ROUTES, REPOSITORIES_ROUTES, GROUPS_ROUTES } from './routes';
 import { middlewares } from './utils/middlewares';
-import { getBadRequestResponse, getOkResponse } from './utils/server-utils';
+import { getServerErrorResponse, getOkResponse } from './utils/server-utils';
 import { host, port } from './env';
-import { Method } from './types';
+import { Code, Method } from './types';
+import { errorNames, ServerError } from './utils/server-error';
 
 const ROUTES = {
     ...AUTH_ROUTES,
     ...REPOSITORIES_ROUTES,
+    ...GROUPS_ROUTES
 };
 
 const requestListener = async (request: IncomingMessage, response: ServerResponse) => {
@@ -28,7 +30,10 @@ const requestListener = async (request: IncomingMessage, response: ServerRespons
     const callback = ROUTES[url.pathname ?? ''];
 
     if (!callback || callback.method !== request.method) {
-        return getBadRequestResponse(response, 'Ошибка роутера', 'Не найден соответствующий роутер');
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.routerError, code: Code.badRequest }),
+        );
     }
 
     middlewares({ request, response, callback, queryParams: url.query });

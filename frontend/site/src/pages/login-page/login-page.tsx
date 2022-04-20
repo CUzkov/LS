@@ -1,7 +1,7 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { LoginForm } from 'components/LoginForm';
+import { LoginForm } from 'components/login-form';
 
 import styles from './style.scss';
 

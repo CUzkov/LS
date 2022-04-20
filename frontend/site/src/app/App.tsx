@@ -8,10 +8,12 @@ import {
     getMainPage,
     // getAllMaps,
     // getUserPage,
-    // getMapCreate,
+    getMapCreate,
     getRepositoryCreate,
     getAllRepositories,
     getRepositoryTemplate,
+    getLoginPage,
+    getMapTemplate
 } from 'constants/routers';
 import { Logger } from 'components/logger';
 import { MovablePopupManager } from 'components/movable-popup-manager';
@@ -21,10 +23,11 @@ import {
     MainPage,
     // MapsListPage,
     // UserPage,
-    // CreateMapPage,
+    CreateMapPage,
     CreateRepositoryPage,
     RepositoriesListPage,
     RepositoryPage,
+    MapPage
 } from 'pages';
 import { FetchStatus } from 'types';
 
@@ -61,11 +64,12 @@ export const App: FC = () => {
             <MovablePopupManager>
                 <Header />
                 <Routes>
-                    <Route path={getMainPage} element={<MainPage />} />
-                    <Route path="/login" element={<LoginPage />} />
+                    <Route path={getMainPage()} element={<MainPage />} />
+                    <Route path={getLoginPage()} element={<LoginPage />} />
                     {/* <Route path={getAllMaps(userStore.username)} element={<MapsListPage />} /> */}
                     {/* <Route path={getUserPage(userStore.username)} element={<UserPage />} /> */}
-                    {/* <Route path={getMapCreate(userStore.username)} element={<CreateMapPage />} /> */}
+                    <Route path={getMapCreate(userStore.username)} element={<CreateMapPage />} />
+                    <Route path={getMapTemplate(userStore.username)} element={<MapPage />} />
                     <Route path={getRepositoryCreate(userStore.username)} element={<CreateRepositoryPage />} />
                     <Route path={getAllRepositories(userStore.username)} element={<RepositoriesListPage />} />
                     <Route path={getRepositoryTemplate(userStore.username)} element={<RepositoryPage />} />

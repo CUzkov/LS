@@ -1,0 +1,10 @@
+@import '../../../index.scss';
+
+.ghraphWrapper {
+    height: 100%;
+    width: 100%;
+	background-color: $cards-color;
+	border-radius: 5px;
+	border: 1px solid $default-border-color;
+	box-sizing: border-box;
+}

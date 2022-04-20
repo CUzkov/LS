@@ -5,11 +5,10 @@ import cn from 'classnames';
 
 import { loginUser } from 'actions/user';
 import { setLoginForm } from 'actions/login-form';
-import { useDispatch, useSelector } from 'store/store';
+import { useSelector } from 'store/store';
 import { TextField, Button } from 'small-components/index';
 import { emailValidate, requiredValidate } from 'utils/final-forms';
-import type { ILoginFormProps, IFormSpy } from './LoginForm.typings';
-import { NO_SUCH_USER, INCORRECT_PASSWORD } from 'store/reducers/login-form';
+import type { ILoginFormProps, IFormSpy } from './login-form.typings';
 import { FetchStatus } from 'types/index';
 
 import Spinner from 'assets/spinner.svg';
@@ -17,8 +16,11 @@ import Spinner from 'assets/spinner.svg';
 import styles from './style.scss';
 
 export const LoginForm: FC = () => {
-    const dispatch = useDispatch();
     const loginFormStore = useSelector((root) => root.loginForm);
+    const isSubmitDisable =
+        loginFormStore.fetchStatus === FetchStatus.loading ||
+        !!loginFormStore.loginOrEmailError ||
+        !!loginFormStore.passwordError;
 
     const onSubmit = useCallback((userForm: ILoginFormProps) => {
         const isEmail = emailValidate(userForm['email-username']);
@@ -39,42 +41,37 @@ export const LoginForm: FC = () => {
     }, []);
 
     const formValidate = useCallback(() => {
-        if (loginFormStore.error !== '' && loginFormStore.error !== undefined && loginFormStore.error !== null) {
-            if (loginFormStore.error === NO_SUCH_USER) {
-                return {
-                    'email-username': NO_SUCH_USER,
-                };
-            }
+        if (loginFormStore.loginOrEmailError) {
+            return {
+                'email-username': loginFormStore.loginOrEmailError,
+            };
+        }
 
-            if (loginFormStore.error === INCORRECT_PASSWORD) {
-                return {
-                    password: INCORRECT_PASSWORD,
-                };
-            }
+        if (loginFormStore.passwordError) {
+            return {
+                password: loginFormStore.passwordError,
+            };
         }
 
         return {};
-    }, [loginFormStore.error]);
+    }, [loginFormStore.loginOrEmailError, loginFormStore.passwordError]);
 
     const modifiedSinceLastSubmit = useCallback(
         (spyValue: IFormSpy) => {
             if (spyValue.modifiedSinceLastSubmit) {
                 if (
-                    loginFormStore.error === NO_SUCH_USER &&
+                    loginFormStore.loginOrEmailError &&
                     spyValue.dirtyFieldsSinceLastSubmit['email-username'] === true
                 ) {
-                    setLoginForm(dispatch, '');
+                    setLoginForm('', 'loginOrEmailError');
                 }
 
-                if (
-                    loginFormStore.error === INCORRECT_PASSWORD &&
-                    spyValue.dirtyFieldsSinceLastSubmit.password === true
-                ) {
-                    setLoginForm(dispatch, '');
+                if (loginFormStore.passwordError && spyValue.dirtyFieldsSinceLastSubmit.password === true) {
+                    setLoginForm('', 'passwordError');
                 }
             }
         },
-        [loginFormStore.error],
+        [loginFormStore.loginOrEmailError, loginFormStore.passwordError],
     );
 
     return (
@@ -100,13 +97,7 @@ export const LoginForm: FC = () => {
                                 isDisable={loginFormStore.fetchStatus === FetchStatus.loading}
                             />
 
-                            <Button
-                                text={'Войти'}
-                                type={'submit'}
-                                isDisable={
-                                    loginFormStore.fetchStatus === FetchStatus.loading || loginFormStore.error !== ''
-                                }
-                            />
+                            <Button text={'Войти'} type={'submit'} isDisable={isSubmitDisable} />
 
                             <FormSpy
                                 subscription={{ dirtyFieldsSinceLastSubmit: true, modifiedSinceLastSubmit: true }}

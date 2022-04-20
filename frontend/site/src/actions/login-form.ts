@@ -1,7 +1,11 @@
-import type { Dispatch } from '../store';
+import { Dispatch, store } from '../store';
 
-import { LoginFormErrors } from '../store/reducers/login-form';
+export const setLoginForm = async (error: string, field: 'loginOrEmailError' | 'passwordError') => {
+    const dispatch: Dispatch = store.dispatch;
 
-export const setLoginForm = async (dispath: Dispatch, error: LoginFormErrors) => {
-    dispath({ type: 'login-form/error', data: { error } });
+    if (error) {
+        dispatch({ type: 'login-form/error', data: { error, field } });
+    } else {
+        dispatch({ type: 'login-form/none' });
+    }
 };

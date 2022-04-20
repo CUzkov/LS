@@ -6,22 +6,17 @@ create table users (
 	is_admin				boolean not null
 );
 
-create table rubrics (
-	id 						serial primary key,
-	title					text not null,
-	parent_id 				integer not null REFERENCES rubrics (id) ON DELETE CASCADE
-);
+CREATE TYPE groupType AS ENUM ('map', 'rubric');
 
-create table maps (
+create table groups (
 	id 						serial primary key,
 	user_id					integer not null REFERENCES users (id) ON DELETE CASCADE,
-	title					text not null
+	title					text not null,
+	group_type				groupType
 );
 
 create table repositories (
 	id 							serial primary key,
-	rubric_id					integer REFERENCES rubrics (id) ON DELETE CASCADE,
-	map_id						integer REFERENCES maps (id) ON DELETE CASCADE,
 	user_id						integer REFERENCES users (id) ON DELETE CASCADE,
 
 	path_to_repository			text not null,
@@ -39,54 +34,25 @@ create table users_repositories_relationship (
 	UNIQUE (user_id, repository_id)
 );
 
-create table users_rubrics_relationship (
+create table users_groups_relationship (
 	id 						serial primary key,
 	user_id					integer not null REFERENCES users (id) ON DELETE CASCADE,
-	rubrics_id				integer not null REFERENCES rubrics (id) ON DELETE CASCADE,
+	group_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
 	relationship			bit(3) not null,
 	
-	UNIQUE (user_id, rubrics_id)
+	UNIQUE (user_id, group_id)
 );
 
-create table users_maps_relationship (
+create table group_to_group_links (
 	id 						serial primary key,
-	user_id					integer not null REFERENCES users (id) ON DELETE CASCADE,
-	map_id					integer not null REFERENCES maps (id) ON DELETE CASCADE,
-	relationship			bit(3) not null,
-	
-	UNIQUE (user_id, map_id)
-);
-
-create table groups (
-	id 						serial primary key,
-	title					text not null,
-	parent_id 				integer not null REFERENCES groups (id) ON DELETE CASCADE
-);
-
-create table usesrs_groups (
-	id 						serial primary key,
-	user_id					integer not null REFERENCES users (id) ON DELETE CASCADE,
-	group_id				integer not null REFERENCES groups (id) ON DELETE CASCADE
-);
-
-create table map_to_map_links (
-	id 						serial primary key,
-	parent_id				integer not null REFERENCES maps (id) ON DELETE CASCADE,
-	child_id				integer not null REFERENCES maps (id) ON DELETE CASCADE,
-	is_child				boolean,
+	parent_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
+	child_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
 	link_name				text not null
 );
 
-create table map_to_rubric_links (
+create table group_to_repository_links (
 	id 						serial primary key,
-	map_id					integer not null REFERENCES maps (id) ON DELETE CASCADE,
-	rubric_id				integer not null REFERENCES rubrics (id) ON DELETE CASCADE,
-	link_name				text not null
-);
-
-create table map_to_repository_links (
-	id 						serial primary key,
-	map_id					integer not null REFERENCES maps (id) ON DELETE CASCADE,
+	group_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
 	repository_id			integer not null REFERENCES repositories (id) ON DELETE CASCADE,
 	link_name				text not null
 );
@@ -175,24 +141,24 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Создание новой карты знаний
+-- Создание новой группы
 -----------------------------------------------------------------------
-create function create_map(
+create function create_group(
 	user_id_v integer,
 	title_v text
 ) returns integer as
 $BODY$
 	declare
-		map_id_v integer;
+		group_id_v integer;
 	begin
-		insert into maps (user_id, title)
+		insert into groups (user_id, title)
 		values (user_id_v, title_v)
-		returning id into map_id_v;
+		returning id into group_id_v;
 		
-		insert into users_maps_relationship (user_id, map_id, relationship)
-		values (user_id_v, map_id_v, B'111');
+		insert into users_groups_relationship (user_id, group_id, relationship)
+		values (user_id_v, group_id_v, B'111');
 
-		return map_id_v;
+		return group_id_v;
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -211,8 +177,7 @@ create function create_repository(
 	is_private boolean,
 	user_id integer,
 	title text,
-	rubric_id integer,
-	map_id integer
+	path_to_draft_repository text
 ) as
 $BODY$
 	declare
@@ -232,8 +197,7 @@ $BODY$
 				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
-				repositories.rubric_id,
-				repositories.map_id
+				repositories.path_to_draft_repository
 			from repositories
 			where repositories.id=repository_id_v limit 1;
 	end;
@@ -326,8 +290,7 @@ create function get_repositories_by_filter(
 	is_private boolean,
 	user_id integer,
 	title text,
-	rubric_id integer,
-	map_id integer
+	path_to_draft_repository text
 ) as
 $BODY$
 	declare
@@ -342,8 +305,7 @@ $BODY$
 				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
-				repositories.rubric_id,
-				repositories.map_id
+				repositories.path_to_draft_repository
 			from repositories
 			inner join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
@@ -371,8 +333,6 @@ create function get_repository_by_id(
 	is_private boolean,
 	user_id integer,
 	title text,
-	rubric_id integer,
-	map_id integer,
 	path_to_draft_repository text
 ) as
 $BODY$
@@ -388,8 +348,6 @@ $BODY$
 				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
-				repositories.rubric_id,
-				repositories.map_id,
 				repositories.path_to_draft_repository
 			from repositories
 			inner join users_repositories_relationship
@@ -409,7 +367,7 @@ $BODY$
 -----------------------------------------------------------------------
 -- Выборка карт по фильрам
 -----------------------------------------------------------------------
-create function get_maps_by_filter(
+create function get_groups_by_filter(
 	user_id_v integer,
 	by_user_v integer,
 	title_v text,
@@ -428,19 +386,19 @@ $BODY$
 
 		return query
 			select
-				maps.id,
-				maps.user_id,
-				maps.title
-			from maps
-			inner join users_maps_relationship
-			on map.id = users_maps_relationship.repository_id and users_maps_relationship.user_id = user_id_v
+				groups.id,
+				groups.user_id,
+				groups.title
+			from groups
+			inner join users_groups_relationship
+			on groups.id = users_groups_relationship.repository_id and users_groups_relationship.user_id = user_id_v
 			where
 				(by_user_v = -1 or repositories.user_id = by_user_v) and
 				(title_v = '' or repositories.title like title_v) and
 				(
-					users_maps_relationship.relationship = relationships_v[1] or
-					users_maps_relationship.relationship = relationships_v[2] or
-					users_maps_relationship.relationship = relationships_v[3]
+					users_groups_relationship.relationship = relationships_v[1] or
+					users_groups_relationship.relationship = relationships_v[2] or
+					users_groups_relationship.relationship = relationships_v[3]
 				);
 	end;
 $BODY$
@@ -518,8 +476,6 @@ create function set_repository_path_to_draft(
 	is_private boolean,
 	user_id integer,
 	title text,
-	rubric_id integer,
-	map_id integer,
 	path_to_draft_repository text
 ) as
 $BODY$
@@ -536,8 +492,6 @@ $BODY$
 				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
-				repositories.rubric_id,
-				repositories.map_id,
 				repositories.path_to_draft_repository
 			from repositories
 			where repositories.id=id_v limit 1;
@@ -545,3 +499,57 @@ $BODY$
 $BODY$
 	language 'plpgsql' volatile;
 
+-----------------------------------------------------------------------
+-- Проверка свободности имени группы
+-----------------------------------------------------------------------
+create function check_is_group_name_free(
+	group_title_v text,
+	user_id_v integer,
+	group_type_v groupType
+) returns table(id integer) as
+$BODY$
+	declare
+	--------------------
+	begin
+		return query 
+			select groups.id from groups
+			where groups.title=group_title_v and groups.user_id=user_id_v and groups.group_type = group_type_v;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Создание новой группы
+-----------------------------------------------------------------------
+create function create_group(
+	title_v text,
+	groupr_type_v groupType,
+	user_id_v integer
+) returns table(
+	id integer,
+	user_id integer,
+	title text,
+	group_type groupType
+) as
+$BODY$
+	declare
+		group_id_v integer;
+	begin
+		insert into groups (title, group_type, user_id)
+		values (title_v, groupr_type_v, user_id_v)
+		returning groups.id into group_id_v;
+
+		insert into users_groups_relationship (user_id, group_id, relationship)
+		values (user_id_v, group_id_v, B'111');
+
+		return query 
+			select
+				groups.id,
+				groups.user_id,
+				groups.title,
+				groups.group_type
+			from groups
+			where groups.id=group_id_v limit 1;
+	end;
+$BODY$
+	language 'plpgsql' volatile;

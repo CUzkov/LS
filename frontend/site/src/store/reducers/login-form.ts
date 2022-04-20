@@ -1,50 +1,44 @@
 import { FetchStatus } from '../../types';
 
-export const INCORRECT_PASSWORD = 'Неверный пароль';
-export const NO_SUCH_USER = 'Такого пользователя не существует';
-
-export type LoginFormErrors = typeof INCORRECT_PASSWORD | typeof NO_SUCH_USER | '';
-
-export interface ILoginFormD {
-    error?: LoginFormErrors;
-}
-
 export type LoginFormEvents =
     | { type: 'login-form/success' }
     | { type: 'login-form/loading' }
-    | { type: 'login-form/error'; data: ILoginFormD };
+    | { type: 'login-form/none' }
+    | { type: 'login-form/error'; data: { field: 'passwordError' | 'loginOrEmailError'; error: string } };
 
 export type LoginFormStore = {
-    error: LoginFormErrors;
+    passwordError: string;
+    loginOrEmailError: string;
     fetchStatus: FetchStatus;
 };
 
 const initialState: LoginFormStore = {
-    error: '',
+    loginOrEmailError: '',
+    passwordError: '',
     fetchStatus: FetchStatus.none,
 };
 
 export const loginFormReducer = (state: LoginFormStore = initialState, event: LoginFormEvents): LoginFormStore => {
+    const result = { ...state };
+
     if (event.type === 'login-form/loading') {
-        return {
-            ...state,
-            fetchStatus: FetchStatus.loading,
-        };
+        result.fetchStatus = FetchStatus.loading;
     }
 
-    if (event.type === 'login-form/error') {
-        return {
-            error: event.data.error ?? '',
-            fetchStatus: FetchStatus.error,
-        };
+    if (event.type === 'login-form/none') {
+        result.fetchStatus = FetchStatus.none;
+        result.loginOrEmailError = '';
+        result.passwordError = '';
     }
 
     if (event.type === 'login-form/success') {
-        return {
-            ...state,
-            fetchStatus: FetchStatus.successed,
-        };
+        result.fetchStatus = FetchStatus.successed;
     }
 
-    return state;
+    if (event.type === 'login-form/error') {
+        result[event.data.field] = event.data.error;
+        result.fetchStatus = FetchStatus.error;
+    }
+
+    return result;
 };

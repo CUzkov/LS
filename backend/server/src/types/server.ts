@@ -11,12 +11,6 @@ export enum Code {
     internalServerError = 500,
 }
 
-export type ServerError = {
-    code?: Code;
-    name: string;
-    message: string;
-};
-
 export type ServerResponse<T> = {
     data?: T;
 };

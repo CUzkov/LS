@@ -27,8 +27,8 @@ export const getPageRepositoriesByFilters = async (filters: RepositoriesByFilter
 
         dispath({ type: 'repositories-list-page/repositories-list/error' });
 
-        if (e?.error) {
-            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.error, description: e.description } });
+        if (e?.name) {
+            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.name, description: e.description } });
             return;
         }
 

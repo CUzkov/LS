@@ -1,48 +1,58 @@
 import { ServerResponse } from 'http';
-import fs from 'fs';
+import fse from 'fs-extra';
 import path from 'path';
 import mime from 'mime';
 import archive from 'archiver';
 
-import { Code } from '../types';
 import { baseGitPath } from '../env';
 import { noop } from './helpers';
+import { ServerError } from './server-error';
+import { Code } from '../types';
 
-const fsAsync = fs.promises;
-
-export const getBadRequestResponse = (
-    response: ServerResponse,
-    error: string,
-    description: string,
-    isForField?: boolean,
-) => {
-    const body = JSON.stringify({
-        error,
-        description,
-        isForField,
-    });
+export const getServerErrorResponse = (response: ServerResponse, error: ServerError) => {
+    const body = error.getStringifyError();
 
     response
-        .writeHead(Code.badRequest, {
+        .writeHead(error.code, {
             'Content-Length': Buffer.byteLength(body),
             'Content-Type': 'application/json;charset=utf-8',
         })
         .end(body);
 };
 
-export const getUnauthorizedResponse = (response: ServerResponse, error: string, description: string) => {
-    const body = JSON.stringify({
-        code: Code.unauthorized,
-        error,
-        description,
-    });
+export const getDownloadResponse = async (response: ServerResponse, absFullPathToFile: string) => {
+    const mimetype = mime.lookup(absFullPathToFile);
+    const filename = path.basename(absFullPathToFile);
+    const isDir = (await fse.stat(absFullPathToFile)).isDirectory();
 
-    response
-        .writeHead(Code.unauthorized, {
-            'Content-Length': Buffer.byteLength(body),
-            'Content-Type': 'application/json;charset=utf-8',
-        })
-        .end(body);
+    response.setHeader('Content-type', mimetype);
+    response.setHeader(
+        'Content-Disposition',
+        `attachment; name="file"; filename="${encodeURI(filename + (isDir ? '.zip' : ''))}"`,
+    );
+
+    if (isDir) {
+        const pathToZipFile = `${baseGitPath}/temp/${new Date().getTime()}`;
+        await fse.ensureDir(pathToZipFile);
+        const fullPathToZipFile = `${pathToZipFile}/${filename}.zip`;
+        const output = fse.createWriteStream(fullPathToZipFile);
+        const archiver = archive('zip');
+
+        archiver.pipe(output);
+        archiver.directory(absFullPathToFile, false);
+
+        await archiver.finalize();
+
+        const filestream = fse.createReadStream(fullPathToZipFile);
+        filestream.pipe(response);
+
+        response.on('close', () => fse.unlink(fullPathToZipFile, noop));
+
+        return;
+    }
+
+    const filestream = fse.createReadStream(absFullPathToFile);
+    filestream.pipe(response);
 };
 
 export const getOkResponse = <T>(response: ServerResponse, data?: T) => {
@@ -54,70 +64,4 @@ export const getOkResponse = <T>(response: ServerResponse, data?: T) => {
             'Content-Type': 'application/json;charset=utf-8',
         })
         .end(body);
-};
-
-export const getInternalServerErrorResponse = (response: ServerResponse, error: string, description: string) => {
-    const body = JSON.stringify({
-        error,
-        description,
-    });
-
-    response
-        .writeHead(Code.internalServerError, {
-            'Content-Length': Buffer.byteLength(body),
-            'Content-Type': 'application/json;charset=utf-8',
-        })
-        .end(body);
-};
-
-export const getServerErrorResponse = (response: ServerResponse, error: string, description: string, code: Code) => {
-    const body = JSON.stringify({
-        error,
-        description,
-    });
-
-    response
-        .writeHead(code, {
-            'Content-Length': Buffer.byteLength(body),
-            'Content-Type': 'application/json;charset=utf-8',
-        })
-        .end(body);
-};
-
-export const getDownloadResponse = async (response: ServerResponse, pathToFile: string) => {
-    const mimetype = mime.lookup(pathToFile);
-
-    response.setHeader('Content-type', mimetype);
-
-    const isDir = await fsAsync.stat(pathToFile).then((stat) => stat.isDirectory());
-
-    if (isDir) {
-        const filename = path.basename(pathToFile);
-        const pathToZipFile = `${baseGitPath}/temp/${filename}.zip`;
-        const output = fs.createWriteStream(pathToZipFile);
-        const archiver = archive('zip');
-
-        archiver.pipe(output);
-        archiver.directory(pathToFile, false);
-
-        await archiver.finalize();
-
-        const filestream = fs.createReadStream(pathToZipFile);
-        filestream.pipe(response);
-
-        response.on('close', () => fs.unlink(pathToZipFile, noop));
-
-        return;
-    }
-
-    const filestream = fs.createReadStream(pathToFile);
-    filestream.pipe(response);
-};
-
-export const normalizeErrorCode = (code: string | number | undefined) => {
-    if (!code || typeof code === 'string') {
-        return Code.internalServerError;
-    }
-
-    return Object.values(Code).includes(code) ? code : Code.internalServerError;
 };

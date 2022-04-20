@@ -30,12 +30,12 @@ export const createRepository = async (props: CreateRepositoryD): Promise<Reposi
             return;
         }
     } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
+        const e = error as IServerError;
 
         dispath({ type: 'create-repository-form/error' });
 
-        if (e?.error) {
-            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.error, description: e.description } });
+        if (e?.name) {
+            dispath({ type: 'logger/add-log', data: { type: 'error', title: e.name, description: e.description } });
             return;
         }
 
@@ -69,14 +69,14 @@ export const checkIsRepositoryNameFree = async (props: { title: string }) => {
             return;
         }
     } catch (error) {
-        const e = (error as AxiosError).response?.data as IServerError;
+        const e = error as IServerError;
 
         dispath({ type: 'create-repository-form/is-repository-name-free/error' });
 
-        if (e?.error) {
+        if (e?.name) {
             dispath({
                 type: 'logger/add-log',
-                data: { title: e.error, description: e.description, type: 'error' },
+                data: { title: e.name, description: e.description, type: 'error' },
             });
             return;
         }

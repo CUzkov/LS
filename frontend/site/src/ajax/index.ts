@@ -41,7 +41,7 @@ export const ajax = {
                 return;
             }
 
-            if (e?.error) {
+            if (e?.name) {
                 throw e;
             }
 
@@ -83,7 +83,7 @@ export const ajax = {
                 return;
             }
 
-            if (e?.error) {
+            if (e?.name) {
                 throw e;
             }
 

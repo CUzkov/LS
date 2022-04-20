@@ -4,8 +4,8 @@ import fse from 'fs-extra';
 
 import { UserFns } from './';
 import { pg } from '../database';
+import { Code } from '../types';
 import { Git, FileMeta, DirMeta, DirStatus } from '../utils/git';
-import { errors } from '../constants/errors';
 
 import {
     getRepositoryByIdQ,
@@ -28,6 +28,7 @@ import {
     SetRepositoryPathToDraftQP,
     SetRepositoryPathToDraftR,
 } from '../database/pg-typings/set-repository-path-to-draft';
+import { ServerError, errorNames } from '../utils/server-error';
 
 export type Repository = {
     id: number;
@@ -79,11 +80,15 @@ export const RepositoryFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         if (!result.rowCount) {
-            throw errors.dbError('Ошибка создания репозитория!');
+            throw new ServerError({
+                name: errorNames.dbError,
+                code: Code.badRequest,
+                message: 'Репозиторий не создан!',
+            });
         }
 
         const repository = result.rows[0];
@@ -102,7 +107,7 @@ export const RepositoryFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         if (result.rowCount) {
@@ -129,7 +134,7 @@ export const RepositoryFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         const user = await UserFns.getUserById(userId);
@@ -175,11 +180,11 @@ export const RepositoryFns = {
             client.release();
         } catch (error) {
             const e = error as Error;
-            throw errors.dbError(e.message);
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
         if (!result.rowCount) {
-            throw errors.repositoryNotFoundOrPermissionDenied('');
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
         }
 
         const repository = result.rows[0];
@@ -232,7 +237,7 @@ export const RepositoryFns = {
         const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, isDraft);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         return (isDraft ? gitDraft : git).getAbsPathToFile([...pathToFile, fileName]);
@@ -247,7 +252,7 @@ export const RepositoryFns = {
         const [, git, , gitByVersion] = await RepositoryFns.getRepositoryById(id, userId, false, version);
 
         if (version && !gitByVersion) {
-            throw errors.cannotCheckoutToVersion('');
+            throw new ServerError({ name: errorNames.cannotCheckoutToVersion, code: Code.badRequest });
         }
 
         const filesAndDirs = (version ? gitByVersion ?? git : git).getDirFiles(pathToDir, dirName);
@@ -257,11 +262,11 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         if (!file.originalFilename) {
-            throw errors.fileNameNotPresent('');
+            throw new ServerError({ name: errorNames.fileNameNotPresent, code: Code.badRequest });
         }
 
         const addedFile = await gitDraft.addFile(pathToFile, file.originalFilename, file.filepath);
@@ -277,7 +282,7 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         const deletedFileOfDir = await gitDraft.deleteFileOrDir(pathToFileOrDir, fileOrDirName);
@@ -294,7 +299,7 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         const renamedFileOrDir = await gitDraft.renameFileOrDir(pathToFile, fileName, newFileName);
@@ -310,7 +315,7 @@ export const RepositoryFns = {
         const [repository, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         await git._capture();
@@ -329,11 +334,15 @@ export const RepositoryFns = {
                 client.release();
             } catch (error) {
                 const e = error as Error;
-                throw errors.dbError(e.message);
+                throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
             }
 
             if (result.rows?.[0]?.path_to_draft_repository !== gitDraft.path) {
-                throw errors.dbError('Ошибка создания драфта для репозитория!');
+                throw new ServerError({
+                    name: errorNames.dbError,
+                    code: Code.badRequest,
+                    message: 'Путь до репозитория не проставлен в бд',
+                });
             }
         }
 
@@ -352,7 +361,7 @@ export const RepositoryFns = {
         const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         gitDraft.addDir(pathToDir, newDirName);
@@ -372,7 +381,7 @@ export const RepositoryFns = {
         const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
 
         if (!gitDraft) {
-            throw errors.cannotCreateDraftRepositpory('');
+            throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
         }
 
         const formattedVersion = await gitDraft.saveVersion(git, versionSummary, version);

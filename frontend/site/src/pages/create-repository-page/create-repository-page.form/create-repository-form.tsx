@@ -1,11 +1,12 @@
-import React, { useCallback, FC, useState } from 'react';
+import React, { useCallback, FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cn from 'classnames';
-import { Form, FormSpy } from 'react-final-form';
+import { Field, Form, FormSpy, useForm } from 'react-final-form';
 
 import { FetchStatus } from 'types/index';
 import { getRepository } from 'constants/routers';
 import { checkIsRepositoryNameFree, createRepository, setRepositoryNameNotChecked } from 'actions/repositories';
+import { useBooleanState } from 'hooks';
 import { useSelector } from 'store/store';
 import { TextField, Button, CheckboxField } from 'small-components/index';
 import { requiredValidate } from 'utils/final-forms';
@@ -19,6 +20,7 @@ export const CreateRepositoryForm: FC = () => {
     const { repositoryNameStatus, fetchStatus } = useSelector((root) => root.createRepositoryForm);
     const { username } = useSelector((root) => root.user);
     const [lastRepositoryName, setLastRepositoryName] = useState<string>('');
+    const [busyNameError, setBuzyNameErrorTrue, setBuzyNameErrorFalse] = useBooleanState(false);
     const navigate = useNavigate();
 
     const isSubmitDisable =
@@ -41,18 +43,13 @@ export const CreateRepositoryForm: FC = () => {
         [navigate, username, isSubmitDisable],
     );
 
-    const formValidate = useCallback(
-        (values: { title: string; isPrivate: boolean }) => {
-            const errors = {};
+    const noBusyNameValidator = useCallback((value: string) => {
+        if (repositoryNameStatus.status === RepositoryNameStatus.busy && lastRepositoryName === value) {
+            return 'репозиторий с таким названием уже существует';
+        }
 
-            if (repositoryNameStatus.status === RepositoryNameStatus.busy && lastRepositoryName === values.title) {
-                errors['title'] = 'Репозиторий с таким названием уже существует';
-            }
-
-            return errors;
-        },
-        [repositoryNameStatus, lastRepositoryName],
-    );
+        return undefined;
+    }, [lastRepositoryName, repositoryNameStatus]);
 
     const handleRepositoryNameBlur = useCallback(
         (event: React.FocusEvent<HTMLInputElement, Element>) => {
@@ -64,11 +61,18 @@ export const CreateRepositoryForm: FC = () => {
         [lastRepositoryName],
     );
 
+    useEffect(() => {
+        if (repositoryNameStatus.status === RepositoryNameStatus.busy) {
+            setBuzyNameErrorTrue()
+        } else {
+            setBuzyNameErrorFalse();
+        }
+    }, [repositoryNameStatus.status])
+
     return (
         <div className={styles.createRepositoryFrom}>
             <Form
                 onSubmit={handleSubmit}
-                validate={formValidate}
                 render={({ handleSubmit }) => (
                     <form onSubmit={handleSubmit}>
                         <div>
@@ -77,7 +81,7 @@ export const CreateRepositoryForm: FC = () => {
                                     name="title"
                                     type="text"
                                     title="Название репозитория"
-                                    validators={[requiredValidate]}
+                                    validators={[requiredValidate, noBusyNameValidator]}
                                     isDisable={fetchStatus === FetchStatus.loading}
                                     onBlur={handleRepositoryNameBlur}
                                 />
@@ -96,7 +100,9 @@ export const CreateRepositoryForm: FC = () => {
                                     title="сделать приватным"
                                     isDisable={fetchStatus === FetchStatus.loading}
                                 />
+
                             </div>
+                            <ErrorFieldSpy busyNameError={busyNameError} />
                         </div>
                         <div className={styles.buttonWrapper}>
                             <div className={styles.button}>
@@ -124,3 +130,14 @@ export const CreateRepositoryForm: FC = () => {
         </div>
     );
 };
+
+const ErrorFieldSpy: FC<{busyNameError: boolean}> = ({busyNameError}) => {
+    const name = 'title-force-validation';
+    const form = useForm();
+
+    useEffect(() => {
+        form.change(name, busyNameError ? undefined : '123')
+    }, [busyNameError])
+
+    return <Field name={name} validate={requiredValidate} children={() => <></>} initialValue={'123'} />;
+}
