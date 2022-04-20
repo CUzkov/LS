@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, FC, useCallback, useRef, useContext } from 'react';
+import React, { useEffect, useMemo, FC } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/page-wrapper';
