@@ -13,7 +13,7 @@ import {
     getAllRepositories,
     getRepositoryTemplate,
     getLoginPage,
-    getMapTemplate
+    getMapTemplate,
 } from 'constants/routers';
 import { Logger } from 'components/logger';
 import { MovablePopupManager } from 'components/movable-popup-manager';
@@ -27,7 +27,7 @@ import {
     CreateRepositoryPage,
     RepositoriesListPage,
     RepositoryPage,
-    MapPage
+    MapPage,
 } from 'pages';
 import { FetchStatus } from 'types';
 

@@ -8,4 +8,4 @@ export const isCorrectPath = (str: string) => {
 export const isCorrectGroupName = (str: string) => {
     const test = RegExp(/^[a-z0-9а-яA-ZА-Я_ ]{1,}$/);
     return test.test(str);
-}
+};

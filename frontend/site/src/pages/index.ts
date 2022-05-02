@@ -6,4 +6,4 @@ export { CreateMapPage } from './create-map-page';
 export { CreateRepositoryPage } from './create-repository-page';
 export { RepositoriesListPage } from './repositories-list-page';
 export { RepositoryPage } from './repository-page';
-export {MapPage} from './map-page'
+export { MapPage } from './map-page';

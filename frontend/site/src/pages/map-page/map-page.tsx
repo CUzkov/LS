@@ -3,34 +3,32 @@ import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
+import { getMapById } from 'actions/map-page';
 import { FetchStatus } from 'types';
+import { PageTitle } from 'components/PageTitle';
 import Spinner from 'assets/spinner.svg';
 
 import { getPaths } from './map-page.constants';
-import {Graph} from './map-page.graph'
+import { Tree } from './map-page.tree';
 
 import styles from './style.scss';
-import { PageTitle } from 'components/PageTitle';
 
 export const MapPage: FC = () => {
     const { username } = useSelector((root) => root.user);
-    const { repository, files, currentPath, repositoryFetchStatus, repositoryVersion } = useSelector(
-        (root) => root.repositoryPage,
-    );
-    const isRepositoryLoading = repositoryFetchStatus === FetchStatus.loading;
+    const { mapFetchStatus, map } = useSelector((root) => root.mapPage);
+    const isMapLoading = mapFetchStatus === FetchStatus.loading;
     const { id } = useParams();
-    // const [query, setQuery] = useQueryParams(queryParamConfig);
 
     useEffect(() => {
         if (id) {
-            // getPageRepositoriesById(Number(id), query.version ?? undefined);
+            getMapById(Number(id));
         }
     }, [id]);
 
     const paths = useMemo(() => {
-        const basePaths = getPaths(username, repository?.title, String(repository?.id));
+        const basePaths = getPaths(username, map?.title, String(map?.id));
 
-        if (isRepositoryLoading) {
+        if (isMapLoading) {
             basePaths[basePaths.length - 1] = {
                 title: (
                     <div className={styles.breadcrumbsSpinner}>
@@ -42,18 +40,16 @@ export const MapPage: FC = () => {
         }
 
         return basePaths;
-    }, [username, repository, isRepositoryLoading]);
+    }, [username, map, isMapLoading]);
 
     const content = useMemo(
         () => (
             <div className={styles.mapPage}>
-                <PageTitle title={'Project X'} />
-                <div className={styles.graph}>
-                    <Graph />
-                </div>
+                <PageTitle title={map?.title} />
+                <div className={styles.graph}>{map && <Tree group={map} />}</div>
             </div>
         ),
-        [repository, files, currentPath],
+        [map],
     );
 
     return <PageWrapper content={content} paths={paths} />;

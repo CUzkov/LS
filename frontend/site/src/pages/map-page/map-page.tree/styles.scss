@@ -7,4 +7,10 @@
 	border-radius: 5px;
 	border: 1px solid $default-border-color;
 	box-sizing: border-box;
+
+	.react-flow {
+		.react-flow__attribution {
+			display: none;
+		}
+	}
 }

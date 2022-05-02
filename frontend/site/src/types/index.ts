@@ -63,11 +63,19 @@ export const enum RWA {
 
 export enum GroupType {
     map = 'map',
-    rubric = 'rubric'
+    rubric = 'rubric',
 }
 
 export type Group = {
     id: number;
     title: string;
     type: GroupType;
+};
+
+export type FullGroup = {
+    id: number;
+    title: string;
+    type: GroupType;
+    parentId: number;
+    children?: FullGroup[];
 };

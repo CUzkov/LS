@@ -51,7 +51,7 @@ export const getPageRepositoriesById = async (id: number, version?: string) => {
         dispath({ type: 'repository-page/repository/error' });
         dispath({
             type: 'logger/add-log',
-            data: { type: 'error', title: e.error, description: e.description },
+            data: { type: 'error', title: e.name, description: e.description },
         });
         return;
     }
@@ -97,7 +97,7 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
         dispath({ type: 'repository-page/files-and-dirs/error' });
         dispath({
             type: 'logger/add-log',
-            data: { title: e.error, description: e.description, type: 'error' },
+            data: { title: e.name, description: e.description, type: 'error' },
         });
         return;
     }
@@ -345,7 +345,7 @@ export const getAllVersions = async () => {
 
         dispath({
             type: 'logger/add-log',
-            data: { title: e.error, description: e.description, type: 'error' },
+            data: { title: e.name, description: e.description, type: 'error' },
         });
         return;
     }

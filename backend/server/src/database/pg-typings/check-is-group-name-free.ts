@@ -1,4 +1,4 @@
-import {GroupType} from '../../models/group'
+import { GroupType } from '../../models/group';
 
 export type CheckIsGroupNameFreeR = {
     id: number;

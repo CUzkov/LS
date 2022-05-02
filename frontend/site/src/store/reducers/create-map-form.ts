@@ -8,7 +8,7 @@ export enum MapNameStatus {
 
 export type CreateMapFormEvents =
     | { type: 'create-map-form/error' }
-    | { type: 'create-map-form/success', data: Group }
+    | { type: 'create-map-form/success'; data: Group }
     | { type: 'create-map-form/loading' }
     | { type: 'create-map-form/is-map-name-free/error' }
     | { type: 'create-map-form/is-map-name-free/loading' }

@@ -11,7 +11,7 @@ import { errorNames, ServerError } from './utils/server-error';
 const ROUTES = {
     ...AUTH_ROUTES,
     ...REPOSITORIES_ROUTES,
-    ...GROUPS_ROUTES
+    ...GROUPS_ROUTES,
 };
 
 const requestListener = async (request: IncomingMessage, response: ServerResponse) => {

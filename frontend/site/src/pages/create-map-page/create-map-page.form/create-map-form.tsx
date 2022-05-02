@@ -9,7 +9,7 @@ import { checkIsMapNameFree, createMap, setMapNameNotChecked } from 'actions/cre
 import { TextField, Button } from 'small-components/index';
 import { requiredValidate } from 'utils/final-forms';
 import { MapNameStatus } from 'store/reducers/create-map-form';
-import { FetchStatus, GroupType } from 'types/index';
+import { FetchStatus } from 'types/index';
 import { useBooleanState } from 'hooks';
 import { getMap } from 'constants/routers';
 import Spinner from 'assets/spinner.svg';
@@ -36,25 +36,28 @@ export const CreateMapForm: FC = () => {
 
             createMap(userForm.title).then((map) => {
                 if (map) {
-                    navigate(getMap(username, String(map.id)))
+                    navigate(getMap(username, String(map.id)));
                 }
-            })
+            });
         },
         [navigate, username, isSubmitDisable],
     );
 
-    const noBusyNameValidator = useCallback((value: string) => {
-        if (mapNameStatus.status === MapNameStatus.busy && lastMapName === value) {
-            return 'карта с таким названием уже существует';
-        }
+    const noBusyNameValidator = useCallback(
+        (value: string) => {
+            if (mapNameStatus.status === MapNameStatus.busy && lastMapName === value) {
+                return 'карта с таким названием уже существует';
+            }
 
-        return undefined;
-    }, [lastMapName, mapNameStatus]);
+            return undefined;
+        },
+        [lastMapName, mapNameStatus],
+    );
 
     const handleRepositoryNameBlur = useCallback(
         (event: React.FocusEvent<HTMLInputElement, Element>) => {
             if (event.target.value !== lastMapName) {
-                checkIsMapNameFree(event.target.value)
+                checkIsMapNameFree(event.target.value);
                 setlastMapName(event.target.value);
             }
         },
@@ -63,11 +66,11 @@ export const CreateMapForm: FC = () => {
 
     useEffect(() => {
         if (mapNameStatus.status === MapNameStatus.busy) {
-            setBuzyNameErrorTrue()
+            setBuzyNameErrorTrue();
         } else {
             setBuzyNameErrorFalse();
         }
-    }, [mapNameStatus.status])
+    }, [mapNameStatus.status]);
 
     return (
         <div className={styles.createMapFrom}>
@@ -97,11 +100,7 @@ export const CreateMapForm: FC = () => {
                         </div>
                         <div className={styles.submitButtonWrapper}>
                             <div className={styles.submitButton}>
-                                <Button
-                                    text={'Создать'}
-                                    type={'submit'}
-                                    isDisable={isSubmitDisable}
-                                />
+                                <Button text={'Создать'} type={'submit'} isDisable={isSubmitDisable} />
                             </div>
                         </div>
                         <div className={cn(styles.spinner, fetchStatus === FetchStatus.loading && styles.loading)}>
@@ -111,10 +110,7 @@ export const CreateMapForm: FC = () => {
                         <FormSpy
                             subscription={{ values: true }}
                             children={({ values }) => {
-                                if (
-                                    values.title !== lastMapName &&
-                                    mapNameStatus.status !== MapNameStatus.notChecked
-                                ) {
+                                if (values.title !== lastMapName && mapNameStatus.status !== MapNameStatus.notChecked) {
                                     setMapNameNotChecked();
                                 }
                                 return null;
@@ -127,13 +123,13 @@ export const CreateMapForm: FC = () => {
     );
 };
 
-const ErrorFieldSpy: FC<{busyNameError: boolean}> = ({busyNameError}) => {
+const ErrorFieldSpy: FC<{ busyNameError: boolean }> = ({ busyNameError }) => {
     const name = 'title-force-validation';
     const form = useForm();
 
     useEffect(() => {
-        form.change(name, busyNameError ? undefined : '123')
-    }, [busyNameError])
+        form.change(name, busyNameError ? undefined : '123');
+    }, [busyNameError]);
 
     return <Field name={name} validate={requiredValidate} children={() => <></>} initialValue={'123'} />;
-}
+};

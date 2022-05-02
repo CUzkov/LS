@@ -45,9 +45,8 @@ create table users_groups_relationship (
 
 create table group_to_group_links (
 	id 						serial primary key,
-	parent_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
-	child_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
-	link_name				text not null
+	parent_id				integer null REFERENCES groups (id) ON DELETE CASCADE,
+	child_id				integer not null REFERENCES groups (id) ON DELETE CASCADE
 );
 
 create table group_to_repository_links (
@@ -63,6 +62,51 @@ values ('cuzkov', 'users@gmail.com', 'Gurkina12', true),
 ('cuzkov2', 'users2@gmail.com', 'Gurkina12', false),
 ('cuzkov3', 'users3@gmail.com', 'Gurkina12', false),
 ('cuzkov4', 'users4@gmail.com', 'Gurkina12', false);
+
+insert into groups (user_id, title, group_type)
+values (1, 'Наука', 'map'),
+(1, 'Физика', 'map'),
+(1, 'Химия', 'map'),
+(1, 'Биология', 'map'),
+(1, 'Развитие жизни', 'map'),
+(1, 'Теология', 'map'),
+(1, 'Дарвин', 'map'),
+(1, 'Новый дарвин', 'map'),
+(1, 'Старый дарвин', 'map'),
+(1, 'Ионизация', 'map'),
+(1, 'Сильная ионизация', 'map'),
+(1, 'Слабая ионизация', 'map'),
+(1, 'Ампер', 'map');
+
+insert into users_groups_relationship (user_id, group_id, relationship)
+values (1, 1, B'111'),
+(1, 2, B'111'),
+(1, 3, B'111'),
+(1, 4, B'111'),
+(1, 5, B'111'),
+(1, 6, B'111'),
+(1, 7, B'111'),
+(1, 8, B'111'),
+(1, 9, B'111'),
+(1, 10, B'111'),
+(1, 11, B'111'),
+(1, 12, B'111'),
+(1, 13, B'111');
+
+insert into group_to_group_links(parent_id, child_id)
+values (null, 1),
+(1, 2),
+(1, 3),
+(1, 4),
+(4, 5),
+(5, 6),
+(5, 7),
+(7, 8),
+(7, 9),
+(3, 10),
+(10, 11),
+(10, 12),
+(2, 13);
 
 -----------------------------------------------------------------------
 -- Создание нового пользователя
@@ -550,6 +594,60 @@ $BODY$
 				groups.group_type
 			from groups
 			where groups.id=group_id_v limit 1;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение полной группы (с вложенными группами и репозиториями)
+-----------------------------------------------------------------------
+create function get_full_group_by_id(
+	user_id_v integer,
+	group_id_v integer
+) returns table(id integer, parent_id integer, title text, group_type groupType) as
+$BODY$
+	declare
+		relationships_v bit(3)[3];
+	begin
+		relationships_v = get_array_of_bit_mask_by_flags(true, true);
+
+		return query (
+			with recursive grp_r as (
+				(
+					select group_to_group_links.child_id, group_to_group_links.parent_id
+					from group_to_group_links
+					inner join users_groups_relationship
+					on group_to_group_links.child_id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+					where
+						(
+							users_groups_relationship.relationship = relationships_v[1] or
+							users_groups_relationship.relationship = relationships_v[2] or
+							users_groups_relationship.relationship = relationships_v[3]
+						) and
+						group_to_group_links.child_id = group_id_v
+					limit 1
+				)
+				union all
+				(
+					select group_to_group_links.child_id, group_to_group_links.parent_id
+					from group_to_group_links
+					join grp_r on grp_r.child_id = group_to_group_links.parent_id
+					inner join users_groups_relationship
+					on group_to_group_links.child_id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+					where
+						(
+							users_groups_relationship.relationship = relationships_v[1] or
+							users_groups_relationship.relationship = relationships_v[2] or
+							users_groups_relationship.relationship = relationships_v[3]
+						)
+				)
+			)
+			
+			select grp_r.child_id as id, grp_r.parent_id, groups.title, groups.group_type
+			from grp_r
+			inner join groups
+			on grp_r.child_id = groups.id
+		);
 	end;
 $BODY$
 	language 'plpgsql' volatile;
