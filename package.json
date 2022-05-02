@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "lint-site": "cd ./frontend/site && npm run lint",
+        "lint-site": "cd ./frontend/site && npm run lint && npm run tsc",
         "lint-backend": "cd ./backend/server && npm run lint"
     },
     "pre-commit": [

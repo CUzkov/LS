@@ -1,9 +1,5 @@
-import { FetchStatus, Map } from '../../types';
-
 export interface IMainPageD {
-    maps?: {
-        data: Map[];
-    };
+    ff: number;
 }
 
 export type MainPageEvents =
@@ -13,27 +9,16 @@ export type MainPageEvents =
     | { type: 'main-page/clear' };
 
 export type MainPageStore = {
-    maps: {
-        data: Map[];
-        fetchStatus: FetchStatus;
-    };
+    ff: number;
 };
 
 const initialState: MainPageStore = {
-    maps: {
-        data: [],
-        fetchStatus: FetchStatus.loading,
-    },
+    ff: 0,
 };
 
 export const mainPageReducer = (state: MainPageStore = initialState, event: MainPageEvents): MainPageStore => {
     if (event.type === 'main-page/maps/success') {
         const result = { ...state };
-
-        result.maps = {
-            data: event.data.maps?.data ?? [],
-            fetchStatus: FetchStatus.successed,
-        };
 
         return result;
     }
@@ -41,15 +26,11 @@ export const mainPageReducer = (state: MainPageStore = initialState, event: Main
     if (event.type === 'main-page/maps/loading') {
         const result = { ...state };
 
-        result.maps.fetchStatus = FetchStatus.loading;
-
         return result;
     }
 
     if (event.type === 'main-page/maps/error') {
         const result = { ...state };
-
-        result.maps.fetchStatus = FetchStatus.error;
 
         return result;
     }
