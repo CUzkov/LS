@@ -1,0 +1,26 @@
+{
+    "name": "ls",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "lint-site": "cd ./frontend/site && npm run lint",
+        "lint-backend": "cd ./backend/server && npm run lint"
+    },
+    "pre-commit": [
+        "lint-site",
+        "lint-backend"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/CUzkov/LS.git"
+    },
+    "author": "CUzkov",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/CUzkov/LS/issues"
+    },
+    "homepage": "https://github.com/CUzkov/LS#readme",
+    "devDependencies": {
+        "pre-commit": "^1.2.2"
+    }
+}

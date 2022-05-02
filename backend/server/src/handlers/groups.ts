@@ -164,3 +164,66 @@ export const getFullGroupById: ResponseCallback<Empty, GetFullGroupByIdQP> = asy
         return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 };
+
+type GetGroupsByFiltersQP = {
+    is_rw?: boolean;
+    is_rwa?: boolean;
+    title?: string;
+    by_user?: number;
+    groupType?: GroupType;
+};
+
+type GetGroupsByFiltersRD = Group[];
+
+const GetGroupsByFiltersDto = ajv.compile<JTDSchemaType<GetGroupsByFiltersQP>>({
+    optionalProperties: {
+        is_rw: { type: 'boolean', nullable: false },
+        is_rwa: { type: 'boolean', nullable: false },
+        title: { type: 'string', nullable: false },
+        by_user: { type: 'float64', nullable: false },
+        groupType: { enum: [GroupType.map, GroupType.rubric], nullable: false },
+    },
+});
+
+export const getGroupsByFilter: ResponseCallback<Empty, GetGroupsByFiltersQP> = async ({
+    response,
+    userId,
+    queryParams,
+}) => {
+    if (!userId) {
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
+    }
+
+    if (
+        !GetGroupsByFiltersDto({
+            ...queryParams,
+            is_rw: Boolean(queryParams?.is_rw),
+            is_rwa: Boolean(queryParams?.is_rwa),
+            by_user: Number(queryParams?.by_user),
+        })
+    ) {
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'Лишние параметры или указанные параметры неверного типа!',
+            }),
+        );
+    }
+
+    try {
+        const groups = await GroupFns.getGroupsByFilters(queryParams ?? {}, userId);
+        getOkResponse<GetGroupsByFiltersRD>(response, groups);
+    } catch (error) {
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
+    }
+};

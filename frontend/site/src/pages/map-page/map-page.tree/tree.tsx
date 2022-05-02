@@ -28,7 +28,6 @@ class DrawTree {
 
     tree: DrawTree | null;
     mod: number;
-    offset: number;
     children: DrawTree[];
 
     constructor(tree: DrawTree | null, depth: number, id: number, parentId: number, title: ReactNode) {

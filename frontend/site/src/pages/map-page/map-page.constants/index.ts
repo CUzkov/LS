@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-// import { StringParam, BooleanParam } from 'use-query-params';
 
 import { getMainPage, getAllMaps, getUserPage, getMap } from 'constants/routers';
 
@@ -13,7 +12,7 @@ export const getPaths = (username: string, entityName: ReactNode, entityValue = 
         url: getUserPage(username),
     },
     {
-        title: 'Все карты',
+        title: 'Карты знаний',
         url: getAllMaps(username),
     },
     {

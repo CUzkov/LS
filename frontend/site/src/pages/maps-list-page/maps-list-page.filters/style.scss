@@ -1,0 +1,35 @@
+@import '../../../index.scss';
+
+.mapsPageFilters {
+	display: flex;
+	align-items: center;
+
+	.searchField {
+		width: 250px;
+		margin-right: 15px;
+	}
+	
+	.rwaField {
+		width: 300px;
+		margin-right: 25px;
+	}
+	
+	.findButton {
+		width: 75px;
+		margin-right: 10px;
+	}
+	
+	.searchForm {
+		display: flex;
+		align-items: center;
+	}
+
+	.rwaForm {
+		display: flex;
+		align-items: center;
+	}
+	
+	.resetButton {
+		width: 75px;
+	}
+}

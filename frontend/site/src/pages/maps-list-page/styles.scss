@@ -1,0 +1,19 @@
+@import '../../index.scss';
+
+.mapsListPage {
+    width: calc(100% - 65px);
+    box-sizing: border-box;
+    border-top: 1px solid $default-dark-border;
+    margin: 5px 10px 0 55px;
+
+    .maps {
+        position: relative;
+    }
+
+    .spinner {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, 0);
+    }
+}

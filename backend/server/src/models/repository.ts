@@ -37,8 +37,6 @@ export type Repository = {
     user_id: number;
     title: string;
     path_to_draft_repository?: string;
-    rubric_id?: number;
-    map_id?: number;
 };
 
 type RepositoryFilters = {
@@ -155,8 +153,6 @@ export const RepositoryFns = {
                     is_private: row.is_private,
                     user_id: row.user_id,
                     title: row.title,
-                    rubric_id: row.rubric_id,
-                    map_id: row.map_id,
                     rootFiles: [],
                 },
                 version: await git.getCurrentVersion(),

@@ -6,7 +6,7 @@ import { useSelector } from 'store/store';
 import { Header } from 'components/Header';
 import {
     getMainPage,
-    // getAllMaps,
+    getAllMaps,
     // getUserPage,
     getMapCreate,
     getRepositoryCreate,
@@ -21,7 +21,7 @@ import { MovablePopupManager } from 'components/movable-popup-manager';
 import {
     LoginPage,
     MainPage,
-    // MapsListPage,
+    MapsListPage,
     // UserPage,
     CreateMapPage,
     CreateRepositoryPage,
@@ -66,7 +66,7 @@ export const App: FC = () => {
                 <Routes>
                     <Route path={getMainPage()} element={<MainPage />} />
                     <Route path={getLoginPage()} element={<LoginPage />} />
-                    {/* <Route path={getAllMaps(userStore.username)} element={<MapsListPage />} /> */}
+                    <Route path={getAllMaps(userStore.username)} element={<MapsListPage />} />
                     {/* <Route path={getUserPage(userStore.username)} element={<UserPage />} /> */}
                     <Route path={getMapCreate(userStore.username)} element={<CreateMapPage />} />
                     <Route path={getMapTemplate(userStore.username)} element={<MapPage />} />

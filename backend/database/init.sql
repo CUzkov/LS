@@ -409,18 +409,20 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Выборка карт по фильрам
+-- Выборка групп по фильрам
 -----------------------------------------------------------------------
 create function get_groups_by_filter(
 	user_id_v integer,
 	by_user_v integer,
 	title_v text,
+	group_type_v groupType,
 	is_can_rw_v boolean,
 	is_can_rwa_v boolean
 ) returns table(
 	id integer,
 	user_id integer,
-	title text
+	title text,
+	group_type groupType
 ) as
 $BODY$
 	declare
@@ -432,13 +434,15 @@ $BODY$
 			select
 				groups.id,
 				groups.user_id,
-				groups.title
+				groups.title,
+				groups.group_type
 			from groups
 			inner join users_groups_relationship
-			on groups.id = users_groups_relationship.repository_id and users_groups_relationship.user_id = user_id_v
+			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where
-				(by_user_v = -1 or repositories.user_id = by_user_v) and
-				(title_v = '' or repositories.title like title_v) and
+				(by_user_v = -1 or groups.user_id = by_user_v) and
+				(title_v = '' or groups.title like title_v) and
+				(group_type_v = null or groups.group_type = group_type_v) and
 				(
 					users_groups_relationship.relationship = relationships_v[1] or
 					users_groups_relationship.relationship = relationships_v[2] or

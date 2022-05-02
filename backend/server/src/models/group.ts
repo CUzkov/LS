@@ -7,6 +7,11 @@ import {
 } from '../database/pg-typings/check-is-group-name-free';
 import { createGroupQ, CreateGroupQP, CreateGroupR } from '../database/pg-typings/create-group';
 import { getFullGroupByIdQ, GetFullGroupByIdQP, GetFullGroupByIdR } from '../database/pg-typings/get-full-group';
+import {
+    getGroupsByFiltersQ,
+    GetGroupsByFiltersQP,
+    GetGroupsByFiltersR,
+} from '../database/pg-typings/get-groups-by-filters';
 
 import { pg } from '../database';
 import { ServerError, errorNames } from '../utils/server-error';
@@ -21,6 +26,7 @@ export type Group = {
     id: number;
     title: string;
     type: GroupType;
+    userId: number;
 };
 
 export type FullGroup = {
@@ -29,6 +35,13 @@ export type FullGroup = {
     type: GroupType;
     parentId: number;
     children?: FullGroup[];
+};
+
+type GroupsFilters = {
+    is_rw?: boolean;
+    is_rwa?: boolean;
+    title?: string;
+    by_user?: number;
 };
 
 const getGroupWithChilds = (group: FullGroup, nodesAdjList: Record<string, FullGroup[]>): FullGroup => {
@@ -87,6 +100,7 @@ export const GroupFns = {
             id: group.id,
             title: group.title,
             type: group.group_type,
+            userId,
         };
     },
     getFullGroupById: async (userId: number, groupId: number) => {
@@ -130,5 +144,31 @@ export const GroupFns = {
             },
             nodesAdjList,
         );
+    },
+    getGroupsByFilters: async ({ by_user, title, is_rw, is_rwa }: GroupsFilters, userId: number): Promise<Group[]> => {
+        let result: QueryResult<GetGroupsByFiltersR>;
+
+        try {
+            const client = await pg.connect();
+            result = await client.query<GetGroupsByFiltersR, GetGroupsByFiltersQP>(getGroupsByFiltersQ, [
+                userId,
+                by_user ?? -1,
+                title ? `${title}%` : '',
+                GroupType.map,
+                is_rw ?? false,
+                is_rwa ?? false,
+            ]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
+
+        return result.rows.map((row) => ({
+            id: row.id,
+            title: row.title,
+            type: row.group_type,
+            userId: row.user_id,
+        }));
     },
 };

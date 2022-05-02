@@ -16,12 +16,6 @@ export enum FetchStatus {
     none,
 }
 
-export type Map = {
-    title: string;
-    userId: number;
-    id: number;
-};
-
 export enum FileStatus {
     commit = 'commit',
     add = 'add',
@@ -70,6 +64,7 @@ export type Group = {
     id: number;
     title: string;
     type: GroupType;
+    userId: number;
 };
 
 export type FullGroup = {
@@ -78,4 +73,5 @@ export type FullGroup = {
     type: GroupType;
     parentId: number;
     children?: FullGroup[];
+    userId: number;
 };

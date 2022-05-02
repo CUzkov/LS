@@ -1,61 +1,39 @@
-import { FetchStatus, Map } from '../../types';
-
-export interface IMapsListPageD {
-    maps?: {
-        data: Map[];
-    };
-}
+import { FetchStatus, Group } from 'types';
 
 export type MapsListPageEvents =
-    | { type: 'maps-list-page/maps-list/success'; data: IMapsListPageD }
+    | { type: 'maps-list-page/maps-list/success'; data: Group[] }
     | { type: 'maps-list-page/maps-list/loading' }
     | { type: 'maps-list-page/maps-list/error' }
     | { type: 'maps-list-page/maps-list/clear' };
 
 export type MapsListPageStore = {
-    maps: {
-        data: Map[];
-        fetchStatus: FetchStatus;
-    };
+    groups: Group[];
+    groupsFetchStatus: FetchStatus;
 };
 
 const initialState: MapsListPageStore = {
-    maps: {
-        data: [],
-        fetchStatus: FetchStatus.loading,
-    },
+    groups: [],
+    groupsFetchStatus: FetchStatus.none,
 };
 
 export const mapsListPageReducer = (
     state: MapsListPageStore = initialState,
     event: MapsListPageEvents,
 ): MapsListPageStore => {
+    const result = { ...state };
+
     if (event.type === 'maps-list-page/maps-list/success') {
-        const result = { ...state };
-
-        result.maps = {
-            data: event.data.maps?.data ?? [],
-            fetchStatus: FetchStatus.successed,
-        };
-
-        return result;
+        result.groups = event.data;
+        result.groupsFetchStatus = FetchStatus.successed;
     }
 
     if (event.type === 'maps-list-page/maps-list/loading') {
-        const result = { ...state };
-
-        result.maps.fetchStatus = FetchStatus.loading;
-
-        return result;
+        result.groupsFetchStatus = FetchStatus.loading;
     }
 
     if (event.type === 'maps-list-page/maps-list/error') {
-        const result = { ...state };
-
-        result.maps.fetchStatus = FetchStatus.error;
-
-        return result;
+        result.groupsFetchStatus = FetchStatus.error;
     }
 
-    return state;
+    return result;
 };
