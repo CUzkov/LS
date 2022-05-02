@@ -10,6 +10,7 @@
         "lint-site",
         "lint-backend"
     ],
+    "precommit.silent": false,
     "repository": {
         "type": "git",
         "url": "git+https://github.com/CUzkov/LS.git"
