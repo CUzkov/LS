@@ -119,7 +119,7 @@ export const RepositoryFns = {
     getRepositoryByFilters: async (
         { by_user, title, is_rw, is_rwa, page, quantity }: RepositoryFilters,
         userId: number,
-    ): Promise<{repositories: { repository: Repository; version: string }[], count: number}> => {
+    ): Promise<{ repositories: { repository: Repository; version: string }[]; count: number }> => {
         let result: QueryResult<GetRepositoryByFiltersR>;
 
         try {
@@ -131,7 +131,7 @@ export const RepositoryFns = {
                 is_rw ?? false,
                 is_rwa ?? false,
                 page,
-                quantity
+                quantity,
             ]);
             client.release();
         } catch (error) {
@@ -165,7 +165,7 @@ export const RepositoryFns = {
 
         return {
             repositories: await Promise.all(resultPromises),
-            count: Math.ceil(result.rows?.[0]?.repositories_count / quantity) ?? 0
+            count: Math.ceil(result.rows?.[0]?.repositories_count / quantity) ?? 0,
         };
     },
     getRepositoryById: async (

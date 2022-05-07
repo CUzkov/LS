@@ -8,7 +8,11 @@ import {
 import { createGroupQ, CreateGroupQP, CreateGroupR } from '../database/pg-typings/create-group';
 import { getFullGroupByIdQ, GetFullGroupByIdQP, GetFullGroupByIdR } from '../database/pg-typings/get-full-group';
 import { addGroupToGroupQ, AddGroupToGroupQP, AddGroupToGroupR } from '../database/pg-typings/add-group-to-group';
-import { checkIsUserCanAddGroupToGroupQ, CheckIsUserCanAddGroupToGroupQP, CheckIsUserCanAddGroupToGroupR } from '../database/pg-typings/check-is-user-can-add-group-to-group';
+import {
+    checkIsUserCanAddGroupToGroupQ,
+    CheckIsUserCanAddGroupToGroupQP,
+    // CheckIsUserCanAddGroupToGroupR,
+} from '../database/pg-typings/check-is-user-can-add-group-to-group';
 import {
     getGroupsByFiltersQ,
     GetGroupsByFiltersQP,
@@ -149,7 +153,10 @@ export const GroupFns = {
             nodesAdjList,
         );
     },
-    getGroupsByFilters: async ({ by_user, title, is_rw, is_rwa, page, quantity }: GroupsFilters, userId: number): Promise<{count: number, groups: Group[]}> => {
+    getGroupsByFilters: async (
+        { by_user, title, is_rw, is_rwa, page, quantity }: GroupsFilters,
+        userId: number,
+    ): Promise<{ count: number; groups: Group[] }> => {
         let result: QueryResult<GetGroupsByFiltersR>;
 
         try {
@@ -162,7 +169,7 @@ export const GroupFns = {
                 is_rw ?? false,
                 is_rwa ?? false,
                 page,
-                quantity
+                quantity,
             ]);
             client.release();
         } catch (error) {
@@ -177,7 +184,7 @@ export const GroupFns = {
                 type: row.group_type,
                 userId: row.user_id,
             })),
-            count: Math.ceil(result.rows?.[0].rows_count / quantity) ?? 0
+            count: Math.ceil(result.rows?.[0].rows_count / quantity) ?? 0,
         };
     },
     addGroupToGroup: async (userId: number, parentGroupId: number, childGroupId: number): Promise<void> => {
@@ -185,11 +192,10 @@ export const GroupFns = {
 
         try {
             const client = await pg.connect();
-            accessResult = await client.query<CheckIsGroupNameFreeR, CheckIsUserCanAddGroupToGroupQP>(checkIsUserCanAddGroupToGroupQ, [
-                userId,
-                parentGroupId,
-                childGroupId
-            ]);
+            accessResult = await client.query<CheckIsGroupNameFreeR, CheckIsUserCanAddGroupToGroupQP>(
+                checkIsUserCanAddGroupToGroupQ,
+                [userId, parentGroupId, childGroupId],
+            );
             client.release();
         } catch (error) {
             const e = error as Error;
@@ -197,7 +203,7 @@ export const GroupFns = {
         }
 
         if (!accessResult) {
-            throw new ServerError({ name: errorNames.groupAccessError, code: Code.badRequest}); 
+            throw new ServerError({ name: errorNames.groupAccessError, code: Code.badRequest });
         }
 
         let result: QueryResult<AddGroupToGroupR>;
@@ -206,7 +212,7 @@ export const GroupFns = {
             const client = await pg.connect();
             result = await client.query<AddGroupToGroupR, AddGroupToGroupQP>(addGroupToGroupQ, [
                 parentGroupId,
-                childGroupId
+                childGroupId,
             ]);
             client.release();
         } catch (error) {
@@ -221,5 +227,5 @@ export const GroupFns = {
                 message: 'Группа не добавлена!',
             });
         }
-    }
+    },
 };

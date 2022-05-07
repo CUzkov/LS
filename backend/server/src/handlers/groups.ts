@@ -225,7 +225,7 @@ export const getGroupsByFilter: ResponseCallback<Empty, GetGroupsByFiltersQP> = 
     }
 
     try {
-        const groups = await GroupFns.getGroupsByFilters(queryParams ?? {page: 1, quantity: 1}, userId);
+        const groups = await GroupFns.getGroupsByFilters(queryParams ?? { page: 1, quantity: 1 }, userId);
         getOkResponse<GetGroupsByFiltersRD>(response, groups);
     } catch (error) {
         if (error instanceof ServerError) {
@@ -244,18 +244,14 @@ type AddGroupToGroupD = {
 
 type AddGroupToGroupRD = Empty;
 
-const AddGroupToGroupDto = ajv.compile<JTDSchemaType<AddGroupToGroupD>>({ 
+const AddGroupToGroupDto = ajv.compile<JTDSchemaType<AddGroupToGroupD>>({
     optionalProperties: {
         childId: { type: 'float64', nullable: false },
         parentId: { type: 'float64', nullable: false },
     },
 });
 
-export const addGroupToGroup: ResponseCallback<AddGroupToGroupD, Empty> = async ({
-    response,
-    userId,
-    data,
-}) => {
+export const addGroupToGroup: ResponseCallback<AddGroupToGroupD, Empty> = async ({ response, userId, data }) => {
     if (!userId) {
         return getServerErrorResponse(
             response,
