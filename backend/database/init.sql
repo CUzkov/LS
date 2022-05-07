@@ -327,20 +327,38 @@ create function get_repositories_by_filter(
 	by_user_v integer,
 	title_v text,
 	is_can_rw_v boolean,
-	is_can_rwa_v boolean
+	is_can_rwa_v boolean,
+	page_v integer,
+	quantity_v integer
 ) returns table(
 	id integer,
 	path_to_repository text,
 	is_private boolean,
 	user_id integer,
 	title text,
-	path_to_draft_repository text
+	path_to_draft_repository text,
+	repositories_count bigint
 ) as
 $BODY$
 	declare
 		relationships_v bit(3)[3];
+		repositories_count bigint;
 	begin
 		relationships_v = get_array_of_bit_mask_by_flags(is_can_rw_v, is_can_rwa_v);
+
+		repositories_count := (
+			select count(*) from repositories
+			inner join users_repositories_relationship
+			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			where
+				(by_user_v = -1 or repositories.user_id = by_user_v) and
+				(title_v = '' or repositories.title like title_v) and
+				(
+					users_repositories_relationship.relationship = relationships_v[1] or
+					users_repositories_relationship.relationship = relationships_v[2] or
+					users_repositories_relationship.relationship = relationships_v[3]
+				)
+		);
 
 		return query
 			select
@@ -349,7 +367,8 @@ $BODY$
 				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
-				repositories.path_to_draft_repository
+				repositories.path_to_draft_repository,
+				repositories_count
 			from repositories
 			inner join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
@@ -360,7 +379,8 @@ $BODY$
 					users_repositories_relationship.relationship = relationships_v[1] or
 					users_repositories_relationship.relationship = relationships_v[2] or
 					users_repositories_relationship.relationship = relationships_v[3]
-				);
+				)
+			limit quantity_v offset quantity_v * (page_v - 1) ;
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -411,31 +431,51 @@ $BODY$
 -----------------------------------------------------------------------
 -- Выборка групп по фильрам
 -----------------------------------------------------------------------
-create function get_groups_by_filter(
+create or replace function get_groups_by_filter(
 	user_id_v integer,
 	by_user_v integer,
 	title_v text,
 	group_type_v groupType,
 	is_can_rw_v boolean,
-	is_can_rwa_v boolean
+	is_can_rwa_v boolean,
+	page_v integer,
+	quantity_v integer
 ) returns table(
 	id integer,
 	user_id integer,
 	title text,
-	group_type groupType
+	group_type groupType,
+	rows_count bigint
 ) as
 $BODY$
 	declare
 		relationships_v bit(3)[3];
+		rows_count_v bigint;
 	begin
 		relationships_v = get_array_of_bit_mask_by_flags(is_can_rw_v, is_can_rwa_v);
+
+		rows_count_v := (
+			select count(*) from groups
+			inner join users_groups_relationship
+			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			where
+				(by_user_v = -1 or groups.user_id = by_user_v) and
+				(title_v = '' or groups.title like title_v) and
+				(group_type_v = null or groups.group_type = group_type_v) and
+				(
+					users_groups_relationship.relationship = relationships_v[1] or
+					users_groups_relationship.relationship = relationships_v[2] or
+					users_groups_relationship.relationship = relationships_v[3]
+				)
+		);
 
 		return query
 			select
 				groups.id,
 				groups.user_id,
 				groups.title,
-				groups.group_type
+				groups.group_type,
+				rows_count_v as rows_count
 			from groups
 			inner join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
@@ -447,7 +487,8 @@ $BODY$
 					users_groups_relationship.relationship = relationships_v[1] or
 					users_groups_relationship.relationship = relationships_v[2] or
 					users_groups_relationship.relationship = relationships_v[3]
-				);
+				)
+			limit quantity_v offset quantity_v * (page_v - 1);
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -603,7 +644,7 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Получение полной группы (с вложенными группами и репозиториями)
+-- Получение полной группы (с вложенными группами)
 -----------------------------------------------------------------------
 create function get_full_group_by_id(
 	user_id_v integer,
@@ -618,32 +659,15 @@ $BODY$
 		return query (
 			with recursive grp_r as (
 				(
-					select group_to_group_links.child_id, group_to_group_links.parent_id
-					from group_to_group_links
-					inner join users_groups_relationship
-					on group_to_group_links.child_id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
-					where
-						(
-							users_groups_relationship.relationship = relationships_v[1] or
-							users_groups_relationship.relationship = relationships_v[2] or
-							users_groups_relationship.relationship = relationships_v[3]
-						) and
-						group_to_group_links.child_id = group_id_v
+					select groups.id as child_id, -1 as parent_id from groups
+					where groups.id = group_id_v
 					limit 1
 				)
-				union all
+				union
 				(
 					select group_to_group_links.child_id, group_to_group_links.parent_id
 					from group_to_group_links
 					join grp_r on grp_r.child_id = group_to_group_links.parent_id
-					inner join users_groups_relationship
-					on group_to_group_links.child_id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
-					where
-						(
-							users_groups_relationship.relationship = relationships_v[1] or
-							users_groups_relationship.relationship = relationships_v[2] or
-							users_groups_relationship.relationship = relationships_v[3]
-						)
 				)
 			)
 			
@@ -651,6 +675,82 @@ $BODY$
 			from grp_r
 			inner join groups
 			on grp_r.child_id = groups.id
+		);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Добавление группы в группу
+-----------------------------------------------------------------------
+create function add_group_to_group(
+	parent_group_id_v integer,
+	child_group_id_v integer
+) returns table(id integer) as
+$BODY$
+	declare
+		new_link_id_v integer;
+	begin
+		insert into group_to_group_links (parent_id, child_id)
+		values (parent_group_id_v, child_group_id_v)
+		returning group_to_group_links.id into new_link_id_v;
+
+		return query
+			select group_to_group_links.id from group_to_group_links
+			where group_to_group_links.id = new_link_id_v;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Проверка, пожет ли пользователь добавить группу в группу
+-----------------------------------------------------------------------
+create function check_is_user_can_add_group_to_group(
+	user_id_v integer,
+	parent_group_id_v integer,
+	child_group_id_v integer
+) returns boolean as
+$BODY$
+	declare
+		is_can_rw_parent_group_v boolean;
+		is_can_r_child_group_v boolean;
+		parent_relationships_v bit(3)[3];
+		child_relationships_v bit(3)[3];
+	begin
+		parent_relationships_v = get_array_of_bit_mask_by_flags(true, false);
+		child_relationships_v = get_array_of_bit_mask_by_flags(false, false);
+
+		is_can_rw_parent_group_v := (
+			select users_groups_relationship.relationship from users_groups_relationship
+			inner join users_groups_relationship
+			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			where (
+				users_groups_relationship.group_id = parent_group_id_v and
+				(
+					users_groups_relationship.relationship = parent_relationships_v[1] or
+					users_groups_relationship.relationship = parent_relationships_v[2] or
+					users_groups_relationship.relationship = parent_relationships_v[3]
+				)
+			)::boolean
+		);
+
+		is_can_r_child_group_v := (
+			select users_groups_relationship.relationship from users_groups_relationship
+			inner join users_groups_relationship
+			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			where (
+				users_groups_relationship.group_id = parent_group_id_v and
+				(
+					users_groups_relationship.relationship = child_relationships_v[1] or
+					users_groups_relationship.relationship = child_relationships_v[2] or
+					users_groups_relationship.relationship = child_relationships_v[3]
+				)
+			)::boolean
+		);
+
+		return (
+			is_can_rw_parent_group_v and
+			is_can_r_child_group_v
 		);
 	end;
 $BODY$

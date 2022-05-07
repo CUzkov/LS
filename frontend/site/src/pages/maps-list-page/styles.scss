@@ -8,6 +8,8 @@
 
     .maps {
         position: relative;
+        height: calc(100vh - 310px);
+        overflow: auto;
     }
 
     .spinner {
@@ -15,5 +17,9 @@
         top: 0;
         left: 50%;
         transform: translate(-50%, 0);
+    }
+
+    .paginator {
+        margin-top: 30px;
     }
 }

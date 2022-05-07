@@ -129,10 +129,10 @@ export const MovablePopupManager: FC<IMovablePopupManagerProps> = ({ children })
             </MovablePopupManagerContext.Provider>
             {ReactDom.createPortal(
                 <div className={cn(styles.popupsLayout)}>
-                    {popups.map(({ content, title, priority, isRequired }, index) => (
+                    {popups.map(({ content, title, priority, isRequired, id }, index) => (
                         <Popup
                             title={title}
-                            key={new Date().getTime() + index}
+                            key={id + index}
                             innerRef={popupsRefs[index]}
                             onMouseMove={(mouseX: number, mouseY: number, e: MouseEvent) =>
                                 handleMouseMove(index, mouseX, mouseY, e)

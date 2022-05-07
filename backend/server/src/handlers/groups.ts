@@ -171,9 +171,14 @@ type GetGroupsByFiltersQP = {
     title?: string;
     by_user?: number;
     groupType?: GroupType;
+    page: number;
+    quantity: number;
 };
 
-type GetGroupsByFiltersRD = Group[];
+type GetGroupsByFiltersRD = {
+    groups: Group[];
+    count: number;
+};
 
 const GetGroupsByFiltersDto = ajv.compile<JTDSchemaType<GetGroupsByFiltersQP>>({
     optionalProperties: {
@@ -181,6 +186,8 @@ const GetGroupsByFiltersDto = ajv.compile<JTDSchemaType<GetGroupsByFiltersQP>>({
         is_rwa: { type: 'boolean', nullable: false },
         title: { type: 'string', nullable: false },
         by_user: { type: 'float64', nullable: false },
+        page: { type: 'float64', nullable: false },
+        quantity: { type: 'float64', nullable: false },
         groupType: { enum: [GroupType.map, GroupType.rubric], nullable: false },
     },
 });
@@ -202,7 +209,9 @@ export const getGroupsByFilter: ResponseCallback<Empty, GetGroupsByFiltersQP> = 
             ...queryParams,
             is_rw: Boolean(queryParams?.is_rw),
             is_rwa: Boolean(queryParams?.is_rwa),
-            by_user: Number(queryParams?.by_user),
+            by_user: Number(queryParams?.by_user) || 1,
+            page: Number(queryParams?.page) || '',
+            quantity: Number(queryParams?.quantity) || '',
         })
     ) {
         return getServerErrorResponse(
@@ -216,8 +225,58 @@ export const getGroupsByFilter: ResponseCallback<Empty, GetGroupsByFiltersQP> = 
     }
 
     try {
-        const groups = await GroupFns.getGroupsByFilters(queryParams ?? {}, userId);
+        const groups = await GroupFns.getGroupsByFilters(queryParams ?? {page: 1, quantity: 1}, userId);
         getOkResponse<GetGroupsByFiltersRD>(response, groups);
+    } catch (error) {
+        if (error instanceof ServerError) {
+            return getServerErrorResponse(response, error);
+        }
+
+        const e = error as Error;
+        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
+    }
+};
+
+type AddGroupToGroupD = {
+    parentId: number;
+    childId: number;
+};
+
+type AddGroupToGroupRD = Empty;
+
+const AddGroupToGroupDto = ajv.compile<JTDSchemaType<AddGroupToGroupD>>({ 
+    optionalProperties: {
+        childId: { type: 'float64', nullable: false },
+        parentId: { type: 'float64', nullable: false },
+    },
+});
+
+export const addGroupToGroup: ResponseCallback<AddGroupToGroupD, Empty> = async ({
+    response,
+    userId,
+    data,
+}) => {
+    if (!userId) {
+        return getServerErrorResponse(
+            response,
+            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
+        );
+    }
+
+    if (!AddGroupToGroupDto(data)) {
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'parentId и childId являются обязательными полями!',
+            }),
+        );
+    }
+
+    try {
+        await GroupFns.addGroupToGroup(userId, data.parentId, data.childId);
+        getOkResponse<AddGroupToGroupRD>(response);
     } catch (error) {
         if (error instanceof ServerError) {
             return getServerErrorResponse(response, error);

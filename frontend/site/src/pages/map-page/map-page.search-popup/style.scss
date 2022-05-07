@@ -1,0 +1,55 @@
+.searchPopupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.searchInputPopup {
+    .searchPopupSpinner {
+        margin-left: 10px;
+        opacity: 0;
+        transition: opacity .2s;
+
+        &.show {
+            opacity: 1;
+        }
+
+        svg {
+            height: 30px;
+            width: 30px;
+        }
+    }
+
+    .searchPopupField {
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .searchInputPopupText {
+        font-size: 14px;
+        margin: 22px 0 10px;
+    }
+
+    .searchPopupText {
+        font-size: 14px;
+        width: min-content;
+        white-space: pre;
+    }
+
+    .searchPopupCross {
+        cursor: pointer;
+    }
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.button {
+    width: 150px;
+
+    &:not(:last-child) {
+        margin-right: 5px;
+    }
+}

@@ -1,8 +1,9 @@
 import { ajax } from '../ajax';
-import { FullGroup, IServerError } from 'types';
+import { FullGroup, Group, GroupType, IServerError } from 'types';
 import { Dispatch, store } from '../store';
 
 const GET_FULL_GROUP_BY_ID = '/api/group/full';
+const GROUPS_BY_FILTERS_URL = '/api/group/filter';
 
 type GetFullGroupByIdQP = {
     groupId: number;
@@ -39,6 +40,48 @@ export const getMapById = async (groupId: number) => {
 
     dispath({
         type: 'map-page/map/success',
+        data: response,
+    });
+};
+
+type GetGroupsByTitleQP = {
+    title: string;
+    groupType: GroupType;
+    excludeGroupIds: number[];
+    page: number;
+};
+
+type GetGroupsByTitleRD = Group[];
+
+export const getMapsByTitleMaps = async (title: string, excludeGroupIds: number[]) => {
+    const dispath: Dispatch = store.dispatch;
+
+    dispath({ type: 'map-page/map/start-searching' });
+
+    let response: GetGroupsByTitleRD | undefined;
+
+    try {
+        response = await ajax.get<GetGroupsByTitleRD, GetGroupsByTitleQP>({
+            url: GROUPS_BY_FILTERS_URL,
+            queryParams: { title, groupType: GroupType.map, excludeGroupIds, page: 1 },
+        });
+
+        if (!response) {
+            return;
+        }
+    } catch (error) {
+        const e = error as IServerError;
+
+        dispath({ type: 'map-page/map/error-searching' });
+        dispath({
+            type: 'logger/add-log',
+            data: { type: 'error', title: e.name, description: e.description },
+        });
+        return;
+    }
+
+    dispath({
+        type: 'map-page/map/success-searching',
         data: response,
     });
 };

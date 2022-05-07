@@ -1,12 +1,40 @@
-import { RepositoriesByFilterQP, RepositoriesByFilterRD } from '@api-types/repository/repositories-by-filter';
-
 import { ajax } from '../ajax';
 import { IServerError } from '../types';
 import { Dispatch, store } from '../store';
 
+const PAGE_SIZE = 1;
+
 const REPOSITORIES_BY_FILTERS_URL = '/api/repository/filter';
 
-export const getPageRepositoriesByFilters = async (filters: RepositoriesByFilterQP) => {
+export type RepositoriesByFilterQP = {
+    is_rw?: boolean;
+    is_rwa?: boolean;
+    title?: string;
+    by_user?: number;
+    page: number;
+    quantity: number;
+};
+
+export type RepositoriesByFilterRD = {
+    repositories: {
+        repository: {
+            title: string;
+            id: number;
+        };
+        version: string;
+    }[];
+    count: number;
+};
+
+export type RepositoriesByFilterProps = {
+    is_rw?: boolean;
+    is_rwa?: boolean;
+    title?: string;
+    by_user?: number;
+    page: number;
+};
+
+export const getPageRepositoriesByFilters = async (filters: RepositoriesByFilterProps) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'repositories-list-page/repositories-list/loading' });
@@ -16,7 +44,7 @@ export const getPageRepositoriesByFilters = async (filters: RepositoriesByFilter
     try {
         response = await ajax.get<RepositoriesByFilterRD, RepositoriesByFilterQP>({
             url: REPOSITORIES_BY_FILTERS_URL,
-            queryParams: filters,
+            queryParams: { ...filters, quantity: PAGE_SIZE },
         });
 
         if (!response) {

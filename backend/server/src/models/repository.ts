@@ -44,6 +44,8 @@ type RepositoryFilters = {
     is_rwa?: boolean;
     title?: string;
     by_user?: number;
+    page: number;
+    quantity: number;
 };
 
 type NewRepository = {
@@ -115,9 +117,9 @@ export const RepositoryFns = {
         return { isFree: true };
     },
     getRepositoryByFilters: async (
-        { by_user, title, is_rw, is_rwa }: RepositoryFilters,
+        { by_user, title, is_rw, is_rwa, page, quantity }: RepositoryFilters,
         userId: number,
-    ): Promise<{ repository: Repository; version: string }[]> => {
+    ): Promise<{repositories: { repository: Repository; version: string }[], count: number}> => {
         let result: QueryResult<GetRepositoryByFiltersR>;
 
         try {
@@ -128,6 +130,8 @@ export const RepositoryFns = {
                 title ? `${title}%` : '',
                 is_rw ?? false,
                 is_rwa ?? false,
+                page,
+                quantity
             ]);
             client.release();
         } catch (error) {
@@ -159,7 +163,10 @@ export const RepositoryFns = {
             };
         });
 
-        return await Promise.all(resultPromises);
+        return {
+            repositories: await Promise.all(resultPromises),
+            count: Math.ceil(result.rows?.[0]?.repositories_count / quantity) ?? 0
+        };
     },
     getRepositoryById: async (
         id: number,

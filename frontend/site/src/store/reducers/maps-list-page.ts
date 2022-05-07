@@ -1,7 +1,7 @@
 import { FetchStatus, Group } from 'types';
 
 export type MapsListPageEvents =
-    | { type: 'maps-list-page/maps-list/success'; data: Group[] }
+    | { type: 'maps-list-page/maps-list/success'; data: { count: number; groups: Group[] } }
     | { type: 'maps-list-page/maps-list/loading' }
     | { type: 'maps-list-page/maps-list/error' }
     | { type: 'maps-list-page/maps-list/clear' };
@@ -9,10 +9,12 @@ export type MapsListPageEvents =
 export type MapsListPageStore = {
     groups: Group[];
     groupsFetchStatus: FetchStatus;
+    groupsCount: number;
 };
 
 const initialState: MapsListPageStore = {
     groups: [],
+    groupsCount: 0,
     groupsFetchStatus: FetchStatus.none,
 };
 
@@ -23,7 +25,8 @@ export const mapsListPageReducer = (
     const result = { ...state };
 
     if (event.type === 'maps-list-page/maps-list/success') {
-        result.groups = event.data;
+        result.groups = event.data.groups;
+        result.groupsCount = event.data.count;
         result.groupsFetchStatus = FetchStatus.successed;
     }
 

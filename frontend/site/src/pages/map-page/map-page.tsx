@@ -9,6 +9,7 @@ import { PageTitle } from 'components/PageTitle';
 import Spinner from 'assets/spinner.svg';
 
 import { getPaths } from './map-page.constants';
+import { MapsPageActions } from './map-page.actions';
 import { Tree } from './map-page.tree';
 
 import styles from './style.scss';
@@ -45,7 +46,7 @@ export const MapPage: FC = () => {
     const content = useMemo(
         () => (
             <div className={styles.mapPage}>
-                <PageTitle title={map?.title} />
+                <PageTitle title={map?.title} rightChild={<MapsPageActions />} />
                 <div className={styles.graph}>{map && <Tree group={map} />}</div>
             </div>
         ),

@@ -1,30 +1,29 @@
-import React, { useEffect, useMemo, FC } from 'react';
-import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
+import React, { useEffect, useMemo, FC, useCallback } from 'react';
+import { useQueryParams } from 'use-query-params';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 import { ItemCard } from 'components/ItemCard';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
-import { RepositoriesPageFilters } from 'components/RepositoriesPageFilters';
 import { getRepository } from 'constants/routers';
 import { PageTitle } from 'components/PageTitle';
 import { FetchStatus } from 'types';
 import SpinnerIcon from 'assets/spinner.svg';
+import { Paginator } from 'components/paginator';
 
-import { getPaths } from './repositories-list-page.constants';
+import { getPaths, queryParams } from './repositories-list-page.constants';
+import { RepositoriesPageFilters } from './repositories-page.filters';
 
 import styles from './style.scss';
 
 export const RepositoriesListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
-    const { repositories, fetchStatus } = useSelector((root) => root.repositoriesListPage);
+    const { repositories, fetchStatus, repositoriesCount } = useSelector((root) => root.repositoriesListPage);
+    const [query, setQuery] = useQueryParams(queryParams);
 
-    const [query] = useQueryParams({
-        by_user: NumberParam,
-        is_rw: BooleanParam,
-        is_rwa: BooleanParam,
-        title: StringParam,
-    });
+    const handlePageChange = useCallback((value: number) => {
+        setQuery({ page: value === 1 ? undefined : value });
+    }, []);
 
     useEffect(() => {
         getPageRepositoriesByFilters({
@@ -32,8 +31,9 @@ export const RepositoriesListPage: FC = () => {
             is_rw: Boolean(query.is_rw),
             is_rwa: Boolean(query.is_rwa),
             title: query.title || '',
+            page: query.page || 1,
         });
-    }, []);
+    }, [query.page]);
 
     const paths = useMemo(() => getPaths(username), [username]);
     const content = useMemo(
@@ -55,6 +55,15 @@ export const RepositoriesListPage: FC = () => {
                         </div>
                     )}
                 </div>
+                {Boolean(repositoriesCount) && (
+                    <div className={styles.paginator}>
+                        <Paginator
+                            onChangePage={handlePageChange}
+                            page={query.page || 1}
+                            pageQuantity={repositoriesCount}
+                        />
+                    </div>
+                )}
             </div>
         ),
         [repositories, fetchStatus],

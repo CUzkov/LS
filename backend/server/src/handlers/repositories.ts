@@ -41,8 +41,15 @@ export const getRepositoriesByFilter: ResponseCallback<Empty, RepositoriesByFilt
         );
     }
 
-    if (!queryParams) {
-        queryParams = {};
+    if (!queryParams?.page || !queryParams.quantity) {
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'page и quantity являются обязательными параметрами!',
+            }),
+        );
     }
 
     try {

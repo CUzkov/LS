@@ -3,12 +3,17 @@ export type RepositoriesByFilterQP = {
     is_rwa?: boolean;
     title?: string;
     by_user?: number;
+    page: number;
+    quantity: number;
 }
 
 export type RepositoriesByFilterRD = {
-    repository: {
-        title: string;
-        id: number;
-    },
-    version: string;
-}[];
+    repositories: {
+        repository: {
+            title: string;
+            id: number;
+        },
+        version: string;
+    }[];
+    count: number;
+};

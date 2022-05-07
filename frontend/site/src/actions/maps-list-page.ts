@@ -2,7 +2,17 @@ import { Group, GroupType, IServerError } from 'types';
 import { Dispatch, store } from 'store';
 import { ajax } from 'ajax';
 
+const PAGE_SIZE = 10;
+
 const GROUPS_BY_FILTERS_URL = '/api/group/filter';
+
+type GetMapsByFiltersMapsProps = {
+    is_rw?: boolean;
+    is_rwa?: boolean;
+    title?: string;
+    by_user?: number;
+    page: number;
+};
 
 type GetGroupsByFiltersQP = {
     is_rw?: boolean;
@@ -10,11 +20,16 @@ type GetGroupsByFiltersQP = {
     title?: string;
     by_user?: number;
     groupType?: GroupType;
+    page: number;
+    quantity: number;
 };
 
-type GetGroupsByFiltersRD = Group[];
+type GetGroupsByFiltersRD = {
+    groups: Group[];
+    count: number;
+};
 
-export const getMapsByFiltersMaps = async (params: GetGroupsByFiltersQP) => {
+export const getMapsByFiltersMaps = async (params: GetMapsByFiltersMapsProps) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'maps-list-page/maps-list/loading' });
@@ -24,7 +39,7 @@ export const getMapsByFiltersMaps = async (params: GetGroupsByFiltersQP) => {
     try {
         response = await ajax.get<GetGroupsByFiltersRD, GetGroupsByFiltersQP>({
             url: GROUPS_BY_FILTERS_URL,
-            queryParams: { ...params, groupType: GroupType.map },
+            queryParams: { ...params, groupType: GroupType.map, quantity: PAGE_SIZE },
         });
 
         if (!response) {

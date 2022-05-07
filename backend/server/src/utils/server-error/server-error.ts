@@ -64,6 +64,7 @@ export enum ErrorsTypes {
     renameFileOrDir = 'renameFileOrDir',
     unauthorized = 'unauthorized',
     formReadError = 'formReadError',
+    groupAccessError = 'groupAccessError',
 }
 
 export const errorNames: Record<ErrorsTypes, string> = {
@@ -87,4 +88,5 @@ export const errorNames: Record<ErrorsTypes, string> = {
     [ErrorsTypes.renameFileOrDir]: 'Ошибка переименования файла или папки!',
     [ErrorsTypes.unauthorized]: 'Вы не авторизованы!',
     [ErrorsTypes.formReadError]: 'Ошибка чтения формы!',
+    [ErrorsTypes.groupAccessError]: 'Ошибка доступа к группе!',
 };

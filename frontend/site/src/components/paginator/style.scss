@@ -1,0 +1,48 @@
+@import '../../index.scss';
+
+.paginator {
+    display: flex;
+    align-items: center;
+
+    .paginatorItem {
+        height: 45px;
+        cursor: pointer;
+        border: 1px solid $default-border-color;
+        transition: all .2s;
+        display: flex;
+        align-items: center;
+        min-width: 45px;
+        user-select: none;
+
+        &:hover {
+            background-color: $default-hover-color;
+        }
+
+        &:first-child {
+            border-bottom-left-radius: 10px;
+            border-top-left-radius: 10px;
+        }
+
+        &:last-child {
+            border-bottom-right-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        &.noInteract {
+            cursor: default;
+
+            &:hover {
+                background-color: initial;
+            }
+        }
+
+        &.active {
+            background-color: $default-hover-color;
+            cursor: default;
+        }
+    }
+
+    .paginatorItemContent {
+        margin: 0 auto;
+    }
+}

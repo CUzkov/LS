@@ -7,38 +7,12 @@ import { SelectField } from 'small-components/Fields';
 import { Button } from 'small-components/Button';
 import { getMapsByFiltersMaps } from 'actions/maps-list-page';
 import { noop } from 'utils/noop';
+import { getRwaFromFlags } from 'utils/rwa';
 import { RWA } from 'types';
 
-import { queryParams } from '../maps-list-page.constants';
+import { queryParams, options } from '../maps-list-page.constants';
 
 import styles from './style.scss';
-
-const getRwaFromFlags = (is_rw: boolean, is_rwa: boolean) => {
-    if (is_rw) {
-        return RWA.rw;
-    }
-
-    if (is_rwa) {
-        return RWA.rwa;
-    }
-
-    return RWA.r;
-};
-
-const options = [
-    {
-        title: 'Все доступные карты',
-        value: RWA.r,
-    },
-    {
-        title: 'Карты с разрешённой записью',
-        value: RWA.rw,
-    },
-    {
-        title: 'Карты с полным доступом',
-        value: RWA.rwa,
-    },
-];
 
 export const MapsPageFilters: FC = () => {
     const [query, setQuery] = useQueryParams(queryParams);
@@ -50,9 +24,10 @@ export const MapsPageFilters: FC = () => {
                 is_rw: !!query.is_rw,
                 is_rwa: !!query.is_rwa,
                 title: values.title || '',
+                page: 1,
             });
 
-            setQuery({ title: values.title || undefined });
+            setQuery({ title: values.title || undefined, page: undefined });
         },
         [query],
     );
@@ -67,12 +42,14 @@ export const MapsPageFilters: FC = () => {
                 is_rw: isRw,
                 is_rwa: isRwa,
                 title: query.title || '',
+                page: 1,
             });
 
             setQuery({
                 ...{ is_rw: undefined, is_rwa: undefined },
                 ...(isRw ? { is_rw: isRw } : {}),
                 ...(isRwa ? { is_rwa: isRwa } : {}),
+                page: undefined,
             });
         },
         [query],

@@ -1,50 +1,21 @@
 import React, { FC, useCallback } from 'react';
+import { useQueryParams } from 'use-query-params';
 import { Form, FormSpy } from 'react-final-form';
 
 import { TextField } from 'small-components/Fields/TextField/TextField';
 import { SelectField } from 'small-components/Fields';
 import { Button } from 'small-components/Button';
-import { useQueryParams, StringParam, NumberParam, BooleanParam } from 'use-query-params';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { noop } from 'utils/noop';
 import { RWA } from 'types';
+import { getRwaFromFlags } from 'utils/rwa';
+
+import { filtersOptions, queryParams } from '../repositories-list-page.constants';
 
 import styles from './style.scss';
 
-const getRwaFromFlags = (is_rw: boolean, is_rwa: boolean) => {
-    if (is_rw) {
-        return RWA.rw;
-    }
-
-    if (is_rwa) {
-        return RWA.rwa;
-    }
-
-    return RWA.r;
-};
-
-const options = [
-    {
-        title: 'Все доступные репозитории',
-        value: RWA.r,
-    },
-    {
-        title: 'Репозитории с разрешённой записью',
-        value: RWA.rw,
-    },
-    {
-        title: 'Репозитории с полным доступом',
-        value: RWA.rwa,
-    },
-];
-
 export const RepositoriesPageFilters: FC = () => {
-    const [query, setQuery] = useQueryParams({
-        by_user: NumberParam,
-        is_rw: BooleanParam,
-        is_rwa: BooleanParam,
-        title: StringParam,
-    });
+    const [query, setQuery] = useQueryParams(queryParams);
 
     const handleSubmitTitleForm = useCallback(
         (values: { title: string }) => {
@@ -53,9 +24,10 @@ export const RepositoriesPageFilters: FC = () => {
                 is_rw: !!query.is_rw,
                 is_rwa: !!query.is_rwa,
                 title: values.title || '',
+                page: 1,
             });
 
-            setQuery({ title: values.title || undefined });
+            setQuery({ title: values.title || undefined, page: undefined });
         },
         [query],
     );
@@ -70,12 +42,14 @@ export const RepositoriesPageFilters: FC = () => {
                 is_rw: isRw,
                 is_rwa: isRwa,
                 title: query.title || '',
+                page: 1,
             });
 
             setQuery({
                 ...{ is_rw: undefined, is_rwa: undefined },
                 ...(isRw ? { is_rw: isRw } : {}),
                 ...(isRwa ? { is_rwa: isRwa } : {}),
+                page: undefined,
             });
         },
         [query],
@@ -90,7 +64,7 @@ export const RepositoriesPageFilters: FC = () => {
                         <div className={styles.rwaField}>
                             <SelectField
                                 name="rwa"
-                                options={options}
+                                options={filtersOptions}
                                 defaultValue={getRwaFromFlags(!!query.is_rw, !!query.is_rwa)}
                             />
                         </div>
