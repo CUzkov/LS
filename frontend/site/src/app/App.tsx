@@ -3,11 +3,10 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 import { checkAuth } from 'actions/user';
 import { useSelector } from 'store/store';
-import { Header } from 'components/Header';
+import { Header } from 'components/header';
 import {
     getMainPage,
     getAllMaps,
-    // getUserPage,
     getMapCreate,
     getRepositoryCreate,
     getAllRepositories,
@@ -17,19 +16,18 @@ import {
 } from 'constants/routers';
 import { Logger } from 'components/logger';
 import { MovablePopupManager } from 'components/movable-popup-manager';
+import { FetchStatus } from 'types';
 
 import {
     LoginPage,
     MainPage,
     MapsListPage,
-    // UserPage,
     CreateMapPage,
     CreateRepositoryPage,
     RepositoriesListPage,
     RepositoryPage,
     MapPage,
 } from 'pages';
-import { FetchStatus } from 'types';
 
 import styles from './style.scss';
 
