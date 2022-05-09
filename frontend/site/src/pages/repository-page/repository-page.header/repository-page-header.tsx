@@ -3,7 +3,7 @@ import { useQueryParams } from 'use-query-params';
 import cn from 'classnames';
 
 import { useSelector } from 'store/store';
-import { PageTitle } from 'components/PageTitle';
+import { PageTitle } from 'components/page-title';
 import {
     addDirToRepository,
     changeFilesDirPath,

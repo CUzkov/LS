@@ -1,10 +1,9 @@
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import type { FC } from 'react';
+import React, { Fragment, useCallback, useMemo, useState, FC } from 'react';
 
 import { useSelector } from 'store/store';
 
-import { MenuItem } from './MenuItem';
-import { getMenu } from './Menu.constants';
+import { MenuItem } from './menu.item';
+import { getMenu } from './menu.constants';
 
 import styles from './style.scss';
 

@@ -8,7 +8,7 @@ import { DirMeta, DirStatus, FileMeta, FileStatus } from 'types';
 import SpinnerIcon from 'assets/spinner.svg';
 import { useBooleanState } from 'hooks';
 
-import { getIconByExtension, getCharsForFantomActions } from './FilesCard.utils';
+import { getIconByExtension, getCharsForFantomActions } from './files-card.utils';
 
 import styles from './style.scss';
 
@@ -54,7 +54,7 @@ const Row = ({ title, className, icon, statusChar, actions, onClick }: RowProps)
     );
 };
 
-interface FilesCardProps {
+type FilesCardProps = {
     files: FileMeta[];
     dirs: DirMeta[];
     path: string[];
@@ -64,7 +64,7 @@ interface FilesCardProps {
     actionsForDirs: (file: DirMeta) => ReactNode;
     onClickDir: (pathToDir: string[], dirName: string) => void;
     onClickToUpDir: () => void;
-}
+};
 
 export const FilesCard: FC<FilesCardProps> = ({
     files,

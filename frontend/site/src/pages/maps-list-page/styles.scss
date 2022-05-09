@@ -22,4 +22,27 @@
     .paginator {
         margin-top: 30px;
     }
+
+    .filters {
+        display: flex;
+        align-items: center;
+    }
+
+    .toggleFiltersButton {
+        height: 45px;
+        width: 45px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        transition: background-color .2s, opacity .2s, margin-right .1s;
+        user-select: none;
+        margin-left: 10px;
+        
+        &:hover {
+            background-color: $default-hover-color;
+        }
+    }
 }

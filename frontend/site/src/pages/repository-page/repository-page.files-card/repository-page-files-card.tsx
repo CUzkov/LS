@@ -3,7 +3,7 @@ import React, { FC, useCallback, useContext } from 'react';
 import cn from 'classnames';
 
 import { useDispatch, useSelector } from 'store/store';
-import { FilesCard as FilesCardBase } from 'components/FilesCard';
+import { FilesCard as FilesCardBase } from 'components/files-card';
 import { getDownloadLink } from 'utils/urls';
 import { DirMeta, FetchStatus, FileMeta } from 'types';
 import { textInputPopup } from 'constants/popups';

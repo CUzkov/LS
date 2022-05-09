@@ -3,10 +3,10 @@ import { useQueryParams } from 'use-query-params';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { ItemCard } from 'components/ItemCard';
+import { ItemCard } from 'components/item-card';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { getRepository } from 'constants/routers';
-import { PageTitle } from 'components/PageTitle';
+import { PageTitle } from 'components/page-title';
 import { FetchStatus } from 'types';
 import SpinnerIcon from 'assets/spinner.svg';
 import { Paginator } from 'components/paginator';

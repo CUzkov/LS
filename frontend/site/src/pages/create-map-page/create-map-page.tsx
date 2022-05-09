@@ -2,7 +2,7 @@ import React, { useMemo, FC } from 'react';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { PageTitle } from 'components/PageTitle';
+import { PageTitle } from 'components/page-title';
 
 import { CreateMapForm } from './create-map-page.form';
 import { getPaths } from './create-map-page.constants';

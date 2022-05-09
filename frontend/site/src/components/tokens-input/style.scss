@@ -1,0 +1,49 @@
+@import '../../index.scss';
+
+.tokensInput {
+    border: 1px solid $input-border;
+    border-radius: 5px;
+    height: 40px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+
+    input {
+        caret-color: $default-text-color;
+        color: $default-text-color;
+        font-size: 20px;
+        width: calc(100vw * 0.4);
+    }
+}
+
+.tokensInputWrapper {
+    display: flex;
+    align-items: center;
+
+    .serachButton {
+        width: 74px;
+        margin-left: 10px;
+    }
+}
+
+.errorPopup {   
+    position: absolute;
+    z-index: 10;
+    background-color: #666;
+    padding: 10px;
+    border-radius: 5px;
+    min-width: 200px;
+    max-width: 350px;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+
+    &::after {
+        content: ''; 
+        position: absolute;
+        left: 36px;
+        top: -23px;
+        border: 8px solid transparent;
+        border-bottom: 16px solid #666;
+    }
+}

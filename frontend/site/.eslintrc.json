@@ -17,7 +17,8 @@
 			{
 				"endOfLine": "auto"
 			}
-		]
+		],
+		"@typescript-eslint/ban-ts-comment": 0
 	},
 	"ignorePatterns": ["src/**/*.test.ts", "src/frontend/generated/*"]
 }

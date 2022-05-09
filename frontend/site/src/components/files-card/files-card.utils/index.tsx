@@ -4,7 +4,7 @@ import { FileMeta } from 'types';
 
 import NoneIcon from 'file-icon-vectors/dist/icons/vivid/blank.svg';
 
-import { extensionToIconMap, mapFantomActionToChar } from '../FilesCard.constants';
+import { extensionToIconMap, mapFantomActionToChar } from '../files-card.constants';
 
 export const getIconByExtension = (name: string): ReactNode => {
     const splitName = name.split('.');

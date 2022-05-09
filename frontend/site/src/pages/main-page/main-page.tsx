@@ -1,8 +1,8 @@
-import React from 'react';
-import type { FC } from 'react';
+import React, { FC } from 'react';
 
-import { paths } from './MainPage.constants';
 import { PageWrapper } from 'pages/page-wrapper';
+
+import { paths } from './main-page.constants';
 
 import styles from './style.scss';
 

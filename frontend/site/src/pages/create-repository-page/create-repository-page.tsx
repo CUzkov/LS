@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 import { CreateRepositoryForm } from './create-repository-page.form';
-import { PageTitle } from 'components/PageTitle';
+import { PageTitle } from 'components/page-title';
 
 import { getPaths } from './create-repository-page.constants';
 

@@ -5,7 +5,7 @@ import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
 import { getMapById } from 'actions/map-page';
 import { FetchStatus } from 'types';
-import { PageTitle } from 'components/PageTitle';
+import { PageTitle } from 'components/page-title';
 import Spinner from 'assets/spinner.svg';
 
 import { getPaths } from './map-page.constants';

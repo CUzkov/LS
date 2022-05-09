@@ -1,12 +1,11 @@
-import React, { ReactNode } from 'react';
-import type { FC } from 'react';
+import React, { ReactNode, FC } from 'react';
 
 import styles from './style.scss';
 
-interface PageTitleProps {
+type PageTitleProps = {
     title: ReactNode;
     rightChild?: ReactNode;
-}
+};
 
 export const PageTitle: FC<PageTitleProps> = ({ title, rightChild }: PageTitleProps) => {
     return (

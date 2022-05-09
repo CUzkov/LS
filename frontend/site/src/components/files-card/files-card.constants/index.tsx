@@ -13,7 +13,7 @@ import PngIcon from 'file-icon-vectors/dist/icons/vivid/png.svg';
 import TxtIcon from 'file-icon-vectors/dist/icons/vivid/txt.svg';
 import JpgIcon from 'file-icon-vectors/dist/icons/vivid/jpg.svg';
 
-import { Extensions } from '../FilesCard.typings';
+import { Extensions } from '../files-card.typings';
 
 export const mapFantomActionToChar: Record<FileStatus, string> = {
     [FileStatus.add]: 'A',

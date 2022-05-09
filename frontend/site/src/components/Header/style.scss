@@ -1,6 +1,6 @@
 @import '../../index.scss';
 
-.Header {
+.header {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -9,9 +9,9 @@
     border-bottom: 1px #060607 solid;
     padding: 16px 24px;
     background-color: #303134;
-}
 
-.HeaderLeft {
-    font-weight: 600;
-    font-size: 32px;
+    .headerLeft {
+        font-weight: 600;
+        font-size: 32px;
+    }
 }
