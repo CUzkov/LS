@@ -28,8 +28,9 @@ export const Popup: FC<IMovablePopupProps> = ({
 }) => {
     const [isTakePopup, takePopup, releasePopup] = useBooleanState(false);
     const [mousePositions, setMousePosition] = useState({ x: 0, y: 0 });
-    const [popupLastPosition, setPopuplastPosotion] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    const [popupLastPosition, setPopupLastPosotion] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     const [isErrorAnimation, startErrorAnimation, stopErrorAnimation] = useBooleanState(false);
+    const [isFirstRender, , checkFirstRender] = useBooleanState(true);
     const isCannotInteract = !isRequired && anotherRequired;
 
     const handleMouseDown = useCallback(
@@ -46,21 +47,21 @@ export const Popup: FC<IMovablePopupProps> = ({
 
     const handleMouseUp = useCallback(() => {
         releasePopup();
-        setPopuplastPosotion({
+        setPopupLastPosotion({
             x: innerRef.current?.offsetLeft ?? 0,
             y: innerRef.current?.offsetTop ?? 0,
         });
     }, [innerRef, isRequired, anotherRequired]);
 
     const handleClickOutside = useCallback(() => {
-        if (isRequired) {
+        if (isRequired && !isFirstRender) {
             startErrorAnimation();
             // @FIXME доделать, что бы при спаме кликами было норм
             setTimeout(() => {
                 stopErrorAnimation();
             }, 750);
         }
-    }, [isRequired]);
+    }, [isRequired, isFirstRender]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => onMouseMove(mousePositions.x, mousePositions.y, e);
@@ -75,6 +76,8 @@ export const Popup: FC<IMovablePopupProps> = ({
             }
         };
     }, [isTakePopup, onMouseMove, mousePositions]);
+
+    useEffect(() => checkFirstRender(), []);
 
     useOutsideClick(innerRef, handleClickOutside);
 

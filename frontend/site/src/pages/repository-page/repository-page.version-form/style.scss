@@ -5,7 +5,7 @@
     margin-right: 10px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .3s;
+    transition: opacity .2s;
 
     .versions {
         width: 150px;
@@ -18,7 +18,7 @@
         transform: translate(-50%, -50%);
         pointer-events: none;
         opacity: 0;
-        transition: opacity .3s;
+        transition: opacity .2s;
     
         svg {
             height: 15px;

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, FC } from 'react';
 import { useParams } from 'react-router-dom';
+import cn from 'classnames'
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
@@ -43,15 +44,19 @@ export const MapPage: FC = () => {
         return basePaths;
     }, [username, map, isMapLoading]);
 
-    const content = useMemo(
-        () => (
-            <div className={styles.mapPage}>
-                <PageTitle title={map?.title} rightChild={<MapsPageActions />} />
-                <div className={styles.graph}>{map && <Tree group={map} />}</div>
+    const content = (
+        <div className={styles.mapPage}>
+            <PageTitle title={map?.title} rightChild={<MapsPageActions />} />
+            <div className={styles.map}>
+                <div className={cn(styles.mapContent, map && styles.show)}>
+                    <Tree group={map} />
+                </div>
+                <div className={cn(styles.mapSpinner, !map && styles.show)}>
+                    <Spinner />
+                </div>
             </div>
-        ),
-        [map],
-    );
+        </div>
+    )
 
     return <PageWrapper content={content} paths={paths} />;
 };

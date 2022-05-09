@@ -86,7 +86,7 @@ class DrawTree {
 }
 
 type GraphProps = {
-    group: FullGroup;
+    group?: FullGroup;
 };
 
 export const Tree: FC<GraphProps> = ({ group }) => {
@@ -98,6 +98,10 @@ export const Tree: FC<GraphProps> = ({ group }) => {
     const onEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), [setEdges]);
 
     useEffect(() => {
+        if (!group) {
+            return;
+        }
+
         const nodes: Node[] = [];
         const edges: Edge[] = [];
 

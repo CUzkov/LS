@@ -100,7 +100,7 @@ export const serachPopup = <T,>(
             isRequired,
             title: (
                 <div className={styles.searchPopupHeader}>
-                    <div className={styles.searchInputPopupText}>{'Ввод'}</div>
+                    <div>{'Ввод'}</div>
                     <div
                         className={styles.searchPopupCross}
                         onClick={() => {
