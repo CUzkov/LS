@@ -3,8 +3,8 @@ import { Form } from 'react-final-form';
 
 import { MovablePopupManagerContext } from 'components/movable-popup-manager/movable-popup.types';
 import { requiredValidate, Validator } from 'utils/final-forms';
-import { TextField } from 'small-components/Fields';
-import { Button } from 'small-components';
+import { TextField } from 'components/fields';
+import { Button } from 'components/button';
 import CrossIcon from 'assets/cross.svg';
 
 import styles from './popups.scss';

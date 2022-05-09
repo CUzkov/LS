@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, FC } from 'react';
 import { Field, Form, FormSpy, useForm } from 'react-final-form';
 import cn from 'classnames';
 import { useNavigate } from 'react-router-dom';
 
 import { useSelector } from 'store/store';
 import { checkIsMapNameFree, createMap, setMapNameNotChecked } from 'actions/create-map-page';
-import { TextField, Button } from 'small-components/index';
+import { Button } from 'components/button';
+import { TextField } from 'components/fields';
 import { requiredValidate } from 'utils/final-forms';
 import { MapNameStatus } from 'store/reducers/create-map-form';
 import { FetchStatus } from 'types/index';

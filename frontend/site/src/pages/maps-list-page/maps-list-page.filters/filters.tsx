@@ -2,9 +2,8 @@ import React, { FC, useCallback } from 'react';
 import { useQueryParams } from 'use-query-params';
 import { Form, FormSpy } from 'react-final-form';
 
-import { TextField } from 'small-components/Fields/TextField/TextField';
-import { SelectField } from 'small-components/Fields';
-import { Button } from 'small-components/Button';
+import { TextField, SelectField } from 'components/fields';
+import { Button } from 'components/button';
 import { getMapsByFiltersMaps } from 'actions/maps-list-page';
 import { noop } from 'utils/noop';
 import { getRwaFromFlags } from 'utils/rwa';

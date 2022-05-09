@@ -1,0 +1,81 @@
+@import '../../../index.scss';
+
+.textField {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .input {
+        display: flex;
+        align-items: center;
+
+        input {
+            border-bottom: 1px solid $input-border;
+            caret-color: $default-text-color;
+            color: $default-text-color;
+
+            height: 30px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        &.disable {
+            input {
+                pointer-events: none;
+            }
+        }
+    }
+
+    .label {
+        font-size: 17px;
+
+        svg {
+            margin-right: 5px;
+
+            path {
+                stroke: $input-icon;
+                fill: $input-icon;
+            }
+        }
+    }
+
+    .errorText {
+        color: $default-text-error-color;
+
+        height: 22px;
+        width: 100%;
+        margin-top: 5px;
+        font-size: 10px;
+    }
+
+    .passwordIcon {
+        height: 20px;
+        width: 20px;
+        cursor: pointer;
+        margin-left: 5px;
+    }
+
+    .searchIcon {
+        padding-left: 5px;
+        border-bottom: 1px solid $input-border;
+        margin-top: 9px;
+
+        svg {
+            path {
+                stroke: $input-icon;
+            }
+        }
+    }
+
+    &.outlined {
+        .input {
+            input {
+                border: 1px solid $input-border;
+                border-radius: 10px;
+                padding: 0 5px;
+            }
+        }
+    }
+}

@@ -3,8 +3,8 @@ import { Form, FormSpy } from 'react-final-form';
 import cn from 'classnames';
 
 import { MovablePopupManagerContext } from 'components/movable-popup-manager/movable-popup.types';
-import { TextField } from 'small-components/Fields';
-import { Button } from 'small-components';
+import { TextField } from 'components/fields';
+import { Button } from 'components/button';
 import CrossIcon from 'assets/cross.svg';
 import SpinnerIcon from 'assets/spinner.svg';
 import { useSelector } from 'store';

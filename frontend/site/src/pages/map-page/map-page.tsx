@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, FC } from 'react';
 import { useParams } from 'react-router-dom';
-import cn from 'classnames'
+import cn from 'classnames';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
@@ -56,7 +56,7 @@ export const MapPage: FC = () => {
                 </div>
             </div>
         </div>
-    )
+    );
 
     return <PageWrapper content={content} paths={paths} />;
 };

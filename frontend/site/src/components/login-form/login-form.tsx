@@ -1,17 +1,17 @@
-import React, { useCallback } from 'react';
-import type { FC } from 'react';
+import React, { useCallback, FC } from 'react';
 import { Form, FormSpy } from 'react-final-form';
 import cn from 'classnames';
 
 import { loginUser } from 'actions/user';
 import { setLoginForm } from 'actions/login-form';
 import { useSelector } from 'store/store';
-import { TextField, Button } from 'small-components/index';
+import { Button } from 'components/button';
+import { TextField } from 'components/fields';
 import { emailValidate, requiredValidate } from 'utils/final-forms';
-import type { ILoginFormProps, IFormSpy } from './login-form.typings';
 import { FetchStatus } from 'types/index';
-
 import Spinner from 'assets/spinner.svg';
+
+import type { ILoginFormProps, IFormSpy } from './login-form.typings';
 
 import styles from './style.scss';
 

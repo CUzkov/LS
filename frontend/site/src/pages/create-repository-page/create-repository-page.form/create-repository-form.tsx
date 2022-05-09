@@ -1,14 +1,15 @@
 import React, { useCallback, FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import cn from 'classnames';
 import { Field, Form, FormSpy, useForm } from 'react-final-form';
+import cn from 'classnames';
 
 import { FetchStatus } from 'types/index';
 import { getRepository } from 'constants/routers';
 import { checkIsRepositoryNameFree, createRepository, setRepositoryNameNotChecked } from 'actions/repositories';
 import { useBooleanState } from 'hooks';
 import { useSelector } from 'store/store';
-import { TextField, Button, CheckboxField } from 'small-components/index';
+import { Button } from 'components/button';
+import { TextField, CheckboxField } from 'components/fields';
 import { requiredValidate } from 'utils/final-forms';
 import { RepositoryNameStatus } from 'store/reducers/create-repository-form';
 

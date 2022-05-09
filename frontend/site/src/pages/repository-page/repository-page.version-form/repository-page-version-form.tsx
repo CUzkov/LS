@@ -6,7 +6,7 @@ import cn from 'classnames';
 import { useSelector } from 'store/store';
 import { changeFilesDirPath, getFilesByPath, setRepositoryVersion } from 'actions/repository-page';
 import SpinnerIcon from 'assets/spinner.svg';
-import { SelectField } from 'small-components/Fields';
+import { SelectField } from 'components/fields';
 import { noop } from 'utils/noop';
 import { FetchStatus } from 'types';
 

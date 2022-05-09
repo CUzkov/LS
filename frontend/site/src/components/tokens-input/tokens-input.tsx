@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import moo, { Token as MooToken } from 'moo';
 
 import { getTextBoundingRect } from 'utils/getTextBoundingRect';
-import { Button } from 'small-components/Button';
+import { Button } from 'components/button';
 
 import { Tokens, formatErrorText, checkInfixErrors } from './tokens-input.utils';
 
