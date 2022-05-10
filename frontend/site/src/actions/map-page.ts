@@ -53,7 +53,7 @@ type GetGroupsByTitleQP = {
 
 type GetGroupsByTitleRD = Group[];
 
-export const getMapsByTitleMaps = async (title: string, excludeGroupIds: number[]) => {
+export const getMapsByTitle = async (title: string, excludeGroupIds: number[]) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'map-page/map/start-searching' });

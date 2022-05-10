@@ -48,6 +48,7 @@ type GroupsFilters = {
     is_rwa?: boolean;
     title?: string;
     by_user?: number;
+    excludeGroupIds?: string[];
     page: number;
     quantity: number;
 };
@@ -154,7 +155,7 @@ export const GroupFns = {
         );
     },
     getGroupsByFilters: async (
-        { by_user, title, is_rw, is_rwa, page, quantity }: GroupsFilters,
+        { by_user, title, is_rw, is_rwa, page, quantity, excludeGroupIds = [] }: GroupsFilters,
         userId: number,
     ): Promise<{ count: number; groups: Group[] }> => {
         let result: QueryResult<GetGroupsByFiltersR>;

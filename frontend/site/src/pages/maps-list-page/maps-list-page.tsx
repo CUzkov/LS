@@ -4,7 +4,7 @@ import type { FC } from 'react';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { getMapsByFiltersMaps } from 'actions/maps-list-page';
+import { getMapsByFilters } from 'actions/maps-list-page';
 import { ItemCard } from 'components/item-card';
 import { PageTitle } from 'components/page-title';
 import { FetchStatus } from 'types';
@@ -31,7 +31,7 @@ export const MapsListPage: FC = () => {
     }, []);
 
     useEffect(() => {
-        getMapsByFiltersMaps({
+        getMapsByFilters({
             by_user: -1,
             is_rw: !!query.is_rw,
             is_rwa: !!query.is_rwa,

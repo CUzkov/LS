@@ -29,7 +29,7 @@ type GetGroupsByFiltersRD = {
     count: number;
 };
 
-export const getMapsByFiltersMaps = async (params: GetMapsByFiltersMapsProps) => {
+export const getMapsByFilters = async (params: GetMapsByFiltersMapsProps) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'maps-list-page/maps-list/loading' });

@@ -4,7 +4,7 @@ import { Form, FormSpy } from 'react-final-form';
 
 import { TextField, SelectField } from 'components/fields';
 import { Button } from 'components/button';
-import { getMapsByFiltersMaps } from 'actions/maps-list-page';
+import { getMapsByFilters } from 'actions/maps-list-page';
 import { noop } from 'utils/noop';
 import { getRwaFromFlags } from 'utils/rwa';
 import { RWA } from 'types';
@@ -18,7 +18,7 @@ export const MapsPageFilters: FC = () => {
 
     const handleSubmitTitleForm = useCallback(
         (values: { title: string }) => {
-            getMapsByFiltersMaps({
+            getMapsByFilters({
                 by_user: -1,
                 is_rw: !!query.is_rw,
                 is_rwa: !!query.is_rwa,
@@ -36,7 +36,7 @@ export const MapsPageFilters: FC = () => {
             const isRw = value === RWA.rw;
             const isRwa = value === RWA.rwa;
 
-            getMapsByFiltersMaps({
+            getMapsByFilters({
                 by_user: -1,
                 is_rw: isRw,
                 is_rwa: isRwa,

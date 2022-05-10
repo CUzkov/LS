@@ -5,8 +5,8 @@ import cn from 'classnames';
 import { composeValidators } from 'utils/final-forms';
 import { useOutsideClick, useBooleanState } from 'hooks/index';
 
-import ChevronIcon from '../Fields.assets/chevron.svg';
-import { FieldProps } from '../Fields.typings';
+import ChevronIcon from '../fields.assets/chevron.svg';
+import { FieldProps } from '../fields.typings';
 
 import styles from './style.scss';
 

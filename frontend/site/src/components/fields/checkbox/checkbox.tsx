@@ -4,9 +4,9 @@ import { Field } from 'react-final-form';
 
 import { composeValidators } from 'utils/final-forms';
 
-import { FieldProps } from '../Fields.typings';
+import { FieldProps } from '../fields.typings';
 
-import TickIcon from '../Fields.assets/tick.svg';
+import TickIcon from '../fields.assets/tick.svg';
 
 import styles from './style.scss';
 

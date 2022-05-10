@@ -9,6 +9,7 @@ import CrossIcon from 'assets/cross.svg';
 import SpinnerIcon from 'assets/spinner.svg';
 import { useSelector } from 'store';
 import { FetchStatus, Group } from 'types';
+import {getMapsByTitle} from 'actions/map-page'
 
 import styles from './style.scss';
 
@@ -19,21 +20,20 @@ type SerachPopupContentProps<T> = {
     text: string;
     resolve: (value: Group[] | PromiseLike<Group[]>) => void;
     id: string;
-    serachFn: (value: string) => T;
 };
 
-const SerachPopupContent = <T,>({ context, text, resolve, id, serachFn }: SerachPopupContentProps<T>): JSX.Element => {
+const SearchPopupContent = <T,>({ context, text, resolve, id }: SerachPopupContentProps<T>): JSX.Element => {
     let submitButton: () => void;
     const fieldName = 'field';
     const [value, setValue] = useState<string>('');
     const { popupSearchingFetchStatus } = useSelector((root) => root.mapPage);
-    const [maps, setMaps] = useState<Group[]>();
+    const [maps, setMaps] = useState<Group[]>([]);
     const isSearching = popupSearchingFetchStatus === FetchStatus.loading;
 
     useEffect(() => {
         const timerId = setTimeout(() => {
-            serachFn(value ?? '');
-        }, 2000);
+            getMapsByTitle(value, maps.map((map) => map.id));
+        }, 1000);
 
         return () => {
             clearTimeout(timerId);
@@ -85,10 +85,9 @@ const SerachPopupContent = <T,>({ context, text, resolve, id, serachFn }: Serach
     );
 };
 
-export const serachPopup = <T,>(
+export const serachPopup = (
     context: MovablePopupManagerContext,
     text: string,
-    serachFn: (value: string) => T,
     isRequired = true,
 ) => {
     const id = String(++ids);
@@ -96,7 +95,7 @@ export const serachPopup = <T,>(
     return new Promise<Group[]>((resolve) => {
         context.addPopup({
             id,
-            content: <SerachPopupContent context={context} id={id} resolve={resolve} text={text} serachFn={serachFn} />,
+            content: <SearchPopupContent context={context} id={id} resolve={resolve} text={text} />,
             isRequired,
             title: (
                 <div className={styles.searchPopupHeader}>

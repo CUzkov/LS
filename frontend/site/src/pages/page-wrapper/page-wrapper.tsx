@@ -1,7 +1,7 @@
 import React, { ReactElement, ReactNode } from 'react';
 import type { FC } from 'react';
 
-import { Menu } from 'components/Menu';
+import { Menu } from 'components/menu';
 import { Breadcrumbs } from 'components/breadcrumbs';
 
 import styles from './style.scss';

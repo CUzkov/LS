@@ -11,12 +11,8 @@ import styles from './style.scss';
 export const MapsPageActions: FC = () => {
     const context = useContext(MovablePopupManagerContext);
 
-    const handleSearch = useCallback((value: string) => {
-        console.log(value);
-    }, []);
-
     const handleClickAddGroupToScreen = useCallback(async () => {
-        const maps = await serachPopup(context, 'Начните вводить название карты:', handleSearch);
+        const maps = await serachPopup(context, 'Начните вводить название карты:');
     }, []);
 
     return (

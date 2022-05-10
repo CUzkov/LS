@@ -3,13 +3,13 @@ import { Field } from 'react-final-form';
 import cn from 'classnames';
 
 import { composeValidators } from 'utils/final-forms';
-import { FieldProps, FieldMeta } from '../Fields.typings';
+import { FieldProps, FieldMeta } from '../fields.typings';
 
-import ViewedIcon from '../Fields.assets/viewed.svg';
-import NotViewedIcon from '../Fields.assets/not-viewed.svg';
-import UserIcon from '../Fields.assets/user.svg';
-import LockIcon from '../Fields.assets/lock.svg';
-import SearchIcon from '../Fields.assets/search.svg';
+import ViewedIcon from '../fields.assets/viewed.svg';
+import NotViewedIcon from '../fields.assets/not-viewed.svg';
+import UserIcon from '../fields.assets/user.svg';
+import LockIcon from '../fields.assets/lock.svg';
+import SearchIcon from '../fields.assets/search.svg';
 
 import styles from './style.scss';
 
