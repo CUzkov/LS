@@ -2,6 +2,8 @@ import { ajax } from '../ajax';
 import { FullGroup, Group, GroupType, IServerError } from 'types';
 import { Dispatch, store } from '../store';
 
+const SEARCH_FILTER_QUANTITY = 5;
+
 const GET_FULL_GROUP_BY_ID = '/api/group/full';
 const GROUPS_BY_FILTERS_URL = '/api/group/filter';
 
@@ -47,8 +49,12 @@ export const getMapById = async (groupId: number) => {
 type GetGroupsByTitleQP = {
     title: string;
     groupType: GroupType;
-    excludeGroupIds: number[];
     page: number;
+    quantity: number;
+    excludeGroupIds: number[];
+    is_rw?: boolean;
+    is_rwa?: boolean;
+    by_user?: number;
 };
 
 type GetGroupsByTitleRD = Group[];
@@ -63,7 +69,7 @@ export const getMapsByTitle = async (title: string, excludeGroupIds: number[]) =
     try {
         response = await ajax.get<GetGroupsByTitleRD, GetGroupsByTitleQP>({
             url: GROUPS_BY_FILTERS_URL,
-            queryParams: { title, groupType: GroupType.map, excludeGroupIds, page: 1 },
+            queryParams: { title, groupType: GroupType.map, excludeGroupIds, page: 1, is_rw: true, quantity: SEARCH_FILTER_QUANTITY },
         });
 
         if (!response) {

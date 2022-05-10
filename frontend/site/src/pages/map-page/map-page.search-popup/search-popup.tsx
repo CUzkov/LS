@@ -9,7 +9,7 @@ import CrossIcon from 'assets/cross.svg';
 import SpinnerIcon from 'assets/spinner.svg';
 import { useSelector } from 'store';
 import { FetchStatus, Group } from 'types';
-import {getMapsByTitle} from 'actions/map-page'
+import { getMapsByTitle } from 'actions/map-page';
 
 import styles from './style.scss';
 
@@ -32,7 +32,10 @@ const SearchPopupContent = <T,>({ context, text, resolve, id }: SerachPopupConte
 
     useEffect(() => {
         const timerId = setTimeout(() => {
-            getMapsByTitle(value, maps.map((map) => map.id));
+            getMapsByTitle(
+                value,
+                maps.map((map) => map.id),
+            );
         }, 1000);
 
         return () => {
@@ -85,11 +88,7 @@ const SearchPopupContent = <T,>({ context, text, resolve, id }: SerachPopupConte
     );
 };
 
-export const serachPopup = (
-    context: MovablePopupManagerContext,
-    text: string,
-    isRequired = true,
-) => {
+export const serachPopup = (context: MovablePopupManagerContext, text: string, isRequired = true) => {
     const id = String(++ids);
 
     return new Promise<Group[]>((resolve) => {
