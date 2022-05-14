@@ -96,5 +96,5 @@ export const errorNames: Record<ErrorsTypes, string> = {
     [ErrorsTypes.noQueryParams]: 'Необходимые параметры отсутствуют!',
     [ErrorsTypes.getFullGroupByIdError]: 'Функция getFullGroupByIdError вернула неправильный результат!',
     [ErrorsTypes.noData]: 'Тело запроса обязательно!',
-    [ErrorsTypes.mapNotFoundOrPermissionDenied]: 'Карта не найдена или доступ закрыт!'
+    [ErrorsTypes.mapNotFoundOrPermissionDenied]: 'Карта не найдена или доступ закрыт!',
 };

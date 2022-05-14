@@ -13,14 +13,14 @@ type GetRepositoriesByFilterQP = {
     page: number;
     excludeRepositoryIds?: number[];
     quantity: number;
-}
+};
 
 type GetRepositoriesByFilterRD = {
     repositories: {
         repository: {
             title: string;
             id: number;
-        },
+        };
         version: string;
     }[];
     count: number;

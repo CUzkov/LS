@@ -16,7 +16,7 @@ class GetFullGroupByIdQPValidator {
     groupId: number;
 
     constructor({ groupId }: GetFullGroupByIdQP) {
-        this.groupId = Number(groupId)
+        this.groupId = Number(groupId);
     }
 }
 
@@ -33,10 +33,7 @@ export const getFullGroupById: ResponseCallback<Empty, GetFullGroupByIdQP> = asy
     }
 
     if (!queryParams) {
-        return getServerErrorResponse(
-            response,
-            new ServerError({ name: errorNames.noData, code: Code.badRequest }),
-        );
+        return getServerErrorResponse(response, new ServerError({ name: errorNames.noData, code: Code.badRequest }));
     }
 
     const queryParamsSanitize = new GetFullGroupByIdQPValidator(queryParams);

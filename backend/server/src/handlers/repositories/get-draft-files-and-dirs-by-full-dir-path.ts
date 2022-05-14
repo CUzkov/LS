@@ -10,7 +10,7 @@ type GetDraftFilesAndDirsByDirPathQP = {
     repositoryId: number;
     pathToDir?: string;
     dirName?: string;
-}
+};
 
 type GetDraftFilesAndDirsByDirPathRD = {
     files: {
@@ -46,7 +46,7 @@ class GetDraftFilesAndDirsByDirPathQPValidator {
         this.dirName = dirName;
         this.pathToDir = pathToDir;
         this.repositoryId = Number(repositoryId);
-    } 
+    }
 }
 
 export const getDraftFilesAndDirsByFullDirPath: ResponseCallback<Empty, GetDraftFilesAndDirsByDirPathQP> = async ({

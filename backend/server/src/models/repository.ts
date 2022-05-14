@@ -97,7 +97,7 @@ export const RepositoryFns = {
 
         const repository = result.rows[0];
 
-        return {...repository, access: RWA.rwa};
+        return { ...repository, access: RWA.rwa };
     },
     checkIsRepositoryNameFree: async (title: string, userId: number): Promise<{ isFree: boolean }> => {
         let result: QueryResult<CheckIsRepositoryNameFreeR>;
@@ -128,16 +128,19 @@ export const RepositoryFns = {
 
         try {
             const client = await pg.connect();
-            result = await client.query<GetRepositoriesByFiltersR, GetRepositoriesByFiltersQP>(getRepositoriesByFiltersQ, [
-                userId,
-                by_user ?? -1,
-                title ? `${title}%` : '',
-                is_rw ?? false,
-                is_rwa ?? false,
-                page,
-                quantity,
-                excludeRepositoryIds
-            ]);
+            result = await client.query<GetRepositoriesByFiltersR, GetRepositoriesByFiltersQP>(
+                getRepositoriesByFiltersQ,
+                [
+                    userId,
+                    by_user ?? -1,
+                    title ? `${title}%` : '',
+                    is_rw ?? false,
+                    is_rwa ?? false,
+                    page,
+                    quantity,
+                    excludeRepositoryIds,
+                ],
+            );
             client.release();
         } catch (error) {
             const e = error as Error;
@@ -184,9 +187,12 @@ export const RepositoryFns = {
             throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
         }
 
-        const repository = {...result.rows[0], access: bitMaskToRWA(result.rows[0].access, result.rows[0].is_private)};
+        const repository = {
+            ...result.rows[0],
+            access: bitMaskToRWA(result.rows[0].access, result.rows[0].is_private),
+        };
         const repositoryOwner = await UserFns.getUserById(result.rows[0].user_id);
-        
+
         const git = new Git(
             {
                 email: repositoryOwner.email,

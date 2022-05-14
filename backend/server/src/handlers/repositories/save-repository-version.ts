@@ -9,11 +9,11 @@ type SaveRepositoryVersionD = {
     repositoryId: number;
     versionSummary: string;
     version: [number, number, number];
-}
+};
 
 type SaveRepositoryVersionRD = {
     version: string;
-}
+};
 
 class SaveRepositoryVersionDValidator {
     @IsNumber()
@@ -29,8 +29,8 @@ class SaveRepositoryVersionDValidator {
     constructor({ repositoryId, version, versionSummary }: SaveRepositoryVersionD) {
         this.repositoryId = Number(repositoryId);
         this.versionSummary = versionSummary;
-        this.version = [version?.[0], version?.[1], version?.[2]]
-    } 
+        this.version = [version?.[0], version?.[1], version?.[2]];
+    }
 }
 
 export const saveRepositoryVersion: ResponseCallback<SaveRepositoryVersionD, SaveRepositoryVersionRD> = async ({

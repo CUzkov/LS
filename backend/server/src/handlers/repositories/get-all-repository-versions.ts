@@ -7,7 +7,7 @@ import { RepositoryFns } from '../../models';
 
 type GetAllRepositoryVersionsQP = {
     repositoryId: number;
-}
+};
 
 type GetAllRepositoryVersionsRD = string[];
 
@@ -17,7 +17,7 @@ class GetAllRepositoryVersionsQPValidator {
 
     constructor({ repositoryId }: GetAllRepositoryVersionsQP) {
         this.repositoryId = Number(repositoryId);
-    } 
+    }
 }
 
 export const getAllRepositoryVersions: ResponseCallback<Empty, GetAllRepositoryVersionsQP> = async ({

@@ -10,7 +10,7 @@ type DownloadFileOrDirQP = {
     pathToFile: string;
     fileName: string;
     isDraft: boolean;
-}
+};
 
 class DownloadFileOrDirQPValidator {
     @IsNumber()
@@ -33,7 +33,11 @@ class DownloadFileOrDirQPValidator {
     }
 }
 
-export const downloadFileOrDir: ResponseCallback<Empty, DownloadFileOrDirQP> = async ({ response, userId, queryParams }) => {
+export const downloadFileOrDir: ResponseCallback<Empty, DownloadFileOrDirQP> = async ({
+    response,
+    userId,
+    queryParams,
+}) => {
     if (!userId) {
         return getServerErrorResponse(
             response,

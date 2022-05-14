@@ -8,13 +8,13 @@ import { RepositoryFns } from '../../models';
 type GetRepositoryByIdQP = {
     id: number;
     version?: string;
-}
+};
 
 type GetRepositoryByIdRD = {
     repository: {
         title: string;
         id: number;
-    },
+    };
     version: string;
 };
 

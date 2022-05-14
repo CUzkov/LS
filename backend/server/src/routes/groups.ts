@@ -1,8 +1,8 @@
 import { getGroupsByFilter } from '../handlers/groups/get-groups-by-filters';
 import { createGroup } from '../handlers/groups/create-group';
-import {addGroupToGroup} from '../handlers/groups/add-group-to-group'
-import {checkIsGroupNameFree} from '../handlers/groups/check-is-group-name-free'
-import {getFullGroupById} from '../handlers/groups/get-full-group-by-id'
+import { addGroupToGroup } from '../handlers/groups/add-group-to-group';
+import { checkIsGroupNameFree } from '../handlers/groups/check-is-group-name-free';
+import { getFullGroupById } from '../handlers/groups/get-full-group-by-id';
 
 import { Route, Method } from '../types';
 

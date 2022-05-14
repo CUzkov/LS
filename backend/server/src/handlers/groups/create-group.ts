@@ -39,10 +39,7 @@ export const createGroup: ResponseCallback<CreateGroupD, Empty> = async ({ respo
     }
 
     if (!data) {
-        return getServerErrorResponse(
-            response,
-            new ServerError({ name: errorNames.noData, code: Code.badRequest }),
-        );
+        return getServerErrorResponse(response, new ServerError({ name: errorNames.noData, code: Code.badRequest }));
     }
 
     const dataSanitize = new CreateGroupDValidator(data);
@@ -60,7 +57,12 @@ export const createGroup: ResponseCallback<CreateGroupD, Empty> = async ({ respo
     }
 
     try {
-        const group = await GroupFns.createGroup(dataSanitize.title, userId, dataSanitize.groupType, dataSanitize.isPrivate);
+        const group = await GroupFns.createGroup(
+            dataSanitize.title,
+            userId,
+            dataSanitize.groupType,
+            dataSanitize.isPrivate,
+        );
         getOkResponse<CreateGroupRD>(response, group);
     } catch (error) {
         if (error instanceof ServerError) {

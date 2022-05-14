@@ -1,4 +1,4 @@
-import { RWA } from "../../utils/access";
+import { RWA } from '../../utils/access';
 
 export type GetRepositoriesByFiltersR = {
     id: number;

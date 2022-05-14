@@ -10,7 +10,7 @@ type AddDirToRepositoryD = {
     repositoryId: number;
     newDirName: string;
     pathToDir?: string;
-}
+};
 
 type AddDirToRepositoryRD = {
     name: string;
@@ -33,7 +33,7 @@ class AddDirToRepositoryDValidator {
         this.newDirName = newDirName;
         this.pathToDir = pathToDir;
         this.repositoryId = Number(repositoryId);
-    } 
+    }
 }
 
 export const addDirToRepository: ResponseCallback<AddDirToRepositoryD, Empty> = async ({ response, userId, data }) => {

@@ -2,7 +2,7 @@ export enum RWA {
     r = 'r',
     rw = 'rw',
     rwa = 'rwa',
-    none = 'none'
+    none = 'none',
 }
 
 export const bitMaskToRWA = (bitMask: string | null, isPrivate: boolean): RWA => {
@@ -16,4 +16,4 @@ export const bitMaskToRWA = (bitMask: string | null, isPrivate: boolean): RWA =>
         default:
             return isPrivate ? RWA.none : RWA.r;
     }
-}
+};

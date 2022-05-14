@@ -107,7 +107,7 @@ export const GroupFns = {
             title: group.title,
             type: group.group_type,
             userId,
-            access: RWA.rwa
+            access: RWA.rwa,
         };
     },
     getFullGroupById: async (userId: number, groupId: number): Promise<FullGroup> => {
@@ -144,7 +144,8 @@ export const GroupFns = {
         try {
             const client = await pg.connect();
             resultRepositories = await client.query<GetRepositoriesByGroupIdR, GetRepositoriesByGroupIdQP>(
-                getRepositoriesByGroupIdQ, [userId, groupId],
+                getRepositoriesByGroupIdQ,
+                [userId, groupId],
             );
             client.release();
         } catch (error) {
@@ -165,7 +166,7 @@ export const GroupFns = {
                     title,
                     type: group_type,
                     userId: user_id,
-                    access: bitMaskToRWA(access, is_private)
+                    access: bitMaskToRWA(access, is_private),
                 })),
             childrenRepositories: resultRepositories.rows.map(({ id, title }) => ({
                 id,
@@ -204,7 +205,7 @@ export const GroupFns = {
                 title: row.title,
                 type: row.group_type,
                 userId: row.user_id,
-                access: bitMaskToRWA(row.access, row.is_private)
+                access: bitMaskToRWA(row.access, row.is_private),
             })),
             count: Math.ceil(result.rows?.[0]?.rows_count / quantity) ?? 0,
         };

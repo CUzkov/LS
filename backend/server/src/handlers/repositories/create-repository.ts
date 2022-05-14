@@ -10,16 +10,16 @@ import { RWA } from '../../utils/access';
 type CreateRepositoryD = {
     title: string;
     isPrivate: boolean;
-}
+};
 
 type CreateRepositoryRD = {
     repository: {
         title: string;
         id: number;
         access: RWA;
-    },
+    };
     version: string;
-}
+};
 
 class CreateRepositoryDValidator {
     @IsString()
@@ -43,10 +43,7 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
     }
 
     if (!data) {
-        return getServerErrorResponse(
-            response,
-            new ServerError({ name: errorNames.noData, code: Code.badRequest }),
-        );
+        return getServerErrorResponse(response, new ServerError({ name: errorNames.noData, code: Code.badRequest }));
     }
 
     const dataSanitize = new CreateRepositoryDValidator(data);

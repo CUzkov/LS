@@ -12,15 +12,17 @@ type DeleteFileFromRepositoryD = {
     pathToFile?: string;
 };
 
-type DeleteFileFromRepositoryRD = {
-    name: string;
-    pathToFile: string[];
-    status: FileStatus;
-} | {
-    name: string;
-    pathToDir: string[];
-    status: DirStatus;
-};
+type DeleteFileFromRepositoryRD =
+    | {
+          name: string;
+          pathToFile: string[];
+          status: FileStatus;
+      }
+    | {
+          name: string;
+          pathToDir: string[];
+          status: DirStatus;
+      };
 
 class DeleteFileFromRepositoryDValidator {
     @IsNumber()
@@ -37,7 +39,7 @@ class DeleteFileFromRepositoryDValidator {
         this.repositoryId = Number(repositoryId);
         this.name = name;
         this.pathToFile = pathToFile;
-    } 
+    }
 }
 
 export const deleteFileOrDirFromRepository: ResponseCallback<DeleteFileFromRepositoryD, Empty> = async ({

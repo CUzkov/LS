@@ -212,7 +212,6 @@ export class Git {
         };
     }
 
-
     // внешние ручки для использования
 
     // коммитит изменения в драфт-репозитории и переносит их в обычный
@@ -227,15 +226,21 @@ export class Git {
         await this.gitCore.addTag(formattedVersion);
 
         const absFullPathToDir = git.getAbsPathToFile([]);
-        const absFullPathToDirVersionOf = path.join(baseGitPath, 'version-of', this.user.username, this.repositoryName, formattedVersion);
+        const absFullPathToDirVersionOf = path.join(
+            baseGitPath,
+            'version-of',
+            this.user.username,
+            this.repositoryName,
+            formattedVersion,
+        );
 
         const absFullPathToDirDraft = this.getAbsPathToFile([]);
 
         await fse.remove(absFullPathToDir);
-        await fse.mkdir(absFullPathToDir, {recursive: true});
+        await fse.mkdir(absFullPathToDir, { recursive: true });
         await fse.copy(absFullPathToDirDraft, absFullPathToDir, { recursive: true });
 
-        await fse.mkdir(absFullPathToDirVersionOf, {recursive: true});
+        await fse.mkdir(absFullPathToDirVersionOf, { recursive: true });
         await fse.copy(absFullPathToDirDraft, absFullPathToDirVersionOf, { recursive: true });
 
         git._release();
@@ -267,7 +272,7 @@ export class Git {
 
         const absFullPathToFile = path.join(this._getDraftAbsPathToFile(pathToFile), fileName);
 
-        await fse.move(absFullPathToFileTmp, absFullPathToFile, {overwrite: true});
+        await fse.move(absFullPathToFileTmp, absFullPathToFile, { overwrite: true });
 
         await this._add();
 

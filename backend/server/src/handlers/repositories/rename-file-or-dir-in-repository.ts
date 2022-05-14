@@ -13,15 +13,17 @@ type RenameFileInRepositoryD = {
     newName: string;
 };
 
-type RenameFileInRepositoryRD = {
-    name: string;
-    pathToFile: string[];
-    status: FileStatus;
-} | {
-    name: string;
-    pathToDir: string[];
-    status: DirStatus;
-};
+type RenameFileInRepositoryRD =
+    | {
+          name: string;
+          pathToFile: string[];
+          status: FileStatus;
+      }
+    | {
+          name: string;
+          pathToDir: string[];
+          status: DirStatus;
+      };
 
 class RenameFileInRepositoryDValidator {
     @IsNumber()
@@ -42,7 +44,7 @@ class RenameFileInRepositoryDValidator {
         this.name = name;
         this.newName = newName;
         this.pathToFile = pathToFile;
-    } 
+    }
 }
 
 export const renameFileOrDirInRepository: ResponseCallback<RenameFileInRepositoryD, Empty> = async ({

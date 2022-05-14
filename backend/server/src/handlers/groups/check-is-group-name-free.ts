@@ -41,10 +41,7 @@ export const checkIsGroupNameFree: ResponseCallback<CheckIsGroupNameFreeD, Empty
     }
 
     if (!data) {
-        return getServerErrorResponse(
-            response,
-            new ServerError({ name: errorNames.noData, code: Code.badRequest }),
-        );
+        return getServerErrorResponse(response, new ServerError({ name: errorNames.noData, code: Code.badRequest }));
     }
 
     const dataSanitize = new CheckIsGroupNameFreeDValidator(data);
