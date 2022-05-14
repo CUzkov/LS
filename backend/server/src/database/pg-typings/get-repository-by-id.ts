@@ -4,9 +4,8 @@ export type GetRepositoryByIdR = {
     is_private: boolean;
     user_id: number;
     title: string;
-    path_to_draft_repository?: string;
-    rubric_id?: number;
-    map_id?: number;
+    path_to_draft_repository: string | null;
+    access: string | null;
 };
 
 export type GetRepositoryByIdQP = [number, number];

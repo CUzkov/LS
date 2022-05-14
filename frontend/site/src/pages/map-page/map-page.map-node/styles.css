@@ -1,0 +1,4 @@
+.react-flow .react-flow__node {
+    border: 1px solid var(--second-border-color);
+    border-radius: 5px;
+}

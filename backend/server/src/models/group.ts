@@ -11,17 +11,23 @@ import { addGroupToGroupQ, AddGroupToGroupQP, AddGroupToGroupR } from '../databa
 import {
     checkIsUserCanAddGroupToGroupQ,
     CheckIsUserCanAddGroupToGroupQP,
-    // CheckIsUserCanAddGroupToGroupR,
+    CheckIsUserCanAddGroupToGroupR,
 } from '../database/pg-typings/check-is-user-can-add-group-to-group';
 import {
     getGroupsByFiltersQ,
     GetGroupsByFiltersQP,
     GetGroupsByFiltersR,
 } from '../database/pg-typings/get-groups-by-filters';
+import {
+    getRepositoriesByGroupIdQ,
+    GetRepositoriesByGroupIdQP,
+    GetRepositoriesByGroupIdR,
+} from '../database/pg-typings/get-repositories-by-group-id';
 
 import { pg } from '../database';
 import { ServerError, errorNames } from '../utils/server-error';
 import { Code } from '../types';
+import { bitMaskToRWA, RWA } from '../utils/access';
 
 export enum GroupType {
     map = 'map',
@@ -33,31 +39,22 @@ export type Group = {
     title: string;
     type: GroupType;
     userId: number;
+    access: RWA;
 };
 
 export type FullGroup = {
-    id: number;
-    title: string;
-    type: GroupType;
-    parentId: number;
-    children?: FullGroup[];
-};
+    childrenGroups: Group[];
+    childrenRepositories: { title: string; id: number }[];
+} & Group;
 
 type GroupsFilters = {
     is_rw?: boolean;
     is_rwa?: boolean;
     title?: string;
     by_user?: number;
-    excludeGroupIds?: string[];
+    excludeGroupIds?: number[];
     page: number;
     quantity: number;
-};
-
-const getGroupWithChilds = (group: FullGroup, nodesAdjList: Record<string, FullGroup[]>): FullGroup => {
-    return {
-        ...group,
-        children: nodesAdjList[group.id]?.map((currGroup) => getGroupWithChilds(currGroup, nodesAdjList)),
-    };
 };
 
 export const GroupFns = {
@@ -83,12 +80,12 @@ export const GroupFns = {
 
         return { isFree: true };
     },
-    createGroup: async (title: string, userId: number, type: GroupType): Promise<Group> => {
+    createGroup: async (title: string, userId: number, type: GroupType, isPrivate: boolean): Promise<Group> => {
         let result: QueryResult<CreateGroupR>;
 
         try {
             const client = await pg.connect();
-            result = await client.query<CreateGroupR, CreateGroupQP>(createGroupQ, [title, type, userId]);
+            result = await client.query<CreateGroupR, CreateGroupQP>(createGroupQ, [title, type, userId, isPrivate]);
             client.release();
         } catch (error) {
             const e = error as Error;
@@ -110,21 +107,25 @@ export const GroupFns = {
             title: group.title,
             type: group.group_type,
             userId,
+            access: RWA.rwa
         };
     },
-    getFullGroupById: async (userId: number, groupId: number) => {
-        let result: QueryResult<GetFullGroupByIdR>;
+    getFullGroupById: async (userId: number, groupId: number): Promise<FullGroup> => {
+        let resultGroups: QueryResult<GetFullGroupByIdR>;
 
         try {
             const client = await pg.connect();
-            result = await client.query<GetFullGroupByIdR, GetFullGroupByIdQP>(getFullGroupByIdQ, [userId, groupId]);
+            resultGroups = await client.query<GetFullGroupByIdR, GetFullGroupByIdQP>(getFullGroupByIdQ, [
+                userId,
+                groupId,
+            ]);
             client.release();
         } catch (error) {
             const e = error as Error;
             throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
-        if (!result.rowCount) {
+        if (!resultGroups.rowCount) {
             throw new ServerError({
                 name: errorNames.dbError,
                 code: Code.badRequest,
@@ -132,27 +133,45 @@ export const GroupFns = {
             });
         }
 
-        const nodesAdjList = result.rows.reduce((acc, curr) => {
-            const group = { id: curr.id, title: curr.title, type: curr.group_type, parentId: curr.parent_id };
+        const baseGroup = resultGroups.rows.filter(({ is_base }) => is_base)?.[0];
 
-            if (!acc[curr.parent_id]) {
-                acc[curr.parent_id] = [group];
-            } else {
-                acc[curr.parent_id].push(group);
-            }
+        if (!baseGroup) {
+            throw new ServerError({ name: errorNames.mapNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
-            return acc;
-        }, {} as Record<string, FullGroup[]>);
+        let resultRepositories: QueryResult<GetRepositoriesByGroupIdR>;
 
-        return getGroupWithChilds(
-            {
-                id: result.rows[0].id,
-                parentId: result.rows[0].parent_id,
-                title: result.rows[0].title,
-                type: result.rows[0].group_type,
-            },
-            nodesAdjList,
-        );
+        try {
+            const client = await pg.connect();
+            resultRepositories = await client.query<GetRepositoriesByGroupIdR, GetRepositoriesByGroupIdQP>(
+                getRepositoriesByGroupIdQ, [userId, groupId],
+            );
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
+
+        return {
+            id: baseGroup.id,
+            title: baseGroup.title,
+            type: baseGroup.group_type,
+            userId: baseGroup.user_id,
+            access: bitMaskToRWA(baseGroup.access, baseGroup.is_private),
+            childrenGroups: resultGroups.rows
+                .filter(({ is_base }) => !is_base)
+                .map(({ id, group_type, title, user_id, access, is_private }) => ({
+                    id,
+                    title,
+                    type: group_type,
+                    userId: user_id,
+                    access: bitMaskToRWA(access, is_private)
+                })),
+            childrenRepositories: resultRepositories.rows.map(({ id, title }) => ({
+                id,
+                title,
+            })),
+        };
     },
     getGroupsByFilters: async (
         { by_user, title, is_rw, is_rwa, page, quantity, excludeGroupIds = [] }: GroupsFilters,
@@ -171,6 +190,7 @@ export const GroupFns = {
                 is_rwa ?? false,
                 page,
                 quantity,
+                excludeGroupIds,
             ]);
             client.release();
         } catch (error) {
@@ -184,16 +204,17 @@ export const GroupFns = {
                 title: row.title,
                 type: row.group_type,
                 userId: row.user_id,
+                access: bitMaskToRWA(row.access, row.is_private)
             })),
-            count: Math.ceil(result.rows?.[0].rows_count / quantity) ?? 0,
+            count: Math.ceil(result.rows?.[0]?.rows_count / quantity) ?? 0,
         };
     },
     addGroupToGroup: async (userId: number, parentGroupId: number, childGroupId: number): Promise<void> => {
-        let accessResult: QueryResult<CheckIsGroupNameFreeR>;
+        let accessResult: QueryResult<CheckIsUserCanAddGroupToGroupR>;
 
         try {
             const client = await pg.connect();
-            accessResult = await client.query<CheckIsGroupNameFreeR, CheckIsUserCanAddGroupToGroupQP>(
+            accessResult = await client.query<CheckIsUserCanAddGroupToGroupR, CheckIsUserCanAddGroupToGroupQP>(
                 checkIsUserCanAddGroupToGroupQ,
                 [userId, parentGroupId, childGroupId],
             );

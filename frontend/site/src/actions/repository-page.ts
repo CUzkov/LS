@@ -1,22 +1,7 @@
-import { RepositoryByIdQP, RepositoryByIdRD } from '@api-types/repository/get-repository-by-id';
-import { FilesByDirPathQP, FilesByDirPathRD } from '@api-types/repository/get-files-by-dir-path';
-import { AddFileToRepositoryRD } from '@api-types/repository/add-file-to-repository';
-import { RenameFileInRepositoryD, RenameFileInRepositoryRD } from '@api-types/repository/rename-file-in-repository';
-import { AddDirToRepositoryD, AddDirToRepositoryRD } from '@api-types/repository/add-dir-to-repository';
-import { SaveRepositoryVersionD, SaveRepositoryVersionRD } from '@api-types/repository/save-repository-version';
-import {
-    GetAllRepositoryVersionsQP,
-    GetAllRepositoryVersionsRD,
-} from '@api-types/repository/get-all-repository-versions';
-import {
-    DeleteFileFromRepositoryD,
-    DeleteFileFromRepositoryRD,
-} from '@api-types/repository/delete-file-from-repository';
-
 import { getDirKeyByPath } from 'pages/repository-page/repository-page.utils';
 
 import { ajax } from '../ajax';
-import { DirMeta, Empty, FileMeta, IServerError } from 'types';
+import { DirMeta, DirStatus, Empty, FileMeta, FileStatus, IServerError, RWA } from 'types';
 import { Dispatch, store } from '../store';
 
 const REPOSITORY_BY_ID_URL = '/api/repository/id';
@@ -29,15 +14,29 @@ const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
 const SAVE_REPOSITORY_VERSION = '/api/repository/version/save';
 const GET_ALL_REPOSITORY_VERSIONS = '/api/repository/version/all';
 
+type GetRepositoryByIdQP = {
+    id: number;
+    version?: string;
+};
+
+type GetRepositoryByIdRD = {
+    repository: {
+        title: string;
+        id: number;
+        access: RWA;
+    };
+    version: string;
+};
+
 export const getPageRepositoriesById = async (id: number, version?: string) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'repository-page/repository/loading' });
 
-    let response: RepositoryByIdRD | undefined;
+    let response: GetRepositoryByIdRD | undefined;
 
     try {
-        response = await ajax.get<RepositoryByIdRD, RepositoryByIdQP>({
+        response = await ajax.get<GetRepositoryByIdRD, GetRepositoryByIdQP>({
             url: REPOSITORY_BY_ID_URL,
             queryParams: { id, version },
         });
@@ -62,6 +61,26 @@ export const getPageRepositoriesById = async (id: number, version?: string) => {
     });
 };
 
+type GetFilesAndDirsByDirPathQP = {
+    repositoryId: number;
+    pathToDir?: string;
+    dirName?: string;
+    version?: string;
+};
+
+type GetFilesAndDirsByDirPathRD = {
+    files: {
+        name: string;
+        pathToFile: string[];
+        status: FileStatus;
+    }[];
+    dirs: {
+        name: string;
+        pathToDir: string[];
+        status: DirStatus;
+    }[];
+};
+
 export const getFilesByPath = async (pathToDir: string[], dirName: string, isDraft: boolean, version?: string) => {
     const dispath: Dispatch = store.dispatch;
 
@@ -75,10 +94,10 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
 
     dispath({ type: 'repository-page/files-and-dirs/loading' });
 
-    let response: FilesByDirPathRD | undefined;
+    let response: GetFilesAndDirsByDirPathRD | undefined;
 
     try {
-        response = await ajax.get<FilesByDirPathRD, FilesByDirPathQP>({
+        response = await ajax.get<GetFilesAndDirsByDirPathRD, GetFilesAndDirsByDirPathQP>({
             url: isDraft ? GET_DRAFT_FILES_BY_FULL_DIR_PATH : GET_FILES_BY_FULL_DIR_PATH_URL,
             queryParams: {
                 pathToDir: pathToDir.join('~'),
@@ -103,6 +122,12 @@ export const getFilesByPath = async (pathToDir: string[], dirName: string, isDra
     }
 
     dispath({ type: 'repository-page/files-and-dirs/success', data: response });
+};
+
+type AddFileToRepositoryRD = {
+    name: string;
+    pathToFile: string[];
+    status: FileStatus;
 };
 
 export const addFile = async (file: File, isBeDeleted?: boolean) => {
@@ -130,9 +155,11 @@ export const addFile = async (file: File, isBeDeleted?: boolean) => {
             return;
         }
     } catch (error) {
+        const e = error as IServerError;
+
         dispath({
             type: 'logger/add-log',
-            data: { title: 'Ошибка загрузки файла!', description: `Файл ${file.name} не загружен`, type: 'error' },
+            data: { title: e.name, description: e.description, type: 'error' },
         });
         return;
     }
@@ -145,6 +172,24 @@ export const changeFilesDirPath = (newFullPathToDir: string[]) => {
 
     dispath({ type: 'repository-page/set-path', data: newFullPathToDir.filter((path) => path !== '.') });
 };
+
+type DeleteFileFromRepositoryD = {
+    name: string;
+    repositoryId: number;
+    pathToFile?: string;
+};
+
+type DeleteFileFromRepositoryRD =
+    | {
+          name: string;
+          pathToFile: string[];
+          status: FileStatus;
+      }
+    | {
+          name: string;
+          pathToDir: string[];
+          status: DirStatus;
+      };
 
 export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
     const dispath: Dispatch = store.dispatch;
@@ -184,6 +229,25 @@ export const deleteFileOrDir = async (fileOrDir: FileMeta | DirMeta) => {
 
     dispath({ type: 'repository-page/file/delete', data: response });
 };
+
+type RenameFileInRepositoryD = {
+    name: string;
+    pathToFile: string;
+    repositoryId: number;
+    newName: string;
+};
+
+type RenameFileInRepositoryRD =
+    | {
+          name: string;
+          pathToFile: string[];
+          status: FileStatus;
+      }
+    | {
+          name: string;
+          pathToDir: string[];
+          status: DirStatus;
+      };
 
 export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: string) => {
     const dispath: Dispatch = store.dispatch;
@@ -231,6 +295,18 @@ export const renameFileOrDir = async (fileOrDir: FileMeta | DirMeta, newName: st
     }
 };
 
+type AddDirToRepositoryD = {
+    repositoryId: number;
+    newDirName: string;
+    pathToDir?: string;
+};
+
+type AddDirToRepositoryRD = {
+    name: string;
+    pathToDir: string[];
+    status: DirStatus;
+};
+
 export const addDirToRepository = async (newDirName: string) => {
     const dispath: Dispatch = store.dispatch;
 
@@ -250,7 +326,7 @@ export const addDirToRepository = async (newDirName: string) => {
             data: {
                 newDirName,
                 repositoryId: repository.id,
-                pathToDir: currentPath,
+                pathToDir: currentPath.join('~'),
             },
         });
 
@@ -270,6 +346,16 @@ export const addDirToRepository = async (newDirName: string) => {
     }
 
     dispath({ type: 'repository-page/dir/add', data: response });
+};
+
+type SaveRepositoryVersionD = {
+    repositoryId: number;
+    versionSummary: string;
+    version: [number, number, number];
+};
+
+type SaveRepositoryVersionRD = {
+    version: string;
 };
 
 export const saveRepositoryVersion = async (
@@ -311,6 +397,12 @@ export const saveRepositoryVersion = async (
 
     return response.version;
 };
+
+type GetAllRepositoryVersionsQP = {
+    repositoryId: number;
+};
+
+type GetAllRepositoryVersionsRD = string[];
 
 export const getAllVersions = async () => {
     const dispath: Dispatch = store.dispatch;

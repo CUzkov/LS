@@ -7,6 +7,6 @@ export type CreateGroupR = {
     group_type: GroupType;
 };
 
-export type CreateGroupQP = [string, GroupType, number];
+export type CreateGroupQP = [string, GroupType, number, boolean];
 
-export const createGroupQ = 'SELECT * from create_group($1, $2, $3)';
+export const createGroupQ = 'SELECT * from create_group($1, $2, $3, $4)';

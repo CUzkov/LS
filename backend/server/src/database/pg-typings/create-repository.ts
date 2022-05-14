@@ -4,8 +4,7 @@ export type CreateRepositoryR = {
     is_private: boolean;
     user_id: number;
     title: string;
-    rubric_id?: number;
-    map_id?: number;
+    path_to_draft_repository: string | null;
 };
 
 export type CreateRepositoryQP = [string, string, boolean, number];

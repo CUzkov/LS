@@ -49,6 +49,7 @@ export enum ErrorsTypes {
     noSuchUser500 = 'noSuchUser500',
     dbError = 'dbError',
     repositoryNotFoundOrPermissionDenied = 'repositoryNotFoundOrPermissionDenied',
+    mapNotFoundOrPermissionDenied = 'mapNotFoundOrPermissionDenied',
     fileNameNotPresent = 'fileNameNotPresent',
     deleteFileError = 'deleteFileError',
     cannotCreateDraftRepositpory = 'cannotCreateDraftRepositpory',
@@ -65,6 +66,9 @@ export enum ErrorsTypes {
     unauthorized = 'unauthorized',
     formReadError = 'formReadError',
     groupAccessError = 'groupAccessError',
+    noQueryParams = 'noQueryParams',
+    getFullGroupByIdError = 'getFullGroupByIdError',
+    noData = 'noData',
 }
 
 export const errorNames: Record<ErrorsTypes, string> = {
@@ -89,4 +93,8 @@ export const errorNames: Record<ErrorsTypes, string> = {
     [ErrorsTypes.unauthorized]: 'Вы не авторизованы!',
     [ErrorsTypes.formReadError]: 'Ошибка чтения формы!',
     [ErrorsTypes.groupAccessError]: 'Ошибка доступа к группе!',
+    [ErrorsTypes.noQueryParams]: 'Необходимые параметры отсутствуют!',
+    [ErrorsTypes.getFullGroupByIdError]: 'Функция getFullGroupByIdError вернула неправильный результат!',
+    [ErrorsTypes.noData]: 'Тело запроса обязательно!',
+    [ErrorsTypes.mapNotFoundOrPermissionDenied]: 'Карта не найдена или доступ закрыт!'
 };

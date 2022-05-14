@@ -5,7 +5,11 @@ import cn from 'classnames';
 
 import { FetchStatus } from 'types/index';
 import { getRepository } from 'constants/routers';
-import { checkIsRepositoryNameFree, createRepository, setRepositoryNameNotChecked } from 'actions/repositories';
+import {
+    checkIsRepositoryNameFree,
+    createRepository,
+    setRepositoryNameNotChecked,
+} from 'actions/create-repository-page';
 import { useBooleanState } from 'hooks';
 import { useSelector } from 'store/store';
 import { Button } from 'components/button';
@@ -37,7 +41,7 @@ export const CreateRepositoryForm: FC = () => {
 
             createRepository(userForm).then((repository) => {
                 if (repository) {
-                    navigate(getRepository(username, String(repository.id)));
+                    navigate(getRepository(username, repository.id));
                 }
             });
         },

@@ -65,7 +65,6 @@ export const App: FC = () => {
                     <Route path={getMainPage()} element={<MainPage />} />
                     <Route path={getLoginPage()} element={<LoginPage />} />
                     <Route path={getAllMaps(userStore.username)} element={<MapsListPage />} />
-                    {/* <Route path={getUserPage(userStore.username)} element={<UserPage />} /> */}
                     <Route path={getMapCreate(userStore.username)} element={<CreateMapPage />} />
                     <Route path={getMapTemplate(userStore.username)} element={<MapPage />} />
                     <Route path={getRepositoryCreate(userStore.username)} element={<CreateRepositoryPage />} />

@@ -20,6 +20,7 @@ body {
     --menu-item-hover-color: #474b4e;
     --breadcrumbs-hover-color: #313537;
     --cards-color: #313537;
+    --secondary-cards-color: rgb(82, 82, 82);
 
     // texts
     --default-text-color: #f1f3f4;
@@ -36,6 +37,7 @@ body {
     --default-icon-succes-color: #B9F287;
 
     --default-border-color: #4e5254;
+    --second-border-color: #6f6f75;
     --default-dark-border: #242728;
     --default-shadow-color: rgba(241, 243, 244, 0.2);
     --default-hover-color: rgba(241, 243, 244, 0.2);
@@ -61,6 +63,7 @@ $menu-hover-color: var(--menu-hover-color);
 $menu-item-hover-color: var(--menu-item-hover-color);
 $breadcrumbs-hover-color: var(--breadcrumbs-hover-color);
 $cards-color: var(--cards-color);
+$secondary-cards-color: var(--secondary-cards-color);
 
 // texts
 $default-text-color: var(--default-text-color);
@@ -77,6 +80,7 @@ $default-icon-error-color: var(--default-icon-error-color);
 $default-icon-succes-color: var(--default-icon-succes-color);
 
 $default-border-color: var(--default-border-color);
+$second-border-color: var(--second-border-color);
 $default-dark-border: var(--default-dark-border);
 $default-shadow-color: var(--default-shadow-color);
 $default-hover-color: var(--default-hover-color);

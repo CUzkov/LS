@@ -7,7 +7,7 @@ import { User, UserFns } from '../models';
 import { redis } from '../database';
 import { ServerError, errorNames } from '../utils/server-error';
 
-const UNIX_MOUNTH = 60 * 60 * 24 * 30;
+const UNIX_MOUNTH = 60 * 60 * 1000 * 3;
 
 export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response, data, cookies }) => {
     if ((!data?.email && !data?.username) || !data?.password) {

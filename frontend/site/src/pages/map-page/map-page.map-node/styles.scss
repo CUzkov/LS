@@ -1,0 +1,42 @@
+@import '../../../index.scss';
+
+.mapNode {
+    height: 50px;
+    color: $default-text-color;
+    border: none;
+    background-color: $secondary-cards-color;
+    border-radius: 5px;
+    box-sizing: border-box;
+    padding: 5px;
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .enterIcon {
+            border-radius: 50%;
+            transition: background-color .2s;
+            height: 20px;
+            width: 20px;
+            box-sizing: border-box;
+            position: relative;
+
+            &:hover {
+                background-color: var(--default-hover-color);
+            }
+
+            svg {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+    }
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

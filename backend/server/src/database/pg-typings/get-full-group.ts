@@ -1,10 +1,13 @@
 import { GroupType } from '../../models/group';
 
 export type GetFullGroupByIdR = {
-    parent_id: number;
     id: number;
     title: string;
+    is_base: boolean;
     group_type: GroupType;
+    user_id: number;
+    access: string;
+    is_private: boolean;
 };
 
 export type GetFullGroupByIdQP = [number, number];

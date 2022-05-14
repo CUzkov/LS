@@ -57,7 +57,7 @@ export const MapsListPage: FC = () => {
             <div className={styles.maps}>
                 {groupsFetchStatus === FetchStatus.successed &&
                     groups.map((map, index) => (
-                        <ItemCard title={map.title} key={index} link={getMap(username, String(map.id))} />
+                        <ItemCard title={map.title} key={index} link={getMap(username, map.id)} />
                     ))}
                 {groupsFetchStatus === FetchStatus.loading && (
                     <div className={styles.spinner}>

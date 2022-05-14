@@ -24,6 +24,7 @@ import { queryParamConfig } from '../repository-page.constants';
 import { RepositoryPageVersionFrom } from '../repository-page.version-form';
 
 import styles from './style.scss';
+import { RWA } from 'types';
 
 type RepositoryPageHeaderProps = {
     isEditing: boolean;
@@ -35,6 +36,7 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
     const { repository } = useSelector((root) => root.repositoryPage);
     const [, setQuery] = useQueryParams(queryParamConfig);
     const context = useContext(MovablePopupManagerContext);
+    const isCanEdit = repository?.access === RWA.rw || repository?.access === RWA.rwa;
 
     const handleToggleEditing = useCallback(() => {
         toggleEditing();
@@ -112,30 +114,37 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
             rightChild={
                 <div className={styles.actions}>
                     <RepositoryPageVersionFrom isEditing={isEditing} />
-                    <div
-                        className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
-                        onClick={handleSaveVersion}
-                    >
-                        <SaveVersionIcon />
-                        {'сохранить версию'}
-                    </div>
-                    <div
-                        className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
-                        onClick={handleAddFile}
-                    >
-                        <AddFileIcon />
-                        {'добавить файлы'}
-                    </div>
-                    <div
-                        className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
-                        onClick={handleAddDir}
-                    >
-                        <AddFolderIcon />
-                        {'добавить папку'}
-                    </div>
-                    <div className={cn(styles.editIcon, isEditing && styles.editing)} onClick={handleToggleEditing}>
-                        <EditIcon />
-                    </div>
+                    {isCanEdit && (
+                        <>
+                            <div
+                                className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
+                                onClick={handleSaveVersion}
+                            >
+                                <SaveVersionIcon />
+                                {'сохранить версию'}
+                            </div>
+                            <div
+                                className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
+                                onClick={handleAddFile}
+                            >
+                                <AddFileIcon />
+                                {'добавить файлы'}
+                            </div>
+                            <div
+                                className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}
+                                onClick={handleAddDir}
+                            >
+                                <AddFolderIcon />
+                                {'добавить папку'}
+                            </div>
+                            <div
+                                className={cn(styles.editIcon, isEditing && styles.editing)}
+                                onClick={handleToggleEditing}
+                            >
+                                <EditIcon />
+                            </div>
+                        </>
+                    )}
                 </div>
             }
         />

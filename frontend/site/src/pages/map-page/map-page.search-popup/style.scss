@@ -11,6 +11,8 @@
 }
 
 .searchInputPopup {
+    width: 400px;
+
     .searchInputPopupText {
         font-size: 14px;
         margin: 22px 0 10px;
@@ -19,6 +21,7 @@
     .searchPopupField {
         display: flex;
         align-items: flex-start;
+        position: relative;
 
         .searchPopupSpinner {
             margin-left: 10px;
@@ -32,6 +35,76 @@
             svg {
                 height: 30px;
                 width: 30px;
+            }
+        }
+
+        .suggests {
+            position: absolute;
+            top: calc(100% - 22px);
+            width: 100%;
+            background-color: $cards-color;
+            border-radius: 10px;
+            border: 1px solid $default-border-color;
+            padding: 5px 0;
+            box-sizing: border-box;
+            z-index: 10;
+
+            .suggest {
+                height: 30px;
+                width: 100%;
+                padding: 0 5px;
+                box-sizing: border-box;
+                border-top: 1px solid $default-border-color;
+                transition: background-color .2s;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+
+                &:hover {
+                    background-color: $default-hover-color;
+                }
+
+                &:last-child {
+                    border-bottom: 1px solid $default-border-color;
+                }
+            }
+
+            .noInteract {
+                cursor: default;
+
+                &:hover {
+                    background-color: inherit;
+                }
+            }
+        }
+    }
+
+    .selectedMaps {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        width: 100%;
+
+        .selectedMap {
+            font-size: 12px;
+            border-radius: 5px;
+            white-space: nowrap;
+            width: min-content;
+            background-color: $secondary-cards-color;
+            padding: 2px 5px;
+            margin-right: 5px;
+            display: flex;
+            margin-bottom: 10px;
+
+            .crossIcon {
+                height: 12px;
+                width: 12px;
+                margin-left: 5px;
+                cursor: pointer;
+
+                svg {
+                    transform: scale(0.8);
+                }
             }
         }
     }

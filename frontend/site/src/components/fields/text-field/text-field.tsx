@@ -21,6 +21,7 @@ interface TextFieldProps {
     validators?: ((value) => undefined | string)[];
     isDisable?: boolean;
     onBlur?: (event: React.FocusEvent<HTMLInputElement, Element>, meta: FieldMeta<string>) => void;
+    onFocus?: (event: React.FocusEvent<HTMLInputElement, Element>) => void;
     isNoNeedErrors?: boolean;
     theme?: 'default' | 'outlined';
 }
@@ -30,6 +31,7 @@ export const TextField: FC<TextFieldProps> = ({
     type,
     title,
     onBlur,
+    onFocus,
     defaultValue = '',
     validators = [],
     isDisable = false,
@@ -69,6 +71,7 @@ export const TextField: FC<TextFieldProps> = ({
                             id={name}
                             type={type === 'password' ? (isVisible ? '' : 'password') : ''}
                             onBlur={handleBlur(input.onBlur, meta)}
+                            onFocus={onFocus}
                         />
                         {type === 'password' && (
                             <div className={styles.passwordIcon} onClick={toggleVisible}>

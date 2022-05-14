@@ -11,6 +11,7 @@
         border-radius: 5px;
         border: 1px solid $default-border-color;
         position: relative;
+        pointer-events: all;
     }
 
     .mapSpinner {

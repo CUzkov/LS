@@ -106,7 +106,7 @@ export const RepositoryPage: FC = () => {
     );
 
     const paths = useMemo(() => {
-        const basePaths = getPaths(username, repository?.title, String(repository?.id));
+        const basePaths = getPaths(username, repository?.title, repository?.id ?? -1);
 
         if (isRepositoryLoading) {
             basePaths[basePaths.length - 1] = {

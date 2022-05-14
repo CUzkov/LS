@@ -46,7 +46,7 @@ export const RepositoriesListPage: FC = () => {
                             <ItemCard
                                 title={repository.title}
                                 key={index}
-                                link={getRepository(username, String(repository.id))}
+                                link={getRepository(username, repository.id)}
                             />
                         ))}
                     {fetchStatus === FetchStatus.loading && (

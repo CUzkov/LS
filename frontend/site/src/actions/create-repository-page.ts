@@ -1,17 +1,23 @@
-import { AxiosError } from 'axios';
-
-import { CreateRepositoryD, CreateRepositoryRD } from '@api-types/repository/create-repository';
-import {
-    CheckIsRepositoryNameFreeD,
-    CheckIsRepositoryNameFreeRD,
-} from '@api-types/repository/check-is-repository-name-free';
-
 import { ajax } from '../ajax';
-import { Empty, IServerError, Repository } from '../types';
+import { Empty, IServerError, Repository, RWA } from '../types';
 import { Dispatch, store } from '../store';
 
 const CHECK_IS_REPOSIROTY_NAME_FREE_URL = '/api/repository/free';
 const CREATE_REPOSITORY_URL = '/api/repository/create';
+
+type CreateRepositoryD = {
+    title: string;
+    isPrivate: boolean;
+};
+
+type CreateRepositoryRD = {
+    repository: {
+        title: string;
+        id: number;
+        access: RWA;
+    };
+    version: string;
+};
 
 export const createRepository = async (props: CreateRepositoryD): Promise<Repository | void> => {
     const dispath: Dispatch = store.dispatch;
@@ -50,6 +56,14 @@ export const createRepository = async (props: CreateRepositoryD): Promise<Reposi
     });
 
     return response.repository;
+};
+
+type CheckIsRepositoryNameFreeD = {
+    title: string;
+};
+
+type CheckIsRepositoryNameFreeRD = {
+    isFree: boolean;
 };
 
 export const checkIsRepositoryNameFree = async (props: { title: string }) => {

@@ -53,15 +53,18 @@ export const Popup: FC<IMovablePopupProps> = ({
         });
     }, [innerRef, isRequired, anotherRequired]);
 
-    const handleClickOutside = useCallback(() => {
-        if (isRequired && !isFirstRender) {
-            startErrorAnimation();
-            // @FIXME доделать, что бы при спаме кликами было норм
-            setTimeout(() => {
-                stopErrorAnimation();
-            }, 750);
-        }
-    }, [isRequired, isFirstRender]);
+    const handleClickOutside = useCallback(
+        (e) => {
+            if (isRequired && !isFirstRender) {
+                startErrorAnimation();
+                // @FIXME доделать, что бы при спаме кликами было норм
+                setTimeout(() => {
+                    stopErrorAnimation();
+                }, 750);
+            }
+        },
+        [isRequired, isFirstRender],
+    );
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => onMouseMove(mousePositions.x, mousePositions.y, e);

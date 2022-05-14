@@ -46,6 +46,26 @@ export const cookiesMiddleware = (request: MiddlewareRequest, resolve: () => voi
     resolve();
 };
 
+export const queryParamsMiddleware = (request: MiddlewareRequest, resolve: () => void) => {
+    const queryParams: Record<string, string | string[] | undefined> = {};
+
+    for (const key in request.queryParams ?? {}) {
+        if (key.endsWith('[]')) {
+            if (Array.isArray(request.queryParams?.[key])) {
+                queryParams[key.slice(0, key.length - 2)] = request.queryParams?.[key];
+            } else {
+                queryParams[key.slice(0, key.length - 2)] = [request.queryParams?.[key] as string];
+            }
+        } else {
+            queryParams[key] = request.queryParams?.[key];
+        }
+    }
+
+    request.queryParams = queryParams;
+
+    resolve();
+};
+
 export const formDataMiddleware = (
     request: MiddlewareRequest,
     resolve: () => void,
@@ -94,7 +114,7 @@ export const authMiddleware = async (
     reject(MiddlewareCode.noCookies);
 };
 
-const MIDDLEWARES = [cookiesMiddleware, authMiddleware, dataMiddleware, formDataMiddleware];
+const MIDDLEWARES = [cookiesMiddleware, authMiddleware, dataMiddleware, formDataMiddleware, queryParamsMiddleware];
 
 export const middlewares = async (middlewareRequest: MiddlewareRequest) => {
     let isError = false;

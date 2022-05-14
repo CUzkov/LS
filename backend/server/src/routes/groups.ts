@@ -1,10 +1,9 @@
-import {
-    checkIsGroupNameFree,
-    createGroup,
-    getFullGroupById,
-    getGroupsByFilter,
-    addGroupToGroup,
-} from '../handlers/groups';
+import { getGroupsByFilter } from '../handlers/groups/get-groups-by-filters';
+import { createGroup } from '../handlers/groups/create-group';
+import {addGroupToGroup} from '../handlers/groups/add-group-to-group'
+import {checkIsGroupNameFree} from '../handlers/groups/check-is-group-name-free'
+import {getFullGroupById} from '../handlers/groups/get-full-group-by-id'
+
 import { Route, Method } from '../types';
 
 const CHECK_IS_GROUP_NAME_FREE_URL = '/api/group/free';

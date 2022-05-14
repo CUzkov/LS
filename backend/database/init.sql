@@ -12,17 +12,19 @@ create table groups (
 	id 						serial primary key,
 	user_id					integer not null REFERENCES users (id) ON DELETE CASCADE,
 	title					text not null,
+	is_private				boolean not null,
 	group_type				groupType
 );
 
 create table repositories (
 	id 							serial primary key,
 	user_id						integer REFERENCES users (id) ON DELETE CASCADE,
-
-	path_to_repository			text not null,
+	path_to_repository			text not null unique,
 	path_to_draft_repository 	text,
 	is_private					boolean not null,
-	title 						text not null unique
+	title 						text not null,
+
+	unique (user_id, title)
 );
 
 create table users_repositories_relationship (
@@ -52,8 +54,7 @@ create table group_to_group_links (
 create table group_to_repository_links (
 	id 						serial primary key,
 	group_id				integer not null REFERENCES groups (id) ON DELETE CASCADE,
-	repository_id			integer not null REFERENCES repositories (id) ON DELETE CASCADE,
-	link_name				text not null
+	repository_id			integer not null REFERENCES repositories (id) ON DELETE CASCADE
 );
 
 insert into users (username, email, u_password, is_admin)
@@ -63,50 +64,35 @@ values ('cuzkov', 'users@gmail.com', 'Gurkina12', true),
 ('cuzkov3', 'users3@gmail.com', 'Gurkina12', false),
 ('cuzkov4', 'users4@gmail.com', 'Gurkina12', false);
 
-insert into groups (user_id, title, group_type)
-values (1, 'Наука', 'map'),
-(1, 'Физика', 'map'),
-(1, 'Химия', 'map'),
-(1, 'Биология', 'map'),
-(1, 'Развитие жизни', 'map'),
-(1, 'Теология', 'map'),
-(1, 'Дарвин', 'map'),
-(1, 'Новый дарвин', 'map'),
-(1, 'Старый дарвин', 'map'),
-(1, 'Ионизация', 'map'),
-(1, 'Сильная ионизация', 'map'),
-(1, 'Слабая ионизация', 'map'),
-(1, 'Ампер', 'map');
+-- insert into groups (user_id, title, group_type, is_private)
+-- values (1, 'Наука', 'map', false),
+-- (1, 'Физика', 'map', false),
+-- (1, 'Химия', 'map', false),
+-- (1, 'Биология', 'map', false),
+-- (1, 'Развитие жизни', 'map', false),
+-- (1, 'Теология', 'map', false),
+-- (1, 'Дарвин', 'map', false),
+-- (1, 'Новый дарвин', 'map', false),
+-- (1, 'Старый дарвин', 'map', false),
+-- (1, 'Ионизация', 'map', false),
+-- (1, 'Сильная ионизация', 'map', false),
+-- (1, 'Слабая ионизация', 'map', false),
+-- (1, 'Ампер', 'map', false);
 
-insert into users_groups_relationship (user_id, group_id, relationship)
-values (1, 1, B'111'),
-(1, 2, B'111'),
-(1, 3, B'111'),
-(1, 4, B'111'),
-(1, 5, B'111'),
-(1, 6, B'111'),
-(1, 7, B'111'),
-(1, 8, B'111'),
-(1, 9, B'111'),
-(1, 10, B'111'),
-(1, 11, B'111'),
-(1, 12, B'111'),
-(1, 13, B'111');
-
-insert into group_to_group_links(parent_id, child_id)
-values (null, 1),
-(1, 2),
-(1, 3),
-(1, 4),
-(4, 5),
-(5, 6),
-(5, 7),
-(7, 8),
-(7, 9),
-(3, 10),
-(10, 11),
-(10, 12),
-(2, 13);
+-- insert into group_to_group_links(parent_id, child_id)
+-- values (null, 1),
+-- (1, 2),
+-- (1, 3),
+-- (1, 4),
+-- (4, 5),
+-- (5, 6),
+-- (5, 7),
+-- (7, 8),
+-- (7, 9),
+-- (3, 10),
+-- (10, 11),
+-- (10, 12),
+-- (2, 13);
 
 -----------------------------------------------------------------------
 -- Создание нового пользователя
@@ -180,29 +166,6 @@ $BODY$
 			select users.id, users.username, users.email, users.u_password, users.is_admin from users
 			where users.id=id_v
 			limit 1;
-	end;
-$BODY$
-	language 'plpgsql' volatile;
-
------------------------------------------------------------------------
--- Создание новой группы
------------------------------------------------------------------------
-create function create_group(
-	user_id_v integer,
-	title_v text
-) returns integer as
-$BODY$
-	declare
-		group_id_v integer;
-	begin
-		insert into groups (user_id, title)
-		values (user_id_v, title_v)
-		returning id into group_id_v;
-		
-		insert into users_groups_relationship (user_id, group_id, relationship)
-		values (user_id_v, group_id_v, B'111');
-
-		return group_id_v;
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -329,7 +292,8 @@ create function get_repositories_by_filter(
 	is_can_rw_v boolean,
 	is_can_rwa_v boolean,
 	page_v integer,
-	quantity_v integer
+	quantity_v integer,
+	exclude_repository_ids_v integer[]
 ) returns table(
 	id integer,
 	path_to_repository text,
@@ -337,7 +301,8 @@ create function get_repositories_by_filter(
 	user_id integer,
 	title text,
 	path_to_draft_repository text,
-	repositories_count bigint
+	repositories_count bigint,
+	access bit(3)
 ) as
 $BODY$
 	declare
@@ -348,16 +313,22 @@ $BODY$
 
 		repositories_count := (
 			select count(*) from repositories
-			inner join users_repositories_relationship
+			left join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
 			where
 				(by_user_v = -1 or repositories.user_id = by_user_v) and
 				(title_v = '' or repositories.title like title_v) and
 				(
-					users_repositories_relationship.relationship = relationships_v[1] or
-					users_repositories_relationship.relationship = relationships_v[2] or
-					users_repositories_relationship.relationship = relationships_v[3]
-				)
+					(
+						repositories.is_private = true and
+						(
+							users_repositories_relationship.relationship = relationships_v[1] or
+							users_repositories_relationship.relationship = relationships_v[2] or
+							users_repositories_relationship.relationship = relationships_v[3]
+						)
+					) or repositories.is_private = false
+				) and
+				repositories.id != all (exclude_repository_ids_v)
 		);
 
 		return query
@@ -368,18 +339,25 @@ $BODY$
 				repositories.user_id,
 				repositories.title,
 				repositories.path_to_draft_repository,
-				repositories_count
+				repositories_count,
+				users_repositories_relationship.relationship as access
 			from repositories
-			inner join users_repositories_relationship
+			left join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
 			where
 				(by_user_v = -1 or repositories.user_id = by_user_v) and
 				(title_v = '' or repositories.title like title_v) and
 				(
-					users_repositories_relationship.relationship = relationships_v[1] or
-					users_repositories_relationship.relationship = relationships_v[2] or
-					users_repositories_relationship.relationship = relationships_v[3]
-				)
+					(
+						repositories.is_private = true and
+						(
+							users_repositories_relationship.relationship = relationships_v[1] or
+							users_repositories_relationship.relationship = relationships_v[2] or
+							users_repositories_relationship.relationship = relationships_v[3]
+						)
+					) or repositories.is_private = false
+				) and
+				repositories.id != all (exclude_repository_ids_v)
 			limit quantity_v offset quantity_v * (page_v - 1) ;
 	end;
 $BODY$
@@ -397,7 +375,8 @@ create function get_repository_by_id(
 	is_private boolean,
 	user_id integer,
 	title text,
-	path_to_draft_repository text
+	path_to_draft_repository text,
+	access bit(3)
 ) as
 $BODY$
 	declare
@@ -412,16 +391,22 @@ $BODY$
 				repositories.is_private,
 				repositories.user_id,
 				repositories.title,
-				repositories.path_to_draft_repository
+				repositories.path_to_draft_repository,
+				users_repositories_relationship.relationship as access
 			from repositories
-			inner join users_repositories_relationship
+			left join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
 			where
 				repositories.id=id_v and
 				(
-					users_repositories_relationship.relationship = relationships_v[1] or
-					users_repositories_relationship.relationship = relationships_v[2] or
-					users_repositories_relationship.relationship = relationships_v[3]
+					(
+						repositories.is_private = true and
+						(
+							users_repositories_relationship.relationship = relationships_v[1] or
+							users_repositories_relationship.relationship = relationships_v[2] or
+							users_repositories_relationship.relationship = relationships_v[3]
+						)
+					) or repositories.is_private = false
 				)
 			limit 1;
 	end;
@@ -431,7 +416,7 @@ $BODY$
 -----------------------------------------------------------------------
 -- Выборка групп по фильрам
 -----------------------------------------------------------------------
-create or replace function get_groups_by_filter(
+create function get_groups_by_filter(
 	user_id_v integer,
 	by_user_v integer,
 	title_v text,
@@ -439,13 +424,16 @@ create or replace function get_groups_by_filter(
 	is_can_rw_v boolean,
 	is_can_rwa_v boolean,
 	page_v integer,
-	quantity_v integer
+	quantity_v integer,
+	exclude_group_ids_v integer[]
 ) returns table(
 	id integer,
 	user_id integer,
 	title text,
 	group_type groupType,
-	rows_count bigint
+	rows_count bigint,
+	access bit(3),
+	is_private boolean
 ) as
 $BODY$
 	declare
@@ -456,17 +444,23 @@ $BODY$
 
 		rows_count_v := (
 			select count(*) from groups
-			inner join users_groups_relationship
+			left join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where
 				(by_user_v = -1 or groups.user_id = by_user_v) and
 				(title_v = '' or groups.title like title_v) and
 				(group_type_v = null or groups.group_type = group_type_v) and
 				(
-					users_groups_relationship.relationship = relationships_v[1] or
-					users_groups_relationship.relationship = relationships_v[2] or
-					users_groups_relationship.relationship = relationships_v[3]
-				)
+					(
+						groups.is_private = true and
+						(
+							users_groups_relationship.relationship = relationships_v[1] or
+							users_groups_relationship.relationship = relationships_v[2] or
+							users_groups_relationship.relationship = relationships_v[3]
+						)
+					) or groups.is_private = false
+				) and
+				groups.id != all (exclude_group_ids_v)
 		);
 
 		return query
@@ -475,19 +469,27 @@ $BODY$
 				groups.user_id,
 				groups.title,
 				groups.group_type,
-				rows_count_v as rows_count
+				rows_count_v as rows_count,
+				users_groups_relationship.relationship as access,
+				groups.is_private
 			from groups
-			inner join users_groups_relationship
+			left join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where
 				(by_user_v = -1 or groups.user_id = by_user_v) and
 				(title_v = '' or groups.title like title_v) and
 				(group_type_v = null or groups.group_type = group_type_v) and
 				(
-					users_groups_relationship.relationship = relationships_v[1] or
-					users_groups_relationship.relationship = relationships_v[2] or
-					users_groups_relationship.relationship = relationships_v[3]
-				)
+					(
+						groups.is_private = true and
+						(
+							users_groups_relationship.relationship = relationships_v[1] or
+							users_groups_relationship.relationship = relationships_v[2] or
+							users_groups_relationship.relationship = relationships_v[3]
+						)
+					) or groups.is_private = false
+				) and
+				groups.id != all (exclude_group_ids_v)
 			limit quantity_v offset quantity_v * (page_v - 1);
 	end;
 $BODY$
@@ -513,7 +515,6 @@ $BODY$
 	end;
 $BODY$
 	language 'plpgsql' volatile;
-
 
 -----------------------------------------------------------------------
 -- Изменение прав доступа для репозитория
@@ -613,7 +614,8 @@ $BODY$
 create function create_group(
 	title_v text,
 	groupr_type_v groupType,
-	user_id_v integer
+	user_id_v integer,
+	is_private_v boolean
 ) returns table(
 	id integer,
 	user_id integer,
@@ -624,8 +626,8 @@ $BODY$
 	declare
 		group_id_v integer;
 	begin
-		insert into groups (title, group_type, user_id)
-		values (title_v, groupr_type_v, user_id_v)
+		insert into groups (title, group_type, user_id, is_private)
+		values (title_v, groupr_type_v, user_id_v, is_private_v)
 		returning groups.id into group_id_v;
 
 		insert into users_groups_relationship (user_id, group_id, relationship)
@@ -644,12 +646,20 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Получение полной группы (с вложенными группами)
+-- Получение полной группы
 -----------------------------------------------------------------------
 create function get_full_group_by_id(
 	user_id_v integer,
 	group_id_v integer
-) returns table(id integer, parent_id integer, title text, group_type groupType) as
+) returns table(
+	id integer, 
+	title text,
+	is_base boolean,
+	group_type groupType,
+	user_id integer,
+	access bit(3),
+	is_private boolean
+) as
 $BODY$
 	declare
 		relationships_v bit(3)[3];
@@ -657,24 +667,63 @@ $BODY$
 		relationships_v = get_array_of_bit_mask_by_flags(true, true);
 
 		return query (
-			with recursive grp_r as (
-				(
-					select groups.id as child_id, -1 as parent_id from groups
-					where groups.id = group_id_v
-					limit 1
-				)
-				union
-				(
-					select group_to_group_links.child_id, group_to_group_links.parent_id
-					from group_to_group_links
-					join grp_r on grp_r.child_id = group_to_group_links.parent_id
+			select distinct
+				groups.id,
+				groups.title,
+				groups.id = group_id_v as is_base,
+				groups.group_type, groups.user_id,
+				users_groups_relationship.relationship as access,
+				groups.is_private
+			from groups
+			left join group_to_group_links on group_to_group_links.parent_id = group_id_v
+			left join users_groups_relationship on users_groups_relationship.group_id = groups.id and users_groups_relationship.user_id = user_id_v
+			where groups.id = group_to_group_links.child_id or (
+				groups.id = group_id_v and (
+					(
+						groups.is_private = true and
+						(
+							users_groups_relationship.relationship = relationships_v[1] or
+							users_groups_relationship.relationship = relationships_v[2] or
+							users_groups_relationship.relationship = relationships_v[3]
+						)
+					) or groups.is_private = false
 				)
 			)
-			
-			select grp_r.child_id as id, grp_r.parent_id, groups.title, groups.group_type
-			from grp_r
-			inner join groups
-			on grp_r.child_id = groups.id
+		);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение репозиториев привязанных в группе
+-----------------------------------------------------------------------
+create function get_repositories_by_group_id(
+	user_id_v integer,
+	group_ids_v integer
+) returns table(
+	id integer,
+	title text,
+	user_id integer,
+	access bit(3),
+	is_private boolean
+) as
+$BODY$
+	declare
+		relationships_v bit(3)[3];
+	begin
+		relationships_v = get_array_of_bit_mask_by_flags(true, true);
+
+		return query (
+			select
+				repositories.id,
+				repositories.title,
+				repositories.user_id,
+				users_repositories_relationship.relationship as access,
+				repositories.is_private
+			from repositories
+			join group_to_repository_links on repositories.id = group_to_repository_links.repository_id
+			left join users_repositories_relationship on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			where group_to_repository_links.group_id = group_ids_v
 		);
 	end;
 $BODY$
@@ -684,26 +733,24 @@ $BODY$
 -- Добавление группы в группу
 -----------------------------------------------------------------------
 create function add_group_to_group(
-	parent_group_id_v integer,
-	child_group_id_v integer
-) returns table(id integer) as
+	parent_id_v integer,
+	child_id_v integer
+) returns integer as
 $BODY$
 	declare
 		new_link_id_v integer;
 	begin
 		insert into group_to_group_links (parent_id, child_id)
-		values (parent_group_id_v, child_group_id_v)
+		values (parent_id_v, child_id_v)
 		returning group_to_group_links.id into new_link_id_v;
 
-		return query
-			select group_to_group_links.id from group_to_group_links
-			where group_to_group_links.id = new_link_id_v;
+		return new_link_id_v;
 	end;
 $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Проверка, пожет ли пользователь добавить группу в группу
+-- Проверка, пожет ли пользователь добавить группу в группу (@FIXME перенести проверку в код js)
 -----------------------------------------------------------------------
 create function check_is_user_can_add_group_to_group(
 	user_id_v integer,
@@ -721,7 +768,7 @@ $BODY$
 		child_relationships_v = get_array_of_bit_mask_by_flags(false, false);
 
 		is_can_rw_parent_group_v := (
-			select users_groups_relationship.relationship from users_groups_relationship
+			select groups.id from groups
 			inner join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where (
@@ -731,27 +778,102 @@ $BODY$
 					users_groups_relationship.relationship = parent_relationships_v[2] or
 					users_groups_relationship.relationship = parent_relationships_v[3]
 				)
-			)::boolean
-		);
+			)
+		)::boolean;
 
 		is_can_r_child_group_v := (
-			select users_groups_relationship.relationship from users_groups_relationship
+			select groups.id from groups
 			inner join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where (
-				users_groups_relationship.group_id = parent_group_id_v and
+				users_groups_relationship.group_id = child_group_id_v and
 				(
 					users_groups_relationship.relationship = child_relationships_v[1] or
 					users_groups_relationship.relationship = child_relationships_v[2] or
 					users_groups_relationship.relationship = child_relationships_v[3]
 				)
-			)::boolean
-		);
+			)
+		)::boolean;
 
 		return (
 			is_can_rw_parent_group_v and
 			is_can_r_child_group_v
-		);
+		) as is_can_add;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Добавление репозитория в группу
+-----------------------------------------------------------------------
+create function add_repository_to_group(
+	repository_id_v integer,
+	group_id_v integer
+) returns integer as
+$BODY$
+	declare
+		new_link_id_v integer;
+		i integer;
+	begin
+		insert into group_to_repository_links (group_id, repository_id)
+		values (group_id_v, repository_id_v)
+		returning group_to_repository_links.id into new_link_id_v;
+
+		return new_link_id_v;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Проверка, пожет ли пользователь добавить репозиторий в группу
+-----------------------------------------------------------------------
+create function check_is_user_can_add_repository_to_group(
+	user_id_v integer,
+	repository_id_v integer,
+	group_id_v integer
+) returns boolean as
+$BODY$
+	declare
+		is_can_rw_group_v boolean;
+		is_can_r_repository_v boolean;
+		group_relationships_v bit(3)[3];
+		repository_relationships_v bit(3)[3];
+	begin
+		group_relationships_v = get_array_of_bit_mask_by_flags(true, false);
+		repository_relationships_v = get_array_of_bit_mask_by_flags(false, false);
+
+		is_can_rw_group_v := (
+			select groups.id from groups
+			inner join users_groups_relationship
+			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			where (
+				users_groups_relationship.group_id = group_id_v and
+				(
+					users_groups_relationship.relationship = parent_relationships_v[1] or
+					users_groups_relationship.relationship = parent_relationships_v[2] or
+					users_groups_relationship.relationship = parent_relationships_v[3]
+				)
+			)
+		)::boolean;
+
+		is_can_r_repository_v := (
+			select groups.id from groups
+			inner join users_groups_relationship
+			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			where (
+				users_groups_relationship.group_id = child_group_id_v and
+				(
+					users_groups_relationship.relationship = child_relationships_v[1] or
+					users_groups_relationship.relationship = child_relationships_v[2] or
+					users_groups_relationship.relationship = child_relationships_v[3]
+				)
+			)
+		)::boolean;
+
+		return (
+			is_can_rw_group_v and
+			is_can_r_repository_v
+		) as is_can_add;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

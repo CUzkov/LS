@@ -1,4 +1,6 @@
-export type CheckIsUserCanAddGroupToGroupR = boolean;
+export type CheckIsUserCanAddGroupToGroupR = {
+    is_can_add: boolean;
+};
 
 export type CheckIsUserCanAddGroupToGroupQP = [number, number, number];
 

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'store/store';
 import { checkIsMapNameFree, createMap, setMapNameNotChecked } from 'actions/create-map-page';
 import { Button } from 'components/button';
-import { TextField } from 'components/fields';
+import { CheckboxField, TextField } from 'components/fields';
 import { requiredValidate } from 'utils/final-forms';
 import { MapNameStatus } from 'store/reducers/create-map-form';
 import { FetchStatus } from 'types/index';
@@ -34,9 +34,9 @@ export const CreateMapForm: FC = () => {
                 return;
             }
 
-            createMap(userForm.title).then((map) => {
+            createMap(userForm.title, userForm.isPrivate).then((map) => {
                 if (map) {
-                    navigate(getMap(username, String(map.id)));
+                    navigate(getMap(username, map.id));
                 }
             });
         },
@@ -96,6 +96,9 @@ export const CreateMapForm: FC = () => {
                                 >
                                     <Spinner />
                                 </div>
+                            </div>
+                            <div className={styles.field}>
+                                <CheckboxField name="isPrivate" title="сделать приватной" />
                             </div>
                         </div>
                         <div className={styles.submitButtonWrapper}>

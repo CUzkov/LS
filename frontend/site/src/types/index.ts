@@ -47,12 +47,14 @@ export type DirMeta = {
 export type Repository = {
     title: string;
     id: number;
+    access: RWA;
 };
 
 export const enum RWA {
     r = 'r',
     rw = 'rw',
     rwa = 'rwa',
+    none = 'none',
 }
 
 export enum GroupType {
@@ -65,13 +67,10 @@ export type Group = {
     title: string;
     type: GroupType;
     userId: number;
+    access: RWA;
 };
 
 export type FullGroup = {
-    id: number;
-    title: string;
-    type: GroupType;
-    parentId: number;
-    children?: FullGroup[];
-    userId: number;
-};
+    childrenGroups: Group[];
+    childrenRepositories: { title: string; id: number }[];
+} & Group;

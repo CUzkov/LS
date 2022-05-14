@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 import { getMainPage, getAllMaps, getUserPage, getMap } from 'constants/routers';
 
-export const getPaths = (username: string, entityName: ReactNode, entityValue = '') => [
+export const getPaths = (username: string, entityName: ReactNode, entityValue: number) => [
     {
         title: 'Главная',
         url: getMainPage(),

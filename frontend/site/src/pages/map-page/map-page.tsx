@@ -4,14 +4,14 @@ import cn from 'classnames';
 
 import { PageWrapper } from 'pages/page-wrapper';
 import { useSelector } from 'store/store';
-import { getMapById } from 'actions/map-page';
-import { FetchStatus } from 'types';
+import { getMapById, clearMapPage } from 'actions/map-page';
+import { FetchStatus, RWA } from 'types';
 import { PageTitle } from 'components/page-title';
 import Spinner from 'assets/spinner.svg';
 
 import { getPaths } from './map-page.constants';
 import { MapsPageActions } from './map-page.actions';
-import { Tree } from './map-page.tree';
+import { Graph } from './map-page.graph';
 
 import styles from './style.scss';
 
@@ -20,6 +20,7 @@ export const MapPage: FC = () => {
     const { mapFetchStatus, map } = useSelector((root) => root.mapPage);
     const isMapLoading = mapFetchStatus === FetchStatus.loading;
     const { id } = useParams();
+    const isCanEdit = map?.access === RWA.rw || map?.access === RWA.rwa;
 
     useEffect(() => {
         if (id) {
@@ -27,8 +28,10 @@ export const MapPage: FC = () => {
         }
     }, [id]);
 
+    useEffect(() => () => clearMapPage(), []);
+
     const paths = useMemo(() => {
-        const basePaths = getPaths(username, map?.title, String(map?.id));
+        const basePaths = getPaths(username, map?.title, map?.id ?? -1);
 
         if (isMapLoading) {
             basePaths[basePaths.length - 1] = {
@@ -46,10 +49,10 @@ export const MapPage: FC = () => {
 
     const content = (
         <div className={styles.mapPage}>
-            <PageTitle title={map?.title} rightChild={<MapsPageActions />} />
+            <PageTitle title={map?.title} rightChild={isCanEdit && <MapsPageActions />} />
             <div className={styles.map}>
                 <div className={cn(styles.mapContent, map && styles.show)}>
-                    <Tree group={map} />
+                    <Graph map={map} />
                 </div>
                 <div className={cn(styles.mapSpinner, !map && styles.show)}>
                     <Spinner />

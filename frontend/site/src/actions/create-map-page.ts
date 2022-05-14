@@ -59,11 +59,12 @@ export const setMapNameNotChecked = () => {
 type CreateMapD = {
     title: string;
     groupType: GroupType;
+    isPrivate: boolean;
 };
 
 type CreateMapRD = Group;
 
-export const createMap = async (title: string) => {
+export const createMap = async (title: string, isPrivate: boolean) => {
     const dispath: Dispatch = store.dispatch;
 
     dispath({ type: 'create-map-form/loading' });
@@ -73,7 +74,7 @@ export const createMap = async (title: string) => {
     try {
         response = await ajax.post<CreateMapD, CreateMapRD, Empty>({
             url: CREATE_GROUP_URL,
-            data: { title, groupType: GroupType.map },
+            data: { title, groupType: GroupType.map, isPrivate },
         });
 
         if (!response) {

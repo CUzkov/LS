@@ -1,7 +1,7 @@
 export const formatTitleToPath = (str: string) => str.toLocaleLowerCase().replace(/ /g, '_');
 
 export const isCorrectPath = (str: string) => {
-    const test = RegExp(/^[a-z_0-9]{1,}$/);
+    const test = RegExp(/^[a-zA-ZА-Яа-я_0-9]{1,}$/);
     return test.test(str);
 };
 

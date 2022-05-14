@@ -1,8 +1,8 @@
 import { ajax } from '../ajax';
-import { IServerError } from '../types';
+import { IServerError, RWA } from '../types';
 import { Dispatch, store } from '../store';
 
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 10;
 
 const REPOSITORIES_BY_FILTERS_URL = '/api/repository/filter';
 
@@ -15,18 +15,19 @@ export type RepositoriesByFilterQP = {
     quantity: number;
 };
 
-export type RepositoriesByFilterRD = {
+type RepositoriesByFilterRD = {
     repositories: {
         repository: {
             title: string;
             id: number;
+            access: RWA;
         };
         version: string;
     }[];
     count: number;
 };
 
-export type RepositoriesByFilterProps = {
+type RepositoriesByFilterProps = {
     is_rw?: boolean;
     is_rwa?: boolean;
     title?: string;

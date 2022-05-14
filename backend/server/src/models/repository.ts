@@ -13,10 +13,10 @@ import {
     GetRepositoryByIdR,
 } from '../database/pg-typings/get-repository-by-id';
 import {
-    getRepositoryByFiltersQ,
-    GetRepositoryByFiltersQP,
-    GetRepositoryByFiltersR,
-} from '../database/pg-typings/get-repository-by-filters';
+    getRepositoriesByFiltersQ,
+    GetRepositoriesByFiltersQP,
+    GetRepositoriesByFiltersR,
+} from '../database/pg-typings/get-repositories-by-filters';
 import {
     checkIsRepositoryNameFreeQ,
     CheckIsRepositoryNameFreeQP,
@@ -29,6 +29,7 @@ import {
     SetRepositoryPathToDraftR,
 } from '../database/pg-typings/set-repository-path-to-draft';
 import { ServerError, errorNames } from '../utils/server-error';
+import { RWA, bitMaskToRWA } from '../utils/access';
 
 export type Repository = {
     id: number;
@@ -36,7 +37,8 @@ export type Repository = {
     is_private: boolean;
     user_id: number;
     title: string;
-    path_to_draft_repository?: string;
+    path_to_draft_repository: string | null;
+    access: RWA;
 };
 
 type RepositoryFilters = {
@@ -46,6 +48,7 @@ type RepositoryFilters = {
     by_user?: number;
     page: number;
     quantity: number;
+    excludeRepositoryIds: number[];
 };
 
 type NewRepository = {
@@ -54,6 +57,7 @@ type NewRepository = {
 };
 
 export const RepositoryFns = {
+    //@FIXME добавить доп проверку для одинаковых заголовков (сейчас только на уровне БД) и санитайзинг символов (сейчас только на фронте через вызов checkIsRepositoryNameFree)
     createRepository: async (newRepository: NewRepository, userId: number): Promise<Repository> => {
         const user = await UserFns.getUserById(userId);
 
@@ -93,7 +97,7 @@ export const RepositoryFns = {
 
         const repository = result.rows[0];
 
-        return repository;
+        return {...repository, access: RWA.rwa};
     },
     checkIsRepositoryNameFree: async (title: string, userId: number): Promise<{ isFree: boolean }> => {
         let result: QueryResult<CheckIsRepositoryNameFreeR>;
@@ -116,15 +120,15 @@ export const RepositoryFns = {
 
         return { isFree: true };
     },
-    getRepositoryByFilters: async (
-        { by_user, title, is_rw, is_rwa, page, quantity }: RepositoryFilters,
+    getRepositoriesByFilters: async (
+        { by_user, title, is_rw, is_rwa, page, quantity, excludeRepositoryIds }: RepositoryFilters,
         userId: number,
     ): Promise<{ repositories: { repository: Repository; version: string }[]; count: number }> => {
-        let result: QueryResult<GetRepositoryByFiltersR>;
+        let result: QueryResult<GetRepositoriesByFiltersR>;
 
         try {
             const client = await pg.connect();
-            result = await client.query<GetRepositoryByFiltersR, GetRepositoryByFiltersQP>(getRepositoryByFiltersQ, [
+            result = await client.query<GetRepositoriesByFiltersR, GetRepositoriesByFiltersQP>(getRepositoriesByFiltersQ, [
                 userId,
                 by_user ?? -1,
                 title ? `${title}%` : '',
@@ -132,6 +136,7 @@ export const RepositoryFns = {
                 is_rwa ?? false,
                 page,
                 quantity,
+                excludeRepositoryIds
             ]);
             client.release();
         } catch (error) {
@@ -139,32 +144,22 @@ export const RepositoryFns = {
             throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
-        const user = await UserFns.getUserById(userId);
-
-        const resultPromises = result.rows.map(async (row) => {
-            const git = new Git(
-                {
-                    email: user.email,
-                    username: user.username,
-                },
-                row.title,
-            );
-
-            return {
-                repository: {
-                    id: row.id,
-                    path_to_repository: row.path_to_repository,
-                    is_private: row.is_private,
-                    user_id: row.user_id,
-                    title: row.title,
-                    rootFiles: [],
-                },
-                version: await git.getCurrentVersion(),
-            };
-        });
-
         return {
-            repositories: await Promise.all(resultPromises),
+            repositories: result.rows.map((row) => {
+                return {
+                    repository: {
+                        id: row.id,
+                        path_to_repository: row.path_to_repository,
+                        is_private: row.is_private,
+                        user_id: row.user_id,
+                        title: row.title,
+                        access: bitMaskToRWA(row.access, row.is_private),
+                        rootFiles: [],
+                        path_to_draft_repository: null,
+                    },
+                    version: '',
+                };
+            }),
             count: Math.ceil(result.rows?.[0]?.repositories_count / quantity) ?? 0,
         };
     },
@@ -174,7 +169,6 @@ export const RepositoryFns = {
         isNeedDraft = false,
         version?: string,
     ): Promise<[Repository, Git, Git | undefined, Git | undefined]> => {
-        const user = await UserFns.getUserById(userId);
         let result: QueryResult<GetRepositoryByIdR>;
 
         try {
@@ -190,11 +184,13 @@ export const RepositoryFns = {
             throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
         }
 
-        const repository = result.rows[0];
+        const repository = {...result.rows[0], access: bitMaskToRWA(result.rows[0].access, result.rows[0].is_private)};
+        const repositoryOwner = await UserFns.getUserById(result.rows[0].user_id);
+        
         const git = new Git(
             {
-                email: user.email,
-                username: user.username,
+                email: repositoryOwner.email,
+                username: repositoryOwner.username,
             },
             repository.title,
         );
@@ -204,8 +200,8 @@ export const RepositoryFns = {
         const gitDraft = isNeedDraft
             ? new Git(
                   {
-                      email: user.email,
-                      username: user.username,
+                      email: repositoryOwner.email,
+                      username: repositoryOwner.username,
                   },
                   repository.title,
                   true,
@@ -217,8 +213,8 @@ export const RepositoryFns = {
         const gitVersion = version
             ? new Git(
                   {
-                      email: user.email,
-                      username: user.username,
+                      email: repositoryOwner.email,
+                      username: repositoryOwner.username,
                   },
                   repository.title,
                   false,
@@ -245,7 +241,7 @@ export const RepositoryFns = {
 
         return (isDraft ? gitDraft : git).getAbsPathToFile([...pathToFile, fileName]);
     },
-    getFilesByFullDirPath: async (
+    getFilesAndDirsByFullDirPath: async (
         id: number,
         userId: number,
         pathToDir: string[] = [],
@@ -258,11 +254,14 @@ export const RepositoryFns = {
             throw new ServerError({ name: errorNames.cannotCheckoutToVersion, code: Code.badRequest });
         }
 
-        const filesAndDirs = (version ? gitByVersion ?? git : git).getDirFiles(pathToDir, dirName);
-        return filesAndDirs;
+        return (version ? gitByVersion ?? git : git).getDirFiles(pathToDir, dirName);
     },
     addFileToRepository: async (id: number, userId: number, pathToFile: string[], file: File): Promise<FileMeta> => {
-        const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+        const [repository, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (repository.access !== RWA.rwa && repository.access !== RWA.rw) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (!gitDraft) {
             throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
@@ -282,7 +281,11 @@ export const RepositoryFns = {
         pathToFileOrDir: string[] = [],
         fileOrDirName: string,
     ): Promise<FileMeta | DirMeta> => {
-        const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+        const [repository, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (repository.access !== RWA.rwa && repository.access !== RWA.rw) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (!gitDraft) {
             throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
@@ -299,7 +302,11 @@ export const RepositoryFns = {
         fileName: string,
         newFileName: string,
     ): Promise<DirMeta | FileMeta> => {
-        const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+        const [repository, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (repository.access !== RWA.rwa && repository.access !== RWA.rw) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (!gitDraft) {
             throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
@@ -309,13 +316,17 @@ export const RepositoryFns = {
 
         return renamedFileOrDir;
     },
-    getDraftFilesByFullDirPath: async (
+    getDraftFilesAndDirsByFullDirPath: async (
         id: number,
         userId: number,
         pathToDir: string[] = [],
         dirName = '',
     ): Promise<{ files: FileMeta[]; dirs: DirMeta[]; deletedFiles: FileMeta[] }> => {
         const [repository, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (repository.access !== RWA.rwa && repository.access !== RWA.rw) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (!gitDraft) {
             throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
@@ -361,7 +372,11 @@ export const RepositoryFns = {
         pathToDir: string[],
         newDirName: string,
     ): Promise<DirMeta> => {
-        const [, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+        const [repository, , gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (repository.access !== RWA.rwa && repository.access !== RWA.rw) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (!gitDraft) {
             throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });
@@ -381,7 +396,11 @@ export const RepositoryFns = {
         versionSummary: string,
         version: [number, number, number],
     ) => {
-        const [, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+        const [repository, git, gitDraft] = await RepositoryFns.getRepositoryById(id, userId, true);
+
+        if (repository.access !== RWA.rwa && repository.access !== RWA.rw) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (!gitDraft) {
             throw new ServerError({ name: errorNames.cannotCreateDraftRepositpory, code: Code.badRequest });

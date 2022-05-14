@@ -3,7 +3,7 @@ import { StringParam, BooleanParam } from 'use-query-params';
 
 import { getMainPage, getAllRepositories, getUserPage, getRepository } from 'constants/routers';
 
-export const getPaths = (username: string, entityName: ReactNode, entityValue = '') => [
+export const getPaths = (username: string, entityName: ReactNode, entityValue: number) => [
     {
         title: 'Главная',
         url: getMainPage(),

@@ -1,1 +1,1 @@
-export { serachPopup } from './search-popup';
+export { mapSearchPopup, repositorySearchPopup, SearchPopupType } from './search-popup';
