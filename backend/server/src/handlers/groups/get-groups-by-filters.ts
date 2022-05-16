@@ -6,8 +6,8 @@ import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils'
 import { ServerError, errorNames } from '../../utils/server-error';
 
 type GetGroupsByFiltersQP = {
-    is_rw?: boolean;
-    is_rwa?: boolean;
+    is_rw?: string;
+    is_rwa?: string;
     title?: string;
     by_user?: number;
     groupType?: GroupType;
@@ -52,8 +52,8 @@ class GetGroupsByFiltersQPValidator {
     groupType?: GroupType;
 
     constructor({ is_rw, is_rwa, title, by_user, excludeGroupIds, page, quantity, groupType }: GetGroupsByFiltersQP) {
-        this.is_rw = Boolean(is_rw);
-        this.is_rwa = Boolean(is_rwa);
+        this.is_rw = is_rw === 'true' ? true : false;
+        this.is_rwa = is_rwa === 'true' ? true : false;
         this.title = title;
         this.by_user = by_user !== undefined ? Number(by_user) : undefined;
         this.excludeGroupIds = excludeGroupIds?.map((id) => Number(id)) ?? [];

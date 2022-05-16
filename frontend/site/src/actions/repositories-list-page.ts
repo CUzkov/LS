@@ -1,5 +1,5 @@
 import { ajax } from '../ajax';
-import { IServerError, RWA } from '../types';
+import { IServerError, Repository } from '../types';
 import { Dispatch, store } from '../store';
 
 const PAGE_SIZE = 10;
@@ -17,11 +17,7 @@ export type RepositoriesByFilterQP = {
 
 type RepositoriesByFilterRD = {
     repositories: {
-        repository: {
-            title: string;
-            id: number;
-            access: RWA;
-        };
+        repository: Repository;
         version: string;
     }[];
     count: number;

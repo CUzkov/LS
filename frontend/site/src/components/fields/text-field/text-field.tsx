@@ -24,6 +24,7 @@ interface TextFieldProps {
     onFocus?: (event: React.FocusEvent<HTMLInputElement, Element>) => void;
     isNoNeedErrors?: boolean;
     theme?: 'default' | 'outlined';
+    isInstantlyValidate?: boolean;
 }
 
 export const TextField: FC<TextFieldProps> = ({
@@ -37,6 +38,7 @@ export const TextField: FC<TextFieldProps> = ({
     isDisable = false,
     isNoNeedErrors = false,
     theme = 'default',
+    isInstantlyValidate = false,
 }: TextFieldProps): ReactElement => {
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -87,7 +89,9 @@ export const TextField: FC<TextFieldProps> = ({
 
                     {!isNoNeedErrors && (
                         <div className={styles.errorText}>
-                            {(meta.touched ?? false) || (meta.submitSucceeded ?? false) ? meta.error : ''}
+                            {isInstantlyValidate || (meta.touched ?? false) || (meta.submitSucceeded ?? false)
+                                ? meta.error
+                                : ''}
                         </div>
                     )}
                 </div>

@@ -1,0 +1,68 @@
+@import '../../index.scss';
+
+.badge {
+    height: 26px;
+    border-radius: 13px;
+    font-size: 14px;
+    padding: 2px 8px;
+    margin-right: 10px;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+
+    .bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    &.small {
+        height: 16px;
+        border-radius: 8px;
+        font-size: 7px;
+        padding: 2px 4px;
+        margin-right: 5px;
+    }
+
+    &.white {
+        border: 1px solid $nuetral-color;
+        color: $nuetral-color;
+        
+        .bg {
+            background-color: $nuetral-color;
+            opacity: .2;
+        }
+    }
+
+    &.red {
+        border: 1px solid $delete-color;
+        color: $delete-color;
+
+        .bg {
+            background-color: $delete-color;
+            opacity: .2;
+        }
+    }
+
+    &.green {
+        border: 1px solid $add-color;
+        color: $add-color;
+
+        .bg {
+            background-color: $add-color;
+            opacity: .2;
+        }
+    }
+
+    &.yellow {
+        border: 1px solid $modify-color;
+        color: $modify-color;
+
+        .bg {
+            background-color: $modify-color;
+            opacity: .2;
+        }
+    }
+}

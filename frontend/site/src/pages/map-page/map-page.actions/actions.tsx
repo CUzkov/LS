@@ -2,7 +2,7 @@ import React, { FC, useCallback, useContext } from 'react';
 import cn from 'classnames';
 
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
-import { addMapNodes } from 'actions/map-page';
+import { addMapNodes, addRepositoryNodes } from 'actions/map-page';
 
 import PlusIcon from '../map-page.assets/plus.svg';
 import { mapSearchPopup, repositorySearchPopup } from '../map-page.search-popup';
@@ -19,7 +19,7 @@ export const MapsPageActions: FC = () => {
 
     const handleClickAddRepository = useCallback(async () => {
         const repositories = await repositorySearchPopup(context, 'Начните вводить название репозитория:');
-        // addNodes(repositories);
+        addRepositoryNodes(repositories);
     }, []);
 
     return (

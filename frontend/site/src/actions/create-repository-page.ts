@@ -11,11 +11,7 @@ type CreateRepositoryD = {
 };
 
 type CreateRepositoryRD = {
-    repository: {
-        title: string;
-        id: number;
-        access: RWA;
-    };
+    repository: Repository;
     version: string;
 };
 

@@ -17,6 +17,7 @@ const GET_FULL_GROUP_BY_ID = '/api/group/full';
 const GROUPS_BY_FILTERS_URL = '/api/group/filter';
 const ADD_GROUP_TO_GROUP_URL = '/api/group/add-group';
 const REPOSITORIES_BY_FILTERS_URL = '/api/repository/filter';
+const ADD_REPOSITORY_TO_GROUP_URL = '/api/group/add-repository';
 
 type GetFullGroupByIdQP = {
     groupId: number;
@@ -117,18 +118,21 @@ type GetRepositoriesByTitleQP = {
     title: string;
     page: number;
     quantity: number;
-    excludeGroupIds: number[];
+    excludeRepositoryIds: number[];
     is_rw?: boolean;
     is_rwa?: boolean;
     by_user?: number;
 };
 
 type GetRepositoriesByTitleRD = {
-    repositories: Repository[];
+    repositories: {
+        repository: Repository;
+        version: string;
+    }[];
     count: number;
 };
 
-export const getRepositoriessByTitle = async (title: string, excludeGroupIds: number[]) => {
+export const getRepositoriessByTitle = async (title: string, excludeRepositoryIds: number[]) => {
     const dispatch: Dispatch = store.dispatch;
 
     dispatch({ type: 'map-page/searched/start' });
@@ -140,7 +144,7 @@ export const getRepositoriessByTitle = async (title: string, excludeGroupIds: nu
             url: REPOSITORIES_BY_FILTERS_URL,
             queryParams: {
                 title,
-                excludeGroupIds,
+                excludeRepositoryIds,
                 page: 1,
                 is_rw: true,
                 quantity: SEARCH_FILTER_QUANTITY,
@@ -193,7 +197,7 @@ export const addMapNodes = async (maps: Group[]) => {
     dispatch({ type: 'map-page/adding/loading' });
 
     try {
-        await Promise.allSettled(
+        const results = await Promise.allSettled(
             maps.map(async (childMap) => {
                 return await ajax.post<addMapToMapD, Empty, Empty>({
                     url: ADD_GROUP_TO_GROUP_URL,
@@ -201,6 +205,13 @@ export const addMapNodes = async (maps: Group[]) => {
                 });
             }),
         );
+
+        if (results.some((result) => result.status === 'rejected')) {
+            throw {
+                name: 'Ошибка добавления карты в группу',
+                description: 'Ошибка доступа!',
+            };
+        }
     } catch (error) {
         const e = error as IServerError;
 
@@ -217,7 +228,12 @@ export const addMapNodes = async (maps: Group[]) => {
     dispatch({ type: 'map-page/adding/success' });
 };
 
-export const addRepositoryNodes = async (maps: Repository[]) => {
+type AddRepositoryToGroupD = {
+    repositoryId: number;
+    groupId: number;
+};
+
+export const addRepositoryNodes = async (repositories: Repository[]) => {
     const dispatch: Dispatch = store.dispatch;
     const {
         mapPage: { map },
@@ -225,30 +241,37 @@ export const addRepositoryNodes = async (maps: Repository[]) => {
 
     dispatch({ type: 'map-page/adding/loading' });
 
-    // try {
-    //     await Promise.allSettled(
-    //         maps.map(async (childMap) => {
-    //             return await ajax.post<addMapToMapD, Empty, Empty>({
-    //                 url: ADD_GROUP_TO_GROUP_URL,
-    //                 data: { childId: childMap.id, parentId: map?.id ?? -1 },
-    //             });
-    //         }),
-    //     );
-    // } catch (error) {
-    //     const e = error as IServerError;
+    try {
+        const results = await Promise.allSettled(
+            repositories.map(async (repository) => {
+                return await ajax.post<AddRepositoryToGroupD, Empty, Empty>({
+                    url: ADD_REPOSITORY_TO_GROUP_URL,
+                    data: { groupId: map?.id ?? -1, repositoryId: repository.id },
+                });
+            }),
+        );
 
-    //     dispatch({ type: 'map-page/adding/error' });
-    //     dispatch({
-    //         type: 'logger/add-log',
-    //         data: { type: 'error', title: e.name, description: e.description },
-    //     });
-    //     return;
-    // }
+        if (results.some((result) => result.status === 'rejected')) {
+            throw {
+                name: 'Ошибка добавления репозитория в группу',
+                description: 'Ошибка доступа!',
+            };
+        }
+    } catch (error) {
+        const e = error as IServerError;
+
+        dispatch({ type: 'map-page/adding/error' });
+        dispatch({
+            type: 'logger/add-log',
+            data: { type: 'error', title: e.name, description: e.description },
+        });
+        return;
+    }
 
     map &&
         dispatch({
             type: 'map-page/map/success',
-            data: { ...map, childrenRepositories: [...map.childrenRepositories, ...maps] },
+            data: { ...map, childrenRepositories: [...map.childrenRepositories, ...repositories] },
         });
     dispatch({ type: 'map-page/adding/success' });
 };

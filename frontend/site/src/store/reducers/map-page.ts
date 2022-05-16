@@ -10,7 +10,10 @@ export type MapPageEvents =
     | { type: 'map-page/searched/clear' }
     | { type: 'map-page/searched/error' }
     | { type: 'map-page/searched-maps/success'; data: { groups: Group[]; count: number } }
-    | { type: 'map-page/searched-repositories/success'; data: { repositories: Repository[]; count: number } }
+    | {
+          type: 'map-page/searched-repositories/success';
+          data: { repositories: { repository: Repository; version: string }[]; count: number };
+      }
     | { type: 'map-page/tree/set-nodes'; data: Node[] }
     | { type: 'map-page/tree/set-edges'; data: Edge[] }
     | { type: 'map-page/adding/loading' }
@@ -76,7 +79,7 @@ export const mapPageReducer = (state: MapPageStore = initialState, event: MapPag
 
     if (event.type === 'map-page/searched-repositories/success') {
         result.popupSearchingFetchStatus = FetchStatus.successed;
-        result.searchedRepositories = event.data.repositories;
+        result.searchedRepositories = event.data.repositories.map(({ repository }) => repository);
     }
 
     if (event.type === 'map-page/searched/clear') {

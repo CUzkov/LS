@@ -3,9 +3,11 @@ import ReactFlow, { Node, Edge, NodeChange, EdgeChange } from 'react-flow-render
 
 import { FullGroup, RWA } from 'types';
 import { setEdges, setNodes, applyEdgeChanges, applyNodeChanges } from 'actions/map-page';
+import { getMap, getRepository } from 'constants/routers';
+import { BadgeColors, RWAtobadgeColor } from 'components/badge';
 import { useSelector } from 'store';
 
-import { MapNode, MapNodeData, MAP_NODE_WIDTH } from '../map-page.map-node';
+import { NODE_WIDTH, Node as NodeComponent, NodeData } from '../map-page.node';
 import { formatMapId, formatRepositoryId } from '../map-page.utils';
 
 import styles from './styles.scss';
@@ -17,8 +19,9 @@ type GraphProps = {
 
 export const Graph: FC<GraphProps> = ({ map }) => {
     const graphWrapperRef = useRef<HTMLDivElement>(null);
-    const nodeTypes = useMemo(() => ({ mapNode: MapNode }), []);
+    const nodeTypes = useMemo(() => ({ customNode: NodeComponent }), []);
     const { tree } = useSelector((root) => root.mapPage);
+    const { username } = useSelector((root) => root.user);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => applyNodeChanges(changes, tree.nodes), [tree.nodes]);
     const onEdgesChange = useCallback((changes: EdgeChange[]) => applyEdgeChanges(changes, tree.edges), [tree.edges]);
@@ -32,19 +35,24 @@ export const Graph: FC<GraphProps> = ({ map }) => {
         const edges: Edge[] = [];
 
         const baseMapId = formatMapId(map.id);
-        const baseMapProps: MapNodeData = {
+        const baseMapProps: NodeData = {
             id: map.id,
             title: map.title,
             noNeedTopConnector: true,
             noNeedBottomConnector: !map.childrenGroups.length && !map.childrenRepositories.length,
             noNeedEnter: true,
             access: map.access,
+            liknTo: '',
+            badges: [
+                { title: 'карта знаний', color: BadgeColors.white },
+                { title: map.access === RWA.none ? 'no access' : map.access, color: RWAtobadgeColor(map.access) },
+            ],
         };
 
         nodes.push({
             id: baseMapId,
             data: baseMapProps,
-            type: 'mapNode',
+            type: 'customNode',
             position: { x: 0, y: 0 },
         });
 
@@ -52,25 +60,30 @@ export const Graph: FC<GraphProps> = ({ map }) => {
         const NODES_GAP = 20;
         const childNodesLength = map.childrenGroups.length + map.childrenRepositories.length;
         const childNodesWidth =
-            childNodesLength * (MAP_NODE_WIDTH + NODES_GAP) +
+            childNodesLength * (NODE_WIDTH + NODES_GAP) +
             (map.childrenRepositories.length !== 0 ? MAPS_TO_REPOSITOPRIES_GAP : 0) -
             NODES_GAP;
 
-        let currentOffset = -(childNodesWidth - MAP_NODE_WIDTH) / 2;
+        let currentOffset = -(childNodesWidth - NODE_WIDTH) / 2;
 
         map.childrenGroups.forEach((map) => {
             const id = formatMapId(map.id);
-            const mapProps: MapNodeData = {
+            const mapProps: NodeData = {
                 id: map.id,
                 title: map.title,
                 noNeedBottomConnector: true,
                 access: map.access,
+                liknTo: getMap(username, map.id),
+                badges: [
+                    { title: 'карта знаний', color: BadgeColors.white },
+                    { title: map.access === RWA.none ? 'no access' : map.access, color: RWAtobadgeColor(map.access) },
+                ],
             };
 
             nodes.push({
                 id,
                 data: mapProps,
-                type: 'mapNode',
+                type: 'customNode',
                 position: { x: currentOffset, y: 100 },
             });
 
@@ -80,25 +93,32 @@ export const Graph: FC<GraphProps> = ({ map }) => {
                 target: id,
             });
 
-            currentOffset += MAP_NODE_WIDTH + NODES_GAP;
+            currentOffset += NODE_WIDTH + NODES_GAP;
         });
 
         currentOffset += MAPS_TO_REPOSITOPRIES_GAP;
 
         map.childrenRepositories.forEach((repository) => {
             const id = formatRepositoryId(repository.id);
-            const repositoryProps: MapNodeData = {
+            const repositoryProps: NodeData = {
                 id: repository.id,
                 title: repository.title,
                 noNeedBottomConnector: true,
-                //awda/wd/awd/aw/d/awd//awd
-                access: RWA.r,
+                access: repository.access,
+                liknTo: getRepository(username, repository.id),
+                badges: [
+                    { title: 'репозиторий', color: BadgeColors.white },
+                    {
+                        title: repository.access === RWA.none ? 'no access' : repository.access,
+                        color: RWAtobadgeColor(repository.access),
+                    },
+                ],
             };
 
             nodes.push({
                 id,
                 data: repositoryProps,
-                type: 'mapNode',
+                type: 'customNode',
                 position: { x: currentOffset, y: 100 },
             });
 
@@ -108,7 +128,7 @@ export const Graph: FC<GraphProps> = ({ map }) => {
                 target: id,
             });
 
-            currentOffset += MAP_NODE_WIDTH + NODES_GAP;
+            currentOffset += NODE_WIDTH + NODES_GAP;
         });
 
         setNodes(nodes);

@@ -1,7 +1,7 @@
 import { getDirKeyByPath } from 'pages/repository-page/repository-page.utils';
 
 import { ajax } from '../ajax';
-import { DirMeta, DirStatus, Empty, FileMeta, FileStatus, IServerError, RWA } from 'types';
+import { DirMeta, DirStatus, Empty, FileMeta, FileStatus, IServerError, Repository } from 'types';
 import { Dispatch, store } from '../store';
 
 const REPOSITORY_BY_ID_URL = '/api/repository/id';
@@ -20,11 +20,7 @@ type GetRepositoryByIdQP = {
 };
 
 type GetRepositoryByIdRD = {
-    repository: {
-        title: string;
-        id: number;
-        access: RWA;
-    };
+    repository: Repository;
     version: string;
 };
 

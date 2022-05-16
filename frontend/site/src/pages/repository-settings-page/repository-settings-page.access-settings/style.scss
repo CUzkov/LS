@@ -1,0 +1,241 @@
+@import '../../../index.scss';
+
+.accessSettings {
+    width: 100%;
+    background-color: $cards-color;
+    border-radius: 5px;
+    border: 1px solid $default-border-color;
+    padding: 10px 10px;
+    box-sizing: border-box;
+    position: relative;
+
+    .title {
+        font-size: 17px;
+    }
+
+    .content {
+        opacity: 0;
+        transition: opacity .2s;
+        pointer-events: none;
+
+        &.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+    }
+
+    .userList {
+        display: flex;
+        flex-direction: column;
+        margin-top: 15px;
+        height: calc(100vh - 285px);
+        overflow: auto;
+
+        .userCard {
+            padding: 10px;
+            border: 1px solid $default-border-color;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            transition: color .2s;
+            background-color: $page-color;
+            position: relative;
+
+            .spinner {
+                svg {
+                    height: 25px;
+                    width: 25px;
+                }
+            }
+
+            .accessSelect {
+                width: 100%;
+                margin-left: 30px;
+            }
+
+            &.deleting {
+                color: $default-text-disable-color;
+            }
+
+            &.disable {
+                opacity: .75;
+                pointer-events: none;
+            }
+        }
+
+        .addUser {
+            padding: 10px;
+            border: 1px solid $default-border-color;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+            transition: background-color .2s;
+            position: relative;
+
+            &:hover {
+                background-color: $default-hover-color;
+            }
+        }
+
+        .addUserForm {
+            padding: 10px;
+            border: 1px solid $default-border-color;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+
+            .spinner {
+                svg {
+                    height: 45px;
+                    width: 45px;
+                }
+            }
+
+            &.disable {
+                pointer-events: none;
+                opacity: .75;
+            }
+
+            .fields {
+                display: flex;
+                margin-bottom: 15px;
+
+                .usernameField {
+                    width: 50%;
+                    margin-right: 15px;
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+
+                    .searchSpinner {
+                        opacity: 0;
+                        transition: opacity .2s;
+
+                        &.show {
+                            opacity: 1;
+                        }
+
+                        svg {
+                            height: 20px;
+                            width: 20px;
+                        }
+                    }
+
+                    .suggests {
+                        position: absolute;
+                        top: calc(100% + 10px);
+                        width: 100%;
+                        background-color: $cards-color;
+                        border-radius: 10px;
+                        border: 1px solid $default-border-color;
+                        padding: 5px 0;
+                        box-sizing: border-box;
+                        z-index: 10;
+            
+                        .suggest {
+                            height: 30px;
+                            width: 100%;
+                            padding: 0 5px;
+                            box-sizing: border-box;
+                            border-top: 1px solid $default-border-color;
+                            transition: background-color .2s;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+            
+                            &:hover {
+                                background-color: $default-hover-color;
+                            }
+            
+                            &:last-child {
+                                border-bottom: 1px solid $default-border-color;
+                            }
+                        }
+            
+                        .noInteract {
+                            cursor: default;
+            
+                            &:hover {
+                                background-color: inherit;
+                            }
+                        }
+                    }
+                }
+    
+                .accessSelect {
+                    width: 50%;
+                    min-width: 50%;
+
+                }
+            }
+
+            .usersForAdded {
+                display: flex;
+                align-items: center;
+
+                .selectedUsers {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    width: 100%;
+            
+                    .selectedUser {
+                        font-size: 12px;
+                        border-radius: 5px;
+                        white-space: nowrap;
+                        width: min-content;
+                        background-color: $secondary-cards-color;
+                        padding: 2px 5px;
+                        margin-right: 5px;
+                        display: flex;
+                        margin-bottom: 10px;
+            
+                        .crossIcon {
+                            height: 12px;
+                            width: 12px;
+                            margin-left: 5px;
+                            cursor: pointer;
+            
+                            svg {
+                                transform: scale(0.8);
+                            }
+                        }
+                    }
+                }
+            }
+
+            .buttons {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+
+                .button {
+                    width: 150px;
+
+                    &:last-child {
+                        margin-left: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    .spinner {
+        opacity: 0;
+        transition: opacity .2s;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+
+        &.show {
+            opacity: 1;
+        }
+    }
+}

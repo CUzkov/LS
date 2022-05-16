@@ -1,7 +1,7 @@
 import { createServer, ServerResponse, IncomingMessage } from 'http';
 import Url from 'url';
 
-import { AUTH_ROUTES, REPOSITORIES_ROUTES, GROUPS_ROUTES } from './routes';
+import { AUTH_ROUTES, REPOSITORIES_ROUTES, GROUPS_ROUTES, USERS_ROUTES } from './routes';
 import { middlewares } from './utils/middlewares';
 import { getServerErrorResponse, getOkResponse } from './utils/server-utils';
 import { host, port } from './env';
@@ -12,6 +12,7 @@ const ROUTES = {
     ...AUTH_ROUTES,
     ...REPOSITORIES_ROUTES,
     ...GROUPS_ROUTES,
+    ...USERS_ROUTES,
 };
 
 const requestListener = async (request: IncomingMessage, response: ServerResponse) => {

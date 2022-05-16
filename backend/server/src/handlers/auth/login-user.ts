@@ -1,13 +1,23 @@
-import { CheckAuthRD } from '@api-types/auth/check-auth';
-import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
-
-import { ResponseCallback, Empty, Code } from '../types';
-import { getOkResponse, getServerErrorResponse } from '../utils/server-utils';
-import { User, UserFns } from '../models';
-import { redis } from '../database';
-import { ServerError, errorNames } from '../utils/server-error';
+import { ResponseCallback, Empty, Code } from '../../types';
+import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
+import { User, UserFns } from '../../models';
+import { redis } from '../../database';
+import { ServerError, errorNames } from '../../utils/server-error';
 
 const UNIX_MOUNTH = 60 * 60 * 1000 * 3;
+
+type LoginUserD = {
+    username: string;
+    password: string;
+    email: string;
+};
+
+type LoginUserRD = {
+    id: number;
+    username: string;
+    email: string;
+    isAdmin: boolean;
+};
 
 export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response, data, cookies }) => {
     if ((!data?.email && !data?.username) || !data?.password) {
@@ -41,7 +51,7 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
         return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
     }
 
-    if (data.password !== user.u_password) {
+    if (data.password !== user.password) {
         return getServerErrorResponse(
             response,
             new ServerError({
@@ -65,28 +75,7 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
     getOkResponse<LoginUserRD>(response, {
         email: user.email,
         id: Number(user.id),
-        is_admin: user.is_admin,
+        isAdmin: user.isAdmin,
         username: user.username,
     });
-};
-
-export const checkAuth: ResponseCallback<Empty, Empty> = async ({ response, userId }) => {
-    if (!userId) {
-        return getServerErrorResponse(
-            response,
-            new ServerError({ name: errorNames.noUserId, code: Code.internalServerError }),
-        );
-    }
-
-    try {
-        const user = await UserFns.getUserById(userId);
-        getOkResponse<CheckAuthRD>(response, user);
-    } catch (error) {
-        if (error instanceof ServerError) {
-            return getServerErrorResponse(response, error);
-        }
-
-        const e = error as Error;
-        return getServerErrorResponse(response, new ServerError({ name: e.name, message: e.message }));
-    }
 };

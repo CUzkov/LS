@@ -9,6 +9,7 @@ import { baseGitPath } from '../../env';
 import { Mutex } from '../mutex';
 import { ServerError, errorNames } from '../server-error';
 import { Code } from '../../types';
+import { formatTitleToPath } from '../paths';
 
 export enum FileStatus {
     commit = 'commit',
@@ -58,7 +59,7 @@ export class Git {
             email: user.email,
             username: user.username,
         };
-        this.repositoryName = repositoryName;
+        this.repositoryName = formatTitleToPath(repositoryName);
 
         if (isDraft) {
             this.path = path.join(baseGitPath, 'draft', this.user.username, this.repositoryName);

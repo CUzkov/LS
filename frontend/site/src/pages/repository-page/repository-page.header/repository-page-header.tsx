@@ -1,5 +1,6 @@
 import React, { FC, RefObject, useCallback, useContext, useEffect } from 'react';
 import { useQueryParams } from 'use-query-params';
+import { Link } from 'react-router-dom';
 import cn from 'classnames';
 
 import { useSelector } from 'store/store';
@@ -15,16 +16,18 @@ import {
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { textInputPopup } from 'constants/popups';
 import { repositoryVersionValidator } from 'utils/final-forms';
+import { getRepositorySettings } from 'constants/routers';
+import { RWA } from 'types';
 
 import EditIcon from '../repository-page.assets/edit.svg';
 import AddFolderIcon from '../repository-page.assets/add-folder.svg';
 import AddFileIcon from '../repository-page.assets/add-file.svg';
 import SaveVersionIcon from '../repository-page.assets/save-version.svg';
+import SettingsIcon from '../repository-page.assets/settings.svg';
 import { queryParamConfig } from '../repository-page.constants';
 import { RepositoryPageVersionFrom } from '../repository-page.version-form';
 
 import styles from './style.scss';
-import { RWA } from 'types';
 
 type RepositoryPageHeaderProps = {
     isEditing: boolean;
@@ -34,9 +37,11 @@ type RepositoryPageHeaderProps = {
 
 export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing, inputRef, toggleEditing }) => {
     const { repository } = useSelector((root) => root.repositoryPage);
+    const { username } = useSelector((root) => root.user);
     const [, setQuery] = useQueryParams(queryParamConfig);
     const context = useContext(MovablePopupManagerContext);
     const isCanEdit = repository?.access === RWA.rw || repository?.access === RWA.rwa;
+    const isCanGiveAccess = repository?.access === RWA.rwa;
 
     const handleToggleEditing = useCallback(() => {
         toggleEditing();
@@ -143,6 +148,14 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
                             >
                                 <EditIcon />
                             </div>
+                            {isCanGiveAccess && (
+                                <Link
+                                    className={cn(styles.editIcon, isEditing && styles.editing)}
+                                    to={getRepositorySettings(username, repository.id)}
+                                >
+                                    <SettingsIcon />
+                                </Link>
+                            )}
                         </>
                     )}
                 </div>

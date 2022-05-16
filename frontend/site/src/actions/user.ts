@@ -1,12 +1,22 @@
-import { CheckAuthRD } from '@api-types/auth/check-auth';
-import { LoginUserD, LoginUserRD } from '@api-types/auth/login-user';
-
 import { ajax } from '../ajax';
 import { IServerError, Empty } from '../types';
 import { Dispatch, store } from '../store';
 
 const CHECK_AUTH_URL = '/api/auth/check';
 const LOGIN_USER_URL = '/api/auth/login';
+
+type LoginUserD = {
+    username: string;
+    password: string;
+    email: string;
+};
+
+type LoginUserRD = {
+    id: number;
+    username: string;
+    email: string;
+    isAdmin: boolean;
+};
 
 export const loginUser = async (props: LoginUserD) => {
     const dispath: Dispatch = store.dispatch;
@@ -56,9 +66,16 @@ export const loginUser = async (props: LoginUserD) => {
             userId: response.id,
             username: response.username,
             email: response.email,
-            isAdmin: response.is_admin,
+            isAdmin: response.isAdmin,
         },
     });
+};
+
+type CheckAuthRD = {
+    id: number;
+    username: string;
+    email: string;
+    isAdmin: boolean;
 };
 
 export const checkAuth = async () => {
@@ -93,6 +110,11 @@ export const checkAuth = async () => {
 
     dispath({
         type: 'user/success',
-        data: response,
+        data: {
+            email: response.email,
+            isAdmin: response.isAdmin,
+            userId: response.id,
+            username: response.username,
+        },
     });
 };

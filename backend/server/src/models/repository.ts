@@ -2,10 +2,12 @@ import { QueryResult } from 'pg';
 import { File } from 'formidable';
 import fse from 'fs-extra';
 
-import { UserFns } from './';
+import { UserFns, User } from './user';
 import { pg } from '../database';
 import { Code } from '../types';
 import { Git, FileMeta, DirMeta, DirStatus } from '../utils/git';
+import { ServerError, errorNames } from '../utils/server-error';
+import { RWA, bitMaskToRWA, RWAtoBitMask } from '../utils/access';
 
 import {
     getRepositoryByIdQ,
@@ -28,16 +30,30 @@ import {
     SetRepositoryPathToDraftQP,
     SetRepositoryPathToDraftR,
 } from '../database/pg-typings/set-repository-path-to-draft';
-import { ServerError, errorNames } from '../utils/server-error';
-import { RWA, bitMaskToRWA } from '../utils/access';
+import {
+    changeRepositoryQ,
+    ChangeRepositoryQP,
+    ChangeRepositoryR,
+} from '../database/pg-typings/change-repository-title';
+import {
+    getUsersWithRepositoryRWrwaAccessQ,
+    GetUsersWithRepositoryRWrwaAccessQP,
+    GetUsersWithRepositoryRWrwaAccessR,
+} from '../database/pg-typings/get-users-with-repository-rw-rwa-access';
+import {
+    changeRepositoryAccessQ,
+    ChangeRepositoryAccessQP,
+    ChangeRepositoryAccessR,
+} from '../database/pg-typings/change-repository-access';
 
 export type Repository = {
     id: number;
-    path_to_repository: string;
-    is_private: boolean;
-    user_id: number;
+    pathToRepository: string;
+    isPrivate: boolean;
+    userId: number;
+    username: string;
     title: string;
-    path_to_draft_repository: string | null;
+    pathToDraftRepository: string | null;
     access: RWA;
 };
 
@@ -97,7 +113,16 @@ export const RepositoryFns = {
 
         const repository = result.rows[0];
 
-        return { ...repository, access: RWA.rwa };
+        return {
+            access: RWA.rwa,
+            id: repository.id,
+            isPrivate: repository.is_private,
+            pathToDraftRepository: '',
+            pathToRepository: '',
+            title: repository.title,
+            userId: repository.user_id,
+            username: user.username,
+        };
     },
     checkIsRepositoryNameFree: async (title: string, userId: number): Promise<{ isFree: boolean }> => {
         let result: QueryResult<CheckIsRepositoryNameFreeR>;
@@ -152,13 +177,14 @@ export const RepositoryFns = {
                 return {
                     repository: {
                         id: row.id,
-                        path_to_repository: row.path_to_repository,
-                        is_private: row.is_private,
-                        user_id: row.user_id,
+                        userId: row.user_id,
                         title: row.title,
                         access: bitMaskToRWA(row.access, row.is_private),
                         rootFiles: [],
-                        path_to_draft_repository: null,
+                        pathToDraftRepository: '',
+                        isPrivate: row.is_private,
+                        pathToRepository: '',
+                        username: row.username,
                     },
                     version: '',
                 };
@@ -187,9 +213,15 @@ export const RepositoryFns = {
             throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
         }
 
-        const repository = {
-            ...result.rows[0],
+        const repository: Repository = {
             access: bitMaskToRWA(result.rows[0].access, result.rows[0].is_private),
+            userId: result.rows[0].user_id,
+            id: result.rows[0].id,
+            title: result.rows[0].title,
+            isPrivate: result.rows[0].is_private,
+            pathToDraftRepository: '',
+            pathToRepository: '',
+            username: result.rows[0].username,
         };
         const repositoryOwner = await UserFns.getUserById(result.rows[0].user_id);
 
@@ -340,7 +372,7 @@ export const RepositoryFns = {
 
         await git._capture();
 
-        if (!repository?.path_to_draft_repository) {
+        if (!repository?.pathToDraftRepository) {
             await fse.copy(git.path, gitDraft.path);
 
             let result: QueryResult<SetRepositoryPathToDraftR>;
@@ -422,5 +454,81 @@ export const RepositoryFns = {
         const [, git] = await RepositoryFns.getRepositoryById(id, userId);
 
         return await git.getAllVersions();
+    },
+    changeRepository: async (userId: number, repositoryId: number, newTitle?: string): Promise<void> => {
+        const [repository] = await RepositoryFns.getRepositoryById(repositoryId, userId);
+
+        if (repository.access !== RWA.rw && repository.access !== RWA.rwa) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
+
+        try {
+            const client = await pg.connect();
+            await client.query<ChangeRepositoryR, ChangeRepositoryQP>(changeRepositoryQ, [
+                repositoryId,
+                newTitle ?? repository.title,
+            ]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
+    },
+    getUsersWithRepositoryRWrwaAccess: async (
+        userId: number,
+        repositoryId: number,
+    ): Promise<Array<User & { access: RWA }>> => {
+        const [repository] = await RepositoryFns.getRepositoryById(repositoryId, userId);
+
+        if (repository.access !== RWA.rw && repository.access !== RWA.rwa) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
+
+        let result: QueryResult<GetUsersWithRepositoryRWrwaAccessR>;
+
+        try {
+            const client = await pg.connect();
+            result = await client.query<GetUsersWithRepositoryRWrwaAccessR, GetUsersWithRepositoryRWrwaAccessQP>(
+                getUsersWithRepositoryRWrwaAccessQ,
+                [repositoryId],
+            );
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
+
+        return result.rows.map((user) => ({
+            email: user.email,
+            id: user.id,
+            isAdmin: user.is_admin,
+            username: user.username,
+            access: bitMaskToRWA(user.access, user.is_admin),
+        }));
+    },
+    changeRepositoryAccess: async (
+        userId: number,
+        repositoryId: number,
+        userIdsToChange: number[],
+        access: RWA,
+    ): Promise<void> => {
+        const [repository] = await RepositoryFns.getRepositoryById(repositoryId, userId);
+
+        if (repository.access !== RWA.rwa) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
+
+        try {
+            const client = await pg.connect();
+            await client.query<ChangeRepositoryAccessR, ChangeRepositoryAccessQP>(changeRepositoryAccessQ, [
+                repositoryId,
+                userIdsToChange,
+                RWAtoBitMask(access),
+            ]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
     },
 };

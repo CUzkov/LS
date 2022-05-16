@@ -13,6 +13,9 @@ import { renameFileOrDirInRepository } from '../handlers/repositories/rename-fil
 import { saveRepositoryVersion } from '../handlers/repositories/save-repository-version';
 import { addDirToRepository } from '../handlers/repositories/add-dir-to-repository';
 import { getAllRepositoryVersions } from '../handlers/repositories/get-all-repository-versions';
+import { changeRepository } from '../handlers/repositories/change-repository';
+import { getUsersWithRepositoryRWrwaAccess } from '../handlers/repositories/get-users-with-repository-rw-rwa-access';
+import { changeRepositoryAccess } from '../handlers/repositories/change-repository-access';
 
 const REPOSITORY_BY_ID_URL = '/api/repository/id';
 const CREATE_REPOSITORY_URL = '/api/repository/create';
@@ -30,6 +33,10 @@ const ADD_DIR_TO_REPOSITORY = '/api/repository/draft/add/dir';
 
 const SAVE_REPOSITORY_VERSION = '/api/repository/version/save';
 const GET_ALL_REPOSITORY_VERSIONS = '/api/repository/version/all';
+
+const CHANGE_REPOSITORY = '/api/repository/change';
+const GET_USERS_WITH_REPOSITORY_RW_RWA_ACCESS = '/api/repository/get-rw-rwa-users';
+const CHANGE_REPOSITORY_ACCESS = '/api/repository/change/access';
 
 export const REPOSITORIES_ROUTES: Record<string, Route> = {
     [REPOSITORIES_BY_FILTERS_URL]: {
@@ -108,6 +115,24 @@ export const REPOSITORIES_ROUTES: Record<string, Route> = {
         name: 'getAllRepositoryVersions',
         callback: getAllRepositoryVersions,
         method: Method.get,
+        isNeedAuth: true,
+    },
+    [CHANGE_REPOSITORY]: {
+        name: 'changeRepository',
+        callback: changeRepository,
+        method: Method.post,
+        isNeedAuth: true,
+    },
+    [GET_USERS_WITH_REPOSITORY_RW_RWA_ACCESS]: {
+        name: 'getUsersWithRepositoryRWrwaAccess',
+        callback: getUsersWithRepositoryRWrwaAccess,
+        method: Method.get,
+        isNeedAuth: true,
+    },
+    [CHANGE_REPOSITORY_ACCESS]: {
+        name: 'changeRepositoryAccess',
+        callback: changeRepositoryAccess,
+        method: Method.post,
         isNeedAuth: true,
     },
 };

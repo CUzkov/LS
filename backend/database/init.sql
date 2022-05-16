@@ -302,7 +302,8 @@ create function get_repositories_by_filter(
 	title text,
 	path_to_draft_repository text,
 	repositories_count bigint,
-	access bit(3)
+	access bit(3),
+	username text
 ) as
 $BODY$
 	declare
@@ -340,10 +341,12 @@ $BODY$
 				repositories.title,
 				repositories.path_to_draft_repository,
 				repositories_count,
-				users_repositories_relationship.relationship as access
+				users_repositories_relationship.relationship as access,
+				users.username
 			from repositories
 			left join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			join users on repositories.user_id = users.id
 			where
 				(by_user_v = -1 or repositories.user_id = by_user_v) and
 				(title_v = '' or repositories.title like title_v) and
@@ -376,13 +379,14 @@ create function get_repository_by_id(
 	user_id integer,
 	title text,
 	path_to_draft_repository text,
-	access bit(3)
+	access bit(3),
+	username text
 ) as
 $BODY$
 	declare
 		relationships_v bit(3)[3];
 	begin
-		relationships_v = get_array_of_bit_mask_by_flags(true, true);
+		relationships_v = get_array_of_bit_mask_by_flags(false, false);
 
 		return query 
 			select	
@@ -392,10 +396,12 @@ $BODY$
 				repositories.user_id,
 				repositories.title,
 				repositories.path_to_draft_repository,
-				users_repositories_relationship.relationship as access
+				users_repositories_relationship.relationship as access,
+				users.username
 			from repositories
 			left join users_repositories_relationship
 			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			join users on users.id = repositories.user_id
 			where
 				repositories.id=id_v and
 				(
@@ -517,44 +523,6 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Изменение прав доступа для репозитория
------------------------------------------------------------------------
-create function change_repository_permitions(
-	repository_id_v integer,
-	user_id_v integer,
-	is_can_r_v boolean,
-	is_can_rw_v boolean,
-	is_can_rwa_v boolean
-) returns table(id integer) as
-$BODY$
-	declare
-		users_repositories_relationship_row_id integer;
-		bit_mask bit(3);
-	begin
-		bit_mask = get_bit_mask_by_flags(is_can_r_v, is_can_rw_v, is_can_rwa_v);
-
-		select users_repositories_relationship.id into users_repositories_relationship_row_id from users_repositories_relationship
-		where
-			users_repositories_relationship.user_id = user_id_v and
-			users_repositories_relationship.repository_id = repository_id_v
-		limit 1;
-
-		if users_repositories_relationship_row_id is null then
-			insert into users_repositories_relationship (user_id, repository_id, relationship)
-			values (user_id_v, repository_id_v, bit_mask);
-		else
-			update users_repositories_relationship set relationship = bit_mask
-			where users_repositories_relationship.id = users_repositories_relationship_row_id;
-		end if;
-
-		return query
-			select users_repositories_relationship.id from users_repositories_relationship
-			where users_repositories_relationship.id = users_repositories_relationship_row_id;
-	end;
-$BODY$
-	language 'plpgsql' volatile;
-
------------------------------------------------------------------------
 -- Установка path_to_draft_repository для начала редактирования репозитория
 -----------------------------------------------------------------------
 create function set_repository_path_to_draft(
@@ -664,7 +632,7 @@ $BODY$
 	declare
 		relationships_v bit(3)[3];
 	begin
-		relationships_v = get_array_of_bit_mask_by_flags(true, true);
+		relationships_v = get_array_of_bit_mask_by_flags(false, false);
 
 		return query (
 			select distinct
@@ -769,7 +737,7 @@ $BODY$
 
 		is_can_rw_parent_group_v := (
 			select groups.id from groups
-			inner join users_groups_relationship
+			join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where (
 				users_groups_relationship.group_id = parent_group_id_v and
@@ -783,14 +751,17 @@ $BODY$
 
 		is_can_r_child_group_v := (
 			select groups.id from groups
-			inner join users_groups_relationship
+			left join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where (
-				users_groups_relationship.group_id = child_group_id_v and
+				groups.id = child_group_id_v and
 				(
-					users_groups_relationship.relationship = child_relationships_v[1] or
-					users_groups_relationship.relationship = child_relationships_v[2] or
-					users_groups_relationship.relationship = child_relationships_v[3]
+					groups.is_private = true and (
+						users_groups_relationship.relationship = child_relationships_v[1] or
+						users_groups_relationship.relationship = child_relationships_v[2] or
+						users_groups_relationship.relationship = child_relationships_v[3]
+					) or
+					groups.is_private = false
 				)
 			)
 		)::boolean;
@@ -798,7 +769,7 @@ $BODY$
 		return (
 			is_can_rw_parent_group_v and
 			is_can_r_child_group_v
-		) as is_can_add;
+		);
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -813,7 +784,6 @@ create function add_repository_to_group(
 $BODY$
 	declare
 		new_link_id_v integer;
-		i integer;
 	begin
 		insert into group_to_repository_links (group_id, repository_id)
 		values (group_id_v, repository_id_v)
@@ -825,7 +795,7 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Проверка, пожет ли пользователь добавить репозиторий в группу
+-- Проверка, пожет ли пользователь добавить репозиторий в группу (@FIXME перенести проверку в код js)
 -----------------------------------------------------------------------
 create function check_is_user_can_add_repository_to_group(
 	user_id_v integer,
@@ -844,28 +814,30 @@ $BODY$
 
 		is_can_rw_group_v := (
 			select groups.id from groups
-			inner join users_groups_relationship
+			join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
 			where (
 				users_groups_relationship.group_id = group_id_v and
 				(
-					users_groups_relationship.relationship = parent_relationships_v[1] or
-					users_groups_relationship.relationship = parent_relationships_v[2] or
-					users_groups_relationship.relationship = parent_relationships_v[3]
+					users_groups_relationship.relationship = group_relationships_v[1] or
+					users_groups_relationship.relationship = group_relationships_v[2] or
+					users_groups_relationship.relationship = group_relationships_v[3]
 				)
 			)
 		)::boolean;
 
 		is_can_r_repository_v := (
-			select groups.id from groups
-			inner join users_groups_relationship
-			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			select repositories.id from repositories
+			left join users_repositories_relationship
+			on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
 			where (
-				users_groups_relationship.group_id = child_group_id_v and
+				repositories.id = repository_id_v and
 				(
-					users_groups_relationship.relationship = child_relationships_v[1] or
-					users_groups_relationship.relationship = child_relationships_v[2] or
-					users_groups_relationship.relationship = child_relationships_v[3]
+					repositories.is_private = true and (
+						users_repositories_relationship.relationship = repository_relationships_v[1] or
+						users_repositories_relationship.relationship = repository_relationships_v[2] or
+						users_repositories_relationship.relationship = repository_relationships_v[3]
+					) or repositories.is_private = false
 				)
 			)
 		)::boolean;
@@ -873,7 +845,133 @@ $BODY$
 		return (
 			is_can_rw_group_v and
 			is_can_r_repository_v
-		) as is_can_add;
+		);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Изменение репозитория (название, описание и пр)
+-----------------------------------------------------------------------
+create function change_repository(
+	repository_id_v integer,
+	new_title_v text
+) returns boolean as
+$BODY$
+	declare
+	----------------
+	begin
+		update repositories
+		set title = new_title_v
+		where repositories.id = repository_id_v;
+
+		return true;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение всех пользователей, которые имеют rwa и rw доступ к репозиторию
+-----------------------------------------------------------------------
+create function get_users_with_repository_rw_rwa_access(
+	repository_id_v integer
+) returns table(
+	access bit(3),
+	id integer,
+	username text,
+	is_admin boolean,
+	email text
+) as
+$BODY$
+	declare
+	----------------
+	begin
+		return query (
+			select
+				users_repositories_relationship.relationship as access,
+				users.id,
+				users.username,
+				users.is_admin,
+				users.email
+			from users_repositories_relationship
+			join users on users.id = users_repositories_relationship.user_id
+			where users_repositories_relationship.repository_id = repository_id_v
+		);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение пользователей по фильтрам
+-----------------------------------------------------------------------
+create function get_users_by_filters(
+	username_v text,
+	page_v integer,
+	quantity_v integer,
+	exclude_user_ids_v integer[]
+) returns table(
+	id integer,
+	username text,
+	is_admin boolean,
+	email text,
+	users_count bigint
+) as
+$BODY$
+	declare
+		users_count bigint;
+	begin
+		users_count := (
+			select count(*) from users
+			where
+			(username_v = '' or users.username like username_v) and
+			users.id != all (exclude_user_ids_v)
+		);
+
+		return query
+			select
+				users.id,
+				users.username,
+				users.is_admin,
+				users.email,
+				users_count
+			from users
+			where
+			(username_v = '' or users.username like username_v) and
+			users.id != all (exclude_user_ids_v)
+			limit quantity_v offset quantity_v * (page_v - 1) ;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Изменение прав доступа для репозитория
+-----------------------------------------------------------------------
+create function change_repository_access(
+	repository_id_v integer,
+	user_ids_v integer[],
+	access bit(3)
+) returns boolean as
+$BODY$
+	declare
+	current_user_id integer;
+	begin
+		foreach current_user_id in array user_ids_v
+		loop
+			if access = B'000' then
+				delete from users_repositories_relationship
+				where users_repositories_relationship.user_id = current_user_id and users_repositories_relationship.repository_id = repository_id_v;
+			else
+				insert into users_repositories_relationship (user_id, repository_id, relationship)
+				values (current_user_id, repository_id_v, access)
+				on conflict (repository_id, user_id)
+				do update set
+				repository_id=repository_id_v,
+				user_id=current_user_id,
+				relationship=access;
+			end if;
+		end loop;
+		
+		return true;
 	end;
 $BODY$
 	language 'plpgsql' volatile;

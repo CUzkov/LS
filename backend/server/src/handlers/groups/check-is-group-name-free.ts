@@ -4,7 +4,7 @@ import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
 import { GroupFns, GroupType } from '../../models/group';
-import { isCorrectGroupName } from '../../utils/paths';
+import { deleteExtraSpaces, isCorrectName } from '../../utils/paths';
 
 type CheckIsGroupNameFreeD = {
     title: string;
@@ -24,7 +24,7 @@ class CheckIsGroupNameFreeDValidator {
 
     constructor({ groupType, title }: CheckIsGroupNameFreeD) {
         this.groupType = groupType;
-        this.title = title;
+        this.title = deleteExtraSpaces(title);
     }
 }
 
@@ -58,7 +58,7 @@ export const checkIsGroupNameFree: ResponseCallback<CheckIsGroupNameFreeD, Empty
         );
     }
 
-    if (!isCorrectGroupName(data.title)) {
+    if (!isCorrectName(dataSanitize.title)) {
         return getServerErrorResponse(
             response,
             new ServerError({

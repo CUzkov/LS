@@ -1,10 +1,10 @@
 import { FetchStatus } from '../../types';
 
 type UserSuccesAction = {
-    userId?: number;
-    username?: string;
-    email?: string;
-    isAdmin?: boolean;
+    userId: number;
+    username: string;
+    email: string;
+    isAdmin: boolean;
 };
 
 export type UserEvents =

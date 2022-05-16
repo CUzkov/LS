@@ -6,6 +6,7 @@ export type GetRepositoryByIdR = {
     title: string;
     path_to_draft_repository: string | null;
     access: string | null;
+    username: string;
 };
 
 export type GetRepositoryByIdQP = [number, number];

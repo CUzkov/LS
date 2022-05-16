@@ -52,7 +52,7 @@ export const addGroupToGroup: ResponseCallback<AddGroupToGroupD, Empty> = async 
     }
 
     try {
-        await GroupFns.addGroupToGroup(userId, data.parentId, data.childId);
+        await GroupFns.addGroupToGroup(userId, dataSanitize.parentId, dataSanitize.childId);
         getOkResponse<AddGroupToGroupRD>(response);
     } catch (error) {
         if (error instanceof ServerError) {

@@ -3,7 +3,7 @@ import { IsOptional, IsString, IsNumber, validate } from 'class-validator';
 import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
-import { RepositoryFns } from '../../models';
+import { Repository, RepositoryFns } from '../../models';
 
 type GetRepositoryByIdQP = {
     id: number;
@@ -11,10 +11,7 @@ type GetRepositoryByIdQP = {
 };
 
 type GetRepositoryByIdRD = {
-    repository: {
-        title: string;
-        id: number;
-    };
+    repository: Repository;
     version: string;
 };
 

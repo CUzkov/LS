@@ -4,7 +4,7 @@ import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
 import { RepositoryFns } from '../../models';
-import { formatTitleToPath } from '../../utils/paths';
+import { deleteExtraSpaces, isCorrectName } from '../../utils/paths';
 import { RWA } from '../../utils/access';
 
 type CreateRepositoryD = {
@@ -29,7 +29,7 @@ class CreateRepositoryDValidator {
     isPrivate: boolean;
 
     constructor({ isPrivate, title }: CreateRepositoryD) {
-        this.title = title;
+        this.title = deleteExtraSpaces(title);
         this.isPrivate = isPrivate;
     }
 }
@@ -60,11 +60,19 @@ export const createRepository: ResponseCallback<CreateRepositoryD, Empty> = asyn
         );
     }
 
-    try {
-        const repository = await RepositoryFns.createRepository(
-            { ...dataSanitize, title: formatTitleToPath(dataSanitize.title) },
-            userId,
+    if (!isCorrectName(dataSanitize.title)) {
+        return getServerErrorResponse(
+            response,
+            new ServerError({
+                name: errorNames.serializeError,
+                code: Code.badRequest,
+                message: 'title содержит недопустимые символы!',
+            }),
         );
+    }
+
+    try {
+        const repository = await RepositoryFns.createRepository(dataSanitize, userId);
         getOkResponse<CreateRepositoryRD>(response, {
             repository,
             version: '',

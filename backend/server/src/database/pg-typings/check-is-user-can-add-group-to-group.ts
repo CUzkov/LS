@@ -1,5 +1,5 @@
 export type CheckIsUserCanAddGroupToGroupR = {
-    is_can_add: boolean;
+    check_is_user_can_add_group_to_group: boolean;
 };
 
 export type CheckIsUserCanAddGroupToGroupQP = [number, number, number];

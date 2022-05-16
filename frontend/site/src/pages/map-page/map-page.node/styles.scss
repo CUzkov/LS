@@ -1,7 +1,6 @@
 @import '../../../index.scss';
 
-.mapNode {
-    height: 50px;
+.node {
     color: $default-text-color;
     border: none;
     background-color: $secondary-cards-color;
@@ -13,6 +12,18 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+    }
+
+    .metainfo {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-top: 8px;
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+        }
 
         .enterIcon {
             border-radius: 50%;

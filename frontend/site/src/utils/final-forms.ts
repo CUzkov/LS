@@ -17,6 +17,11 @@ export const repositoryVersionValidator = (version: string): string | undefined 
     return re.test(version) ? undefined : 'Недопустимый формат версии. Пример: 1.0.3';
 };
 
+export const entityNameValidator = (str: string) => {
+    const re = /^[a-z0-9а-яA-ZА-Я_ ]{1,}$/;
+    return re.test(str) ? undefined : 'В названии указаны недопустимые символы!';
+};
+
 export type Validator = ((email: string) => string | undefined) | ((password: string) => string | undefined);
 
 export const composeValidators = (...validators: Validator[]) => {
@@ -24,3 +29,5 @@ export const composeValidators = (...validators: Validator[]) => {
         return validators.reduce((error, validator) => error ?? validator(value), undefined);
     };
 };
+
+export const deleteExtraSpaces = (value: string) => value.replace(/\s+/g, ' ').trim();

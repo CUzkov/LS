@@ -23,6 +23,16 @@ import {
     GetRepositoriesByGroupIdQP,
     GetRepositoriesByGroupIdR,
 } from '../database/pg-typings/get-repositories-by-group-id';
+import {
+    checkIsUserCanAddRepositoryToGroupQ,
+    CheckIsUserCanAddRepositoryToGroupQP,
+    CheckIsUserCanAddRepositoryToGroupR,
+} from '../database/pg-typings/check-is-user-can-add-repository-to-group';
+import {
+    addRepositoryToGroupQ,
+    AddRepositoryToGroupQP,
+    AddRepositoryToGroupR,
+} from '../database/pg-typings/add-repository-to-group';
 
 import { pg } from '../database';
 import { ServerError, errorNames } from '../utils/server-error';
@@ -44,7 +54,7 @@ export type Group = {
 
 export type FullGroup = {
     childrenGroups: Group[];
-    childrenRepositories: { title: string; id: number }[];
+    childrenRepositories: { title: string; id: number; access: RWA }[];
 } & Group;
 
 type GroupsFilters = {
@@ -168,9 +178,10 @@ export const GroupFns = {
                     userId: user_id,
                     access: bitMaskToRWA(access, is_private),
                 })),
-            childrenRepositories: resultRepositories.rows.map(({ id, title }) => ({
+            childrenRepositories: resultRepositories.rows.map(({ id, title, access, is_private }) => ({
                 id,
                 title,
+                access: bitMaskToRWA(access, is_private),
             })),
         };
     },
@@ -225,7 +236,7 @@ export const GroupFns = {
             throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
         }
 
-        if (!accessResult) {
+        if (!accessResult.rows?.[0]?.check_is_user_can_add_group_to_group) {
             throw new ServerError({ name: errorNames.groupAccessError, code: Code.badRequest });
         }
 
@@ -248,6 +259,47 @@ export const GroupFns = {
                 name: errorNames.dbError,
                 code: Code.badRequest,
                 message: 'Группа не добавлена!',
+            });
+        }
+    },
+    addRepositoryToGroup: async (userId: number, repositoryId: number, groupId: number): Promise<void> => {
+        let accessResult: QueryResult<CheckIsUserCanAddRepositoryToGroupR>;
+
+        try {
+            const client = await pg.connect();
+            accessResult = await client.query<
+                CheckIsUserCanAddRepositoryToGroupR,
+                CheckIsUserCanAddRepositoryToGroupQP
+            >(checkIsUserCanAddRepositoryToGroupQ, [userId, repositoryId, groupId]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
+
+        if (!accessResult.rows?.[0]?.check_is_user_can_add_repository_to_group) {
+            throw new ServerError({ name: errorNames.groupAccessError, code: Code.badRequest });
+        }
+
+        let result: QueryResult<AddRepositoryToGroupR>;
+
+        try {
+            const client = await pg.connect();
+            result = await client.query<AddRepositoryToGroupR, AddRepositoryToGroupQP>(addRepositoryToGroupQ, [
+                repositoryId,
+                groupId,
+            ]);
+            client.release();
+        } catch (error) {
+            const e = error as Error;
+            throw new ServerError({ name: errorNames.dbError, code: Code.badRequest, message: e.message });
+        }
+
+        if (!result.rowCount) {
+            throw new ServerError({
+                name: errorNames.dbError,
+                code: Code.badRequest,
+                message: 'Репозиторий не добавлен!',
             });
         }
     },

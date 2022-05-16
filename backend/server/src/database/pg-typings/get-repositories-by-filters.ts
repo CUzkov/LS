@@ -8,6 +8,7 @@ export type GetRepositoriesByFiltersR = {
     title: string;
     access: RWA;
     repositories_count: number;
+    username: string;
 };
 
 export type GetRepositoriesByFiltersQP = [number, number, string, boolean, boolean, number, number, number[]];

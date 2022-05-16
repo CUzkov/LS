@@ -3,37 +3,39 @@ import { Link } from 'react-router-dom';
 import { Handle, Position, NodeProps } from 'react-flow-renderer';
 import cn from 'classnames';
 
-import { getMap } from 'constants/routers';
-import { useSelector } from 'store';
 import { RWA } from 'types';
+import { Badge, BadgeColors } from 'components/badge';
 
 import EnterIcon from '../map-page.assets/enter.svg';
 
 import styles from './styles.scss';
 import './styles.css';
 
-export const MAP_NODE_WIDTH = 200;
+export const NODE_WIDTH = 250;
 
-export type MapNodeData = {
+export type NodeData = {
     id: number;
     title: string;
     access: RWA;
+    liknTo: string;
+    badges?: { title: string; color: BadgeColors }[];
     noNeedEnter?: boolean;
     noNeedTopConnector?: boolean;
     noNeedBottomConnector?: boolean;
 };
 
-export const MapNode: FC<NodeProps<MapNodeData>> = ({ data }) => {
-    const { username } = useSelector((root) => root.user);
-
+export const Node: FC<NodeProps<NodeData>> = ({ data }) => {
     return (
         <>
             <Handle type="target" position={Position.Top} className={cn(data.noNeedTopConnector && styles.hidden)} />
-            <div className={styles.mapNode} style={{ width: `${MAP_NODE_WIDTH}px` }}>
-                <div className={styles.header}>
-                    {data.title}
+            <div className={styles.node} style={{ width: `${NODE_WIDTH}px` }}>
+                <div className={styles.header}>{data.title}</div>
+                <div className={styles.metainfo}>
+                    <div className={styles.badges}>
+                        {data.badges && data.badges.map((badge, i) => <Badge {...badge} isInMapNode key={i} />)}
+                    </div>
                     {!data.noNeedEnter && data.access !== RWA.none && (
-                        <Link to={getMap(username, data.id)} className={styles.enterIcon}>
+                        <Link to={data.liknTo} className={styles.enterIcon}>
                             <EnterIcon />
                         </Link>
                     )}

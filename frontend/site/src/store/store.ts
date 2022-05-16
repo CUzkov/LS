@@ -21,6 +21,11 @@ import {
     CreateRepositoryFormEvents,
 } from './reducers/create-repository-form';
 import { mapPageReducer, MapPageStore, MapPageEvents } from './reducers/map-page';
+import {
+    repositorySettingsPageReducer,
+    RepositorySettingsPageStore,
+    RepositorySettingsPageEvents,
+} from './reducers/repository-settings-page';
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -33,6 +38,7 @@ const rootReducer = combineReducers({
     repositoriesListPage: repositoriesListPageReducer,
     repositoryPage: repositoryPageReducer,
     mapPage: mapPageReducer,
+    repositorySettingsPage: repositorySettingsPageReducer,
 });
 export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
 
@@ -46,7 +52,8 @@ export type StoreEvents =
     | CreateRepositoryFormEvents
     | RepositoriesListPageEvents
     | RepositoryPageEvents
-    | MapPageEvents;
+    | MapPageEvents
+    | RepositorySettingsPageEvents;
 
 export interface Store {
     user: UserStore;
@@ -59,6 +66,7 @@ export interface Store {
     repositoriesListPage: RepositoriesListPageStore;
     repositoryPage: RepositoryPageStore;
     mapPage: MapPageStore;
+    repositorySettingsPage: RepositorySettingsPageStore;
 }
 
 export type Dispatch = (event: StoreEvents) => void;

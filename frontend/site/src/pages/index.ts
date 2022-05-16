@@ -6,3 +6,4 @@ export { CreateRepositoryPage } from './create-repository-page';
 export { RepositoriesListPage } from './repositories-list-page';
 export { RepositoryPage } from './repository-page';
 export { MapPage } from './map-page';
+export { RepositorySettingsPage } from './repository-settings-page';

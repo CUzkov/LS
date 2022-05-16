@@ -3,11 +3,11 @@ import { IsOptional, IsString, IsNumber, validate, IsBoolean, IsArray } from 'cl
 import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
-import { RepositoryFns } from '../../models';
+import { Repository, RepositoryFns } from '../../models';
 
 type GetRepositoriesByFilterQP = {
-    is_rw?: boolean;
-    is_rwa?: boolean;
+    is_rw?: string;
+    is_rwa?: string;
     title?: string;
     by_user?: number;
     page: number;
@@ -17,10 +17,7 @@ type GetRepositoriesByFilterQP = {
 
 type GetRepositoriesByFilterRD = {
     repositories: {
-        repository: {
-            title: string;
-            id: number;
-        };
+        repository: Repository;
         version: string;
     }[];
     count: number;
@@ -54,8 +51,8 @@ class GetRepositoriesByFilterQPValidator {
     quantity: number;
 
     constructor({ is_rw, is_rwa, title, by_user, excludeRepositoryIds, page, quantity }: GetRepositoriesByFilterQP) {
-        this.is_rw = Boolean(is_rw);
-        this.is_rwa = Boolean(is_rwa);
+        this.is_rw = is_rw === 'true' ? true : false;
+        this.is_rwa = is_rwa === 'true' ? true : false;
         this.title = title;
         this.by_user = by_user !== undefined ? Number(by_user) : undefined;
         this.excludeRepositoryIds = excludeRepositoryIds?.map((id) => Number(id)) ?? [];

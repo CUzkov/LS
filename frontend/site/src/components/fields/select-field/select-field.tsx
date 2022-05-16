@@ -10,12 +10,14 @@ import { FieldProps } from '../fields.typings';
 
 import styles from './style.scss';
 
+export type SelectOption = {
+    value: string;
+    title: string;
+};
+
 interface SelectFieldProps {
     name: string;
-    options: {
-        value: string;
-        title: string;
-    }[];
+    options: SelectOption[];
     defaultValue?: string;
     validators?: ((value) => undefined | string)[];
 }

@@ -4,7 +4,7 @@ import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
 import { RepositoryFns } from '../../models';
-import { formatTitleToPath, isCorrectPath } from '../../utils/paths';
+import { deleteExtraSpaces, isCorrectName } from '../../utils/paths';
 
 type CheckIsRepositoryNameFreeD = {
     title: string;
@@ -19,7 +19,7 @@ class CheckIsRepositoryNameFreeDValidator {
     title: string;
 
     constructor({ title }: CheckIsRepositoryNameFreeD) {
-        this.title = title;
+        this.title = deleteExtraSpaces(title);
     }
 }
 
@@ -52,9 +52,8 @@ export const checkIsRepositoryNameFree: ResponseCallback<CheckIsRepositoryNameFr
             }),
         );
     }
-    const title = formatTitleToPath(data.title);
 
-    if (!isCorrectPath(title)) {
+    if (!isCorrectName(dataSanitize.title)) {
         return getServerErrorResponse(
             response,
             new ServerError({
@@ -66,7 +65,7 @@ export const checkIsRepositoryNameFree: ResponseCallback<CheckIsRepositoryNameFr
     }
 
     try {
-        const isFree = await RepositoryFns.checkIsRepositoryNameFree(title, userId);
+        const isFree = await RepositoryFns.checkIsRepositoryNameFree(dataSanitize.title, userId);
         getOkResponse<CheckIsRepositoryNameFreeRD>(response, isFree);
     } catch (error) {
         if (error instanceof ServerError) {
