@@ -93,6 +93,7 @@ export const RepositoryPage: FC = () => {
             getFilesByPath([query.fullPathToDir || ''], '', isEditing, query.version ?? undefined);
             setQuery({ version: repositoryVersion });
         }
+
         changeFilesDirPath(getDirPathByKey(query.fullPathToDir));
     }, [repository?.id]);
 
