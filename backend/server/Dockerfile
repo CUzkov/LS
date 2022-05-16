@@ -3,10 +3,14 @@ FROM node:16
 WORKDIR /usr/src/app
 COPY . .
 
-RUN npm install
-RUN npm run build
+RUN ls /usr/src/app -l
+
+RUN cd ./backend/server && npm install
+RUN cd ./backend/server && npm run build
 
 # для корректного отображения гитом не английский символов (русских, украинских и прочих)
 RUN git config --global core.quotepath false
 
-CMD ["node", "./build/backend/server/src/index.js"]
+RUN ls /usr/src/app/backend/server/build
+
+CMD ["node", "/usr/src/app/backend/server/build/index.js"]
