@@ -151,7 +151,7 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
                                 onClick={handleAddFile}
                             >
                                 <AddFileIcon />
-                                {'добавить файлы'}
+                                {'добавить файл(-ы)'}
                             </div>
                             <div
                                 className={cn(styles.editIcon, styles.actionIcon, isEditing && styles.editing)}

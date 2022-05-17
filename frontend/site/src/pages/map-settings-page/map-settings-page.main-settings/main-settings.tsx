@@ -44,7 +44,7 @@ export const MainSettings: FC = () => {
                 },
                 map?.isPrivate
                     ? {
-                          title: 'приватный',
+                          title: 'приватная',
                           color: BadgeColors.red,
                       }
                     : undefined,
@@ -55,7 +55,7 @@ export const MainSettings: FC = () => {
     const noBusyNameValidator = useCallback(
         (value: string) => {
             if (mapNameStatus.status === MapNameStatus.busy && lastMapName === value) {
-                return 'репозиторий с таким названием уже существует';
+                return 'карта с таким названием уже существует';
             }
 
             return undefined;
@@ -100,7 +100,7 @@ export const MainSettings: FC = () => {
                                     name="title"
                                     type="text"
                                     defaultValue={map?.title}
-                                    title={'Название репозитория'}
+                                    title={'Название карты'}
                                     validators={[requiredValidate, entityNameValidator, noBusyNameValidator]}
                                     isInstantlyValidate
                                     onBlur={(e) => handleMapNameBlur(!!errors?.title, e)}
@@ -128,6 +128,7 @@ export const MainSettings: FC = () => {
                                 <div className={cn(styles.spinner, isLoadingNewTitle && styles.show)}>
                                     <SpinnerIcon />
                                 </div>
+                                <ErrorFieldSpy busyNameError={busyNameError} />
                             </div>
                         )}
                     </Form>
@@ -139,7 +140,7 @@ export const MainSettings: FC = () => {
                                 <div className={cn(styles.private, isLoadingNewPrivate && styles.disable)}>
                                     <CheckboxField
                                         name="private"
-                                        title="приватный"
+                                        title="приватная"
                                         defaultValue={map.isPrivate}
                                         isNoNeedErroText
                                     />
@@ -156,7 +157,6 @@ export const MainSettings: FC = () => {
                                     }}
                                     children={<></>}
                                 />
-                                <ErrorFieldSpy busyNameError={busyNameError} />
                             </>
                         )}
                     </Form>

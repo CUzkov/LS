@@ -227,7 +227,7 @@ export const AccessSettings: FC = () => {
     return (
         <div className={styles.accessSettings}>
             <div className={cn(styles.content, !isLoadingUsers && !isNoneUsers && styles.show)}>
-                <div className={styles.title}>Пользователи с доступом к репозиторию</div>
+                <div className={styles.title}>Пользователи с доступом к карте</div>
                 <div className={styles.userList}>
                     {!!rwRwaUsers.users.length &&
                         !isLoadingUsers &&

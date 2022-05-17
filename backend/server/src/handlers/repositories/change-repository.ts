@@ -70,7 +70,12 @@ export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = asyn
     }
 
     try {
-        await RepositoryFns.changeRepository(userId, dataSanitize.repositoryId, dataSanitize.newTitle, dataSanitize.newPrivate);
+        await RepositoryFns.changeRepository(
+            userId,
+            dataSanitize.repositoryId,
+            dataSanitize.newTitle,
+            dataSanitize.newPrivate,
+        );
         getOkResponse<Empty>(response);
     } catch (error) {
         if (error instanceof ServerError) {

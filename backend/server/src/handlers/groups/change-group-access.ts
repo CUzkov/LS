@@ -30,11 +30,7 @@ class ChangeGroupAccessDValidator {
     }
 }
 
-export const changeGroupAccess: ResponseCallback<ChangeGroupAccessD, Empty> = async ({
-    response,
-    userId,
-    data,
-}) => {
+export const changeGroupAccess: ResponseCallback<ChangeGroupAccessD, Empty> = async ({ response, userId, data }) => {
     if (!userId) {
         return getServerErrorResponse(
             response,
@@ -64,12 +60,7 @@ export const changeGroupAccess: ResponseCallback<ChangeGroupAccessD, Empty> = as
     }
 
     try {
-        await GroupFns.changeGroupAccess(
-            userId,
-            dataSanitize.groupId,
-            dataSanitize.userIds,
-            dataSanitize.access,
-        );
+        await GroupFns.changeGroupAccess(userId, dataSanitize.groupId, dataSanitize.userIds, dataSanitize.access);
         getOkResponse<Empty>(response);
     } catch (error) {
         if (error instanceof ServerError) {

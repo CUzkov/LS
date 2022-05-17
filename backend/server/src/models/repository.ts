@@ -30,11 +30,7 @@ import {
     SetRepositoryPathToDraftQP,
     SetRepositoryPathToDraftR,
 } from '../database/pg-typings/set-repository-path-to-draft';
-import {
-    changeRepositoryQ,
-    ChangeRepositoryQP,
-    ChangeRepositoryR,
-} from '../database/pg-typings/change-repository';
+import { changeRepositoryQ, ChangeRepositoryQP, ChangeRepositoryR } from '../database/pg-typings/change-repository';
 import {
     getUsersWithRepositoryRWrwaAccessQ,
     GetUsersWithRepositoryRWrwaAccessQP,
@@ -456,7 +452,12 @@ export const RepositoryFns = {
         return await git.getAllVersions();
     },
     //@FIXME БАААААААГ при переименовании репозитория переименовывать все пути и переносить все фалы по новым путям
-    changeRepository: async (userId: number, repositoryId: number, newTitle?: string, newPrivate?: boolean): Promise<void> => {
+    changeRepository: async (
+        userId: number,
+        repositoryId: number,
+        newTitle?: string,
+        newPrivate?: boolean,
+    ): Promise<void> => {
         const [repository] = await RepositoryFns.getRepositoryById(repositoryId, userId);
 
         if (newPrivate !== repository.isPrivate && repository.access !== RWA.rwa) {
@@ -473,7 +474,6 @@ export const RepositoryFns = {
                 repositoryId,
                 newTitle ?? repository.title,
                 newPrivate ?? repository.isPrivate,
-
             ]);
             client.release();
         } catch (error) {

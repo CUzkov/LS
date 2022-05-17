@@ -617,7 +617,7 @@ $BODY$
 				groups.user_id,
 				users_groups_relationship.relationship as access,
 				groups.is_private,
-				user.username
+				users.username
 			from groups
 			left join group_to_group_links on group_to_group_links.parent_id = group_id_v
 			left join users_groups_relationship on users_groups_relationship.group_id = groups.id and users_groups_relationship.user_id = user_id_v

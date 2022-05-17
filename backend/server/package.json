@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "nodemon",
-        "lint": "prettier --write . && eslint . --ext .ts --fix",
+        "lint": "prettier --write . && eslint . --ext .ts --fix && git add .",
         "build": "tsc"
     },
     "keywords": [],

@@ -128,6 +128,7 @@ export const MainSettings: FC = () => {
                                 <div className={cn(styles.spinner, isLoadingNewTitle && styles.show)}>
                                     <SpinnerIcon />
                                 </div>
+                                <ErrorFieldSpy busyNameError={busyNameError} />
                             </div>
                         )}
                     </Form>
@@ -156,7 +157,6 @@ export const MainSettings: FC = () => {
                                     }}
                                     children={<></>}
                                 />
-                                <ErrorFieldSpy busyNameError={busyNameError} />
                             </>
                         )}
                     </Form>

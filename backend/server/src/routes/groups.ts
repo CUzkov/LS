@@ -4,9 +4,9 @@ import { addGroupToGroup } from '../handlers/groups/add-group-to-group';
 import { checkIsGroupNameFree } from '../handlers/groups/check-is-group-name-free';
 import { getFullGroupById } from '../handlers/groups/get-full-group-by-id';
 import { addRepositoryToGroup } from '../handlers/groups/add-repository-to-group';
-import {changeGroup} from '../handlers/groups/change-group'
-import {changeGroupAccess} from '../handlers/groups/change-group-access'
-import {getUsersWithGroupAccess} from '../handlers/groups/get-users-with-group-access'
+import { changeGroup } from '../handlers/groups/change-group';
+import { changeGroupAccess } from '../handlers/groups/change-group-access';
+import { getUsersWithGroupAccess } from '../handlers/groups/get-users-with-group-access';
 
 import { Route, Method } from '../types';
 
