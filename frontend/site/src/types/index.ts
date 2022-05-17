@@ -73,6 +73,8 @@ export type Group = {
     type: GroupType;
     userId: number;
     access: RWA;
+    isPrivate: boolean;
+    username: string;
 };
 
 export type FullGroup = {

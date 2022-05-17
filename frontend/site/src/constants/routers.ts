@@ -15,3 +15,5 @@ export const getMapCreate = (username: string) => `/${username}/maps/create`;
 export const getMap = (username: string, id: number) => `/${username}/maps/${id}`;
 export const getMapTemplate = (username: string) => `/${username}/maps/:id`;
 export const getAllMaps = (username: string) => `/${username}/maps`;
+export const getMapSettings = (username: string, id: number) => `/${username}/map/${id}/settings`;
+export const getMapSettingsTemplate = (username: string) => `/${username}/map/:id/settings`;

@@ -85,19 +85,19 @@ export const LoginForm: FC = () => {
                             <TextField
                                 name="email-username"
                                 type="email-username"
-                                title="Логин"
+                                title="логин"
                                 validators={[requiredValidate]}
                                 isDisable={loginFormStore.fetchStatus === FetchStatus.loading}
                             />
                             <TextField
                                 name="password"
                                 type="password"
-                                title="Пароль"
+                                title="пароль"
                                 validators={[requiredValidate]}
                                 isDisable={loginFormStore.fetchStatus === FetchStatus.loading}
                             />
 
-                            <Button text={'Войти'} type={'submit'} isDisable={isSubmitDisable} />
+                            <Button text={'войти'} type={'submit'} isDisable={isSubmitDisable} />
 
                             <FormSpy
                                 subscription={{ dirtyFieldsSinceLastSubmit: true, modifiedSinceLastSubmit: true }}

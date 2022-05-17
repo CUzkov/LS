@@ -64,36 +64,6 @@ values ('cuzkov', 'users@gmail.com', 'Gurkina12', true),
 ('cuzkov3', 'users3@gmail.com', 'Gurkina12', false),
 ('cuzkov4', 'users4@gmail.com', 'Gurkina12', false);
 
--- insert into groups (user_id, title, group_type, is_private)
--- values (1, 'Наука', 'map', false),
--- (1, 'Физика', 'map', false),
--- (1, 'Химия', 'map', false),
--- (1, 'Биология', 'map', false),
--- (1, 'Развитие жизни', 'map', false),
--- (1, 'Теология', 'map', false),
--- (1, 'Дарвин', 'map', false),
--- (1, 'Новый дарвин', 'map', false),
--- (1, 'Старый дарвин', 'map', false),
--- (1, 'Ионизация', 'map', false),
--- (1, 'Сильная ионизация', 'map', false),
--- (1, 'Слабая ионизация', 'map', false),
--- (1, 'Ампер', 'map', false);
-
--- insert into group_to_group_links(parent_id, child_id)
--- values (null, 1),
--- (1, 2),
--- (1, 3),
--- (1, 4),
--- (4, 5),
--- (5, 6),
--- (5, 7),
--- (7, 8),
--- (7, 9),
--- (3, 10),
--- (10, 11),
--- (10, 12),
--- (2, 13);
-
 -----------------------------------------------------------------------
 -- Создание нового пользователя
 -----------------------------------------------------------------------
@@ -439,7 +409,8 @@ create function get_groups_by_filter(
 	group_type groupType,
 	rows_count bigint,
 	access bit(3),
-	is_private boolean
+	is_private boolean,
+	username text
 ) as
 $BODY$
 	declare
@@ -477,10 +448,12 @@ $BODY$
 				groups.group_type,
 				rows_count_v as rows_count,
 				users_groups_relationship.relationship as access,
-				groups.is_private
+				groups.is_private,
+				users.username
 			from groups
 			left join users_groups_relationship
 			on groups.id = users_groups_relationship.group_id and users_groups_relationship.user_id = user_id_v
+			join users on users.id = groups.user_id
 			where
 				(by_user_v = -1 or groups.user_id = by_user_v) and
 				(title_v = '' or groups.title like title_v) and
@@ -626,7 +599,8 @@ create function get_full_group_by_id(
 	group_type groupType,
 	user_id integer,
 	access bit(3),
-	is_private boolean
+	is_private boolean,
+	username text
 ) as
 $BODY$
 	declare
@@ -639,12 +613,15 @@ $BODY$
 				groups.id,
 				groups.title,
 				groups.id = group_id_v as is_base,
-				groups.group_type, groups.user_id,
+				groups.group_type,
+				groups.user_id,
 				users_groups_relationship.relationship as access,
-				groups.is_private
+				groups.is_private,
+				user.username
 			from groups
 			left join group_to_group_links on group_to_group_links.parent_id = group_id_v
 			left join users_groups_relationship on users_groups_relationship.group_id = groups.id and users_groups_relationship.user_id = user_id_v
+			join users on users.id = groups.user_id
 			where groups.id = group_to_group_links.child_id or (
 				groups.id = group_id_v and (
 					(
@@ -673,7 +650,8 @@ create function get_repositories_by_group_id(
 	title text,
 	user_id integer,
 	access bit(3),
-	is_private boolean
+	is_private boolean,
+	username text
 ) as
 $BODY$
 	declare
@@ -687,10 +665,12 @@ $BODY$
 				repositories.title,
 				repositories.user_id,
 				users_repositories_relationship.relationship as access,
-				repositories.is_private
+				repositories.is_private,
+				users.username
 			from repositories
 			join group_to_repository_links on repositories.id = group_to_repository_links.repository_id
 			left join users_repositories_relationship on repositories.id = users_repositories_relationship.repository_id and users_repositories_relationship.user_id = user_id_v
+			join users on users.id = repositories.user_id
 			where group_to_repository_links.group_id = group_ids_v
 		);
 	end;
@@ -855,14 +835,15 @@ $BODY$
 -----------------------------------------------------------------------
 create function change_repository(
 	repository_id_v integer,
-	new_title_v text
+	new_title_v text,
+	new_private_v boolean
 ) returns boolean as
 $BODY$
 	declare
 	----------------
 	begin
 		update repositories
-		set title = new_title_v
+		set title = new_title_v, is_private = new_private_v
 		where repositories.id = repository_id_v;
 
 		return true;
@@ -871,7 +852,7 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
--- Получение всех пользователей, которые имеют rwa и rw доступ к репозиторию
+-- Получение всех пользователей, которые имеют доступ к репозиторию @FIXME переиеновать из rw и rwa в просто доступ
 -----------------------------------------------------------------------
 create function get_users_with_repository_rw_rwa_access(
 	repository_id_v integer
@@ -897,6 +878,39 @@ $BODY$
 			join users on users.id = users_repositories_relationship.user_id
 			where users_repositories_relationship.repository_id = repository_id_v
 		);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Изменение прав доступа для репозитория
+-----------------------------------------------------------------------
+create function change_repository_access(
+	repository_id_v integer,
+	user_ids_v integer[],
+	access bit(3)
+) returns boolean as
+$BODY$
+	declare
+	current_user_id integer;
+	begin
+		foreach current_user_id in array user_ids_v
+		loop
+			if access = B'000' then
+				delete from users_repositories_relationship
+				where users_repositories_relationship.user_id = current_user_id and users_repositories_relationship.repository_id = repository_id_v;
+			else
+				insert into users_repositories_relationship (user_id, repository_id, relationship)
+				values (current_user_id, repository_id_v, access)
+				on conflict (repository_id, user_id)
+				do update set
+				repository_id=repository_id_v,
+				user_id=current_user_id,
+				relationship=access;
+			end if;
+		end loop;
+		
+		return true;
 	end;
 $BODY$
 	language 'plpgsql' volatile;
@@ -944,10 +958,62 @@ $BODY$
 	language 'plpgsql' volatile;
 
 -----------------------------------------------------------------------
+-- Изменение группы (название, описание и пр)
+-----------------------------------------------------------------------
+create function change_group(
+	group_id_v integer,
+	new_title_v text,
+	new_private_v boolean
+) returns boolean as
+$BODY$
+	declare
+	----------------
+	begin
+		update groups
+		set title = new_title_v, is_private = new_private_v
+		where groups.id = group_id_v;
+
+		return true;
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
+-- Получение всех пользователей, которые имеют доступ к карте
+-----------------------------------------------------------------------
+create function get_users_with_group_access(
+	group_id_v integer
+) returns table(
+	access bit(3),
+	id integer,
+	username text,
+	is_admin boolean,
+	email text
+) as
+$BODY$
+	declare
+	----------------
+	begin
+		return query (
+			select
+				users_groups_relationship.relationship as access,
+				users.id,
+				users.username,
+				users.is_admin,
+				users.email
+			from users_groups_relationship
+			join users on users.id = users_groups_relationship.user_id
+			where users_groups_relationship.group_id = group_id_v
+		);
+	end;
+$BODY$
+	language 'plpgsql' volatile;
+
+-----------------------------------------------------------------------
 -- Изменение прав доступа для репозитория
 -----------------------------------------------------------------------
-create function change_repository_access(
-	repository_id_v integer,
+create function change_group_access(
+	group_id_v integer,
 	user_ids_v integer[],
 	access bit(3)
 ) returns boolean as
@@ -958,14 +1024,14 @@ $BODY$
 		foreach current_user_id in array user_ids_v
 		loop
 			if access = B'000' then
-				delete from users_repositories_relationship
-				where users_repositories_relationship.user_id = current_user_id and users_repositories_relationship.repository_id = repository_id_v;
+				delete from users_groups_relationship
+				where users_groups_relationship.user_id = current_user_id and users_groups_relationship.group_id = group_id_v;
 			else
-				insert into users_repositories_relationship (user_id, repository_id, relationship)
-				values (current_user_id, repository_id_v, access)
-				on conflict (repository_id, user_id)
+				insert into users_groups_relationship (user_id, group_id, relationship)
+				values (current_user_id, group_id_v, access)
+				on conflict (group_id, user_id)
 				do update set
-				repository_id=repository_id_v,
+				group_id=group_id_v,
 				user_id=current_user_id,
 				relationship=access;
 			end if;

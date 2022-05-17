@@ -26,6 +26,7 @@ import {
     RepositorySettingsPageStore,
     RepositorySettingsPageEvents,
 } from './reducers/repository-settings-page';
+import { mapSettingsPageReducer, MapSettingsPageStore, MapSettingsPageEvents } from './reducers/map-settings-page';
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -39,6 +40,7 @@ const rootReducer = combineReducers({
     repositoryPage: repositoryPageReducer,
     mapPage: mapPageReducer,
     repositorySettingsPage: repositorySettingsPageReducer,
+    mapSettingsPage: mapSettingsPageReducer,
 });
 export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
 
@@ -53,7 +55,8 @@ export type StoreEvents =
     | RepositoriesListPageEvents
     | RepositoryPageEvents
     | MapPageEvents
-    | RepositorySettingsPageEvents;
+    | RepositorySettingsPageEvents
+    | MapSettingsPageEvents;
 
 export interface Store {
     user: UserStore;
@@ -67,6 +70,7 @@ export interface Store {
     repositoryPage: RepositoryPageStore;
     mapPage: MapPageStore;
     repositorySettingsPage: RepositorySettingsPageStore;
+    mapSettingsPage: MapSettingsPageStore;
 }
 
 export type Dispatch = (event: StoreEvents) => void;

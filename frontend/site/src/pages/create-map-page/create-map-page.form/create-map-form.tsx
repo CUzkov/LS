@@ -7,7 +7,7 @@ import { useSelector } from 'store/store';
 import { checkIsMapNameFree, createMap, setMapNameNotChecked } from 'actions/create-map-page';
 import { Button } from 'components/button';
 import { CheckboxField, TextField } from 'components/fields';
-import { requiredValidate } from 'utils/final-forms';
+import { entityNameValidator, requiredValidate } from 'utils/final-forms';
 import { MapNameStatus } from 'store/reducers/create-map-form';
 import { FetchStatus } from 'types/index';
 import { useBooleanState } from 'hooks';
@@ -84,9 +84,10 @@ export const CreateMapForm: FC = () => {
                                     name="title"
                                     type="text"
                                     title="Название карты"
-                                    validators={[requiredValidate, noBusyNameValidator]}
+                                    validators={[requiredValidate, entityNameValidator, noBusyNameValidator]}
                                     isDisable={fetchStatus === FetchStatus.loading}
                                     onBlur={handleRepositoryNameBlur}
+                                    isInstantlyValidate
                                 />
                                 <div
                                     className={cn(

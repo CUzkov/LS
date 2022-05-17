@@ -34,7 +34,7 @@ import {
     changeRepositoryQ,
     ChangeRepositoryQP,
     ChangeRepositoryR,
-} from '../database/pg-typings/change-repository-title';
+} from '../database/pg-typings/change-repository';
 import {
     getUsersWithRepositoryRWrwaAccessQ,
     GetUsersWithRepositoryRWrwaAccessQP,
@@ -455,8 +455,13 @@ export const RepositoryFns = {
 
         return await git.getAllVersions();
     },
-    changeRepository: async (userId: number, repositoryId: number, newTitle?: string): Promise<void> => {
+    //@FIXME БАААААААГ при переименовании репозитория переименовывать все пути и переносить все фалы по новым путям
+    changeRepository: async (userId: number, repositoryId: number, newTitle?: string, newPrivate?: boolean): Promise<void> => {
         const [repository] = await RepositoryFns.getRepositoryById(repositoryId, userId);
+
+        if (newPrivate !== repository.isPrivate && repository.access !== RWA.rwa) {
+            throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
+        }
 
         if (repository.access !== RWA.rw && repository.access !== RWA.rwa) {
             throw new ServerError({ name: errorNames.repositoryNotFoundOrPermissionDenied, code: Code.badRequest });
@@ -467,6 +472,8 @@ export const RepositoryFns = {
             await client.query<ChangeRepositoryR, ChangeRepositoryQP>(changeRepositoryQ, [
                 repositoryId,
                 newTitle ?? repository.title,
+                newPrivate ?? repository.isPrivate,
+
             ]);
             client.release();
         } catch (error) {

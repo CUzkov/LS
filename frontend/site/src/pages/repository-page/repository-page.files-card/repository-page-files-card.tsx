@@ -9,6 +9,7 @@ import { DirMeta, FetchStatus, FileMeta } from 'types';
 import { textInputPopup } from 'constants/popups';
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { deleteFileOrDir, renameFileOrDir, getFilesByPath, changeFilesDirPath } from 'actions/repository-page';
+import { fileNameValidator, requiredValidate } from 'utils/final-forms';
 
 import { queryParamConfig } from '../repository-page.constants';
 import DownloadIcon from '../repository-page.assets/download.svg';
@@ -72,8 +73,8 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
 
     const handleClickDir = useCallback(
         (pathToDir: string[], dirName: string) => {
-            const newPath = [...pathToDir, dirName];
-            setQuery({ fullPathToDir: [...pathToDir, dirName].join('~') });
+            const newPath = [...pathToDir, dirName].filter(Boolean);
+            setQuery({ fullPathToDir: newPath.join('~') });
             getFilesByPath(newPath, '', isEditing);
             changeFilesDirPath(newPath);
         },
@@ -97,17 +98,70 @@ export const RepositoryPageFilesCard: FC<RepositoryPageFilesCardProps> = ({ isEd
         deleteFileOrDir(file);
     }, []);
 
-    const handleFileRenameButtonClick = useCallback(async (file: FileMeta, e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        const newName = await textInputPopup(context, 'Введите новое имя файла', file.name, true);
-        renameFileOrDir(file, newName);
-    }, []);
+    const handleFileRenameButtonClick = useCallback(
+        async (file: FileMeta, e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            const newName = await textInputPopup(
+                context,
+                'Введите новое имя файла',
+                file.name,
+                true,
+                [
+                    requiredValidate,
+                    fileNameValidator,
+                    (value: string) => (file.name === value ? '  ' : undefined),
+                    // @FIXME добавить проверку на беке
+                    (value: string) =>
+                        files
+                            .map((file) => file.name)
+                            .filter((name) => file.name !== name)
+                            .includes(value)
+                            ? 'файл с таким названием уже существует'
+                            : undefined,
+                ],
+                true,
+            );
 
-    const handleDirRenameButtonClick = useCallback(async (dir: DirMeta, e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        const newName = await textInputPopup(context, 'Введите новое имя папки', dir.name, true);
-        renameFileOrDir(dir, newName);
-    }, []);
+            if (!newName) {
+                return;
+            }
+
+            renameFileOrDir(file, newName);
+        },
+        [files],
+    );
+
+    const handleDirRenameButtonClick = useCallback(
+        async (dir: DirMeta, e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            const newName = await textInputPopup(
+                context,
+                'Введите новое имя папки',
+                dir.name,
+                true,
+                [
+                    requiredValidate,
+                    fileNameValidator,
+                    // @FIXME добавить проверку на беке
+                    (value: string) =>
+                        dirs
+                            .map((dir) => dir.name)
+                            .filter((name) => dir.name !== name)
+                            .includes(value)
+                            ? 'папка с таким названием уже существует'
+                            : undefined,
+                ],
+                true,
+            );
+
+            if (!newName) {
+                return;
+            }
+
+            renameFileOrDir(dir, newName);
+        },
+        [dirs],
+    );
 
     return (
         <div className={styles.filesCard}>

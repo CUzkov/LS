@@ -4,6 +4,9 @@ import { addGroupToGroup } from '../handlers/groups/add-group-to-group';
 import { checkIsGroupNameFree } from '../handlers/groups/check-is-group-name-free';
 import { getFullGroupById } from '../handlers/groups/get-full-group-by-id';
 import { addRepositoryToGroup } from '../handlers/groups/add-repository-to-group';
+import {changeGroup} from '../handlers/groups/change-group'
+import {changeGroupAccess} from '../handlers/groups/change-group-access'
+import {getUsersWithGroupAccess} from '../handlers/groups/get-users-with-group-access'
 
 import { Route, Method } from '../types';
 
@@ -13,6 +16,10 @@ const GET_FULL_GROUP_BY_ID = '/api/group/full';
 const GROUPS_BY_FILTERS_URL = '/api/group/filter';
 const ADD_GROUP_TO_GROUP_URL = '/api/group/add-group';
 const ADD_REPOSITORY_TO_GROUP_URL = '/api/group/add-repository';
+
+const CHANGE_GROUP = '/api/group/change';
+const GET_USERS_WITH_GROUP_ACCESS = '/api/group/get-access-users';
+const CHANGE_GROUP_ACCESS = '/api/group/change/access';
 
 export const GROUPS_ROUTES: Record<string, Route> = {
     [CHECK_IS_GROUP_NAME_FREE_URL]: {
@@ -48,6 +55,24 @@ export const GROUPS_ROUTES: Record<string, Route> = {
     [ADD_REPOSITORY_TO_GROUP_URL]: {
         name: 'addRepositoryToGroup',
         callback: addRepositoryToGroup,
+        method: Method.post,
+        isNeedAuth: true,
+    },
+    [CHANGE_GROUP]: {
+        name: 'changeGroup',
+        callback: changeGroup,
+        method: Method.post,
+        isNeedAuth: true,
+    },
+    [GET_USERS_WITH_GROUP_ACCESS]: {
+        name: 'getUsersWithGroupAccess',
+        callback: getUsersWithGroupAccess,
+        method: Method.get,
+        isNeedAuth: true,
+    },
+    [CHANGE_GROUP_ACCESS]: {
+        name: 'changeGroupAccess',
+        callback: changeGroupAccess,
         method: Method.post,
         isNeedAuth: true,
     },

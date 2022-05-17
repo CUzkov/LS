@@ -1,35 +1,40 @@
-import { IsString, IsNumber, validate, IsBoolean } from 'class-validator';
+import { IsNumber, validate, IsArray, IsEnum } from 'class-validator';
 
 import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
-import { RepositoryFns } from '../../models';
-import { isCorrectName } from '../../utils/paths';
+import { GroupFns } from '../../models/group';
+import { RWA } from '../../utils/access';
 
-type ChangeRepositoryD = {
-    newTitle: string;
-    newPrivate: boolean;
-    repositoryId: number;
+type ChangeGroupAccessD = {
+    groupId: number;
+    userIds: number[];
+    access: RWA;
 };
 
-class ChangeRepositoryNameDValidator {
+class ChangeGroupAccessDValidator {
     @IsNumber()
-    repositoryId: number;
+    groupId: number;
 
-    @IsString()
-    newTitle: string;
+    @IsArray()
+    @IsNumber({}, { each: true })
+    userIds: number[];
 
-    @IsBoolean()
-    newPrivate: boolean;
+    @IsEnum({ [RWA.none]: RWA.none, [RWA.r]: RWA.r, [RWA.rw]: RWA.rw, [RWA.rwa]: RWA.rwa })
+    access: RWA;
 
-    constructor({ repositoryId, newTitle, newPrivate }: ChangeRepositoryD) {
-        this.repositoryId = Number(repositoryId);
-        this.newTitle = newTitle;
-        this.newPrivate = newPrivate;
+    constructor({ groupId, access, userIds }: ChangeGroupAccessD) {
+        this.groupId = Number(groupId);
+        this.access = access;
+        this.userIds = userIds;
     }
 }
 
-export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = async ({ response, userId, data }) => {
+export const changeGroupAccess: ResponseCallback<ChangeGroupAccessD, Empty> = async ({
+    response,
+    userId,
+    data,
+}) => {
     if (!userId) {
         return getServerErrorResponse(
             response,
@@ -44,7 +49,7 @@ export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = asyn
         );
     }
 
-    const dataSanitize = new ChangeRepositoryNameDValidator(data);
+    const dataSanitize = new ChangeGroupAccessDValidator(data);
     const errors = await validate(dataSanitize);
 
     if (errors.length) {
@@ -58,19 +63,13 @@ export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = asyn
         );
     }
 
-    if (!isCorrectName(dataSanitize.newTitle)) {
-        return getServerErrorResponse(
-            response,
-            new ServerError({
-                name: errorNames.serializeError,
-                code: Code.badRequest,
-                message: 'newTitle содержит недопустимые символы!',
-            }),
-        );
-    }
-
     try {
-        await RepositoryFns.changeRepository(userId, dataSanitize.repositoryId, dataSanitize.newTitle, dataSanitize.newPrivate);
+        await GroupFns.changeGroupAccess(
+            userId,
+            dataSanitize.groupId,
+            dataSanitize.userIds,
+            dataSanitize.access,
+        );
         getOkResponse<Empty>(response);
     } catch (error) {
         if (error instanceof ServerError) {

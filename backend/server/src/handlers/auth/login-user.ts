@@ -4,7 +4,7 @@ import { User, UserFns } from '../../models';
 import { redis } from '../../database';
 import { ServerError, errorNames } from '../../utils/server-error';
 
-const UNIX_MOUNTH = 60 * 60 * 1000 * 3;
+const UNIX_MOUNTH = 60 * 60 * 1000 * 3 * 10;
 
 type LoginUserD = {
     username: string;

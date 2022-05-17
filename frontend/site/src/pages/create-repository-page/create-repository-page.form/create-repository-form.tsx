@@ -14,7 +14,7 @@ import { useBooleanState } from 'hooks';
 import { useSelector } from 'store/store';
 import { Button } from 'components/button';
 import { TextField, CheckboxField } from 'components/fields';
-import { requiredValidate } from 'utils/final-forms';
+import { requiredValidate, entityNameValidator } from 'utils/final-forms';
 import { RepositoryNameStatus } from 'store/reducers/create-repository-form';
 
 import Spinner from 'assets/spinner.svg';
@@ -24,7 +24,7 @@ import styles from './style.scss';
 export const CreateRepositoryForm: FC = () => {
     const { repositoryNameStatus, fetchStatus } = useSelector((root) => root.createRepositoryForm);
     const { username } = useSelector((root) => root.user);
-    const [lastRepositoryName, setLastRepositoryName] = useState<string>('');
+    const [lastRepositoryName, setLastRepositoryName] = useState('');
     const [busyNameError, setBuzyNameErrorTrue, setBuzyNameErrorFalse] = useBooleanState(false);
     const navigate = useNavigate();
 
@@ -60,8 +60,8 @@ export const CreateRepositoryForm: FC = () => {
     );
 
     const handleRepositoryNameBlur = useCallback(
-        (event: React.FocusEvent<HTMLInputElement, Element>) => {
-            if (event.target.value !== lastRepositoryName) {
+        (isError: boolean, event: React.FocusEvent<HTMLInputElement, Element>) => {
+            if (!isError && event.target.value !== lastRepositoryName) {
                 checkIsRepositoryNameFree({ title: event.target.value });
                 setLastRepositoryName(event.target.value);
             }
@@ -81,7 +81,7 @@ export const CreateRepositoryForm: FC = () => {
         <div className={styles.createRepositoryFrom}>
             <Form
                 onSubmit={handleSubmit}
-                render={({ handleSubmit }) => (
+                render={({ handleSubmit, errors }) => (
                     <form onSubmit={handleSubmit}>
                         <div>
                             <div className={styles.field}>
@@ -89,9 +89,10 @@ export const CreateRepositoryForm: FC = () => {
                                     name="title"
                                     type="text"
                                     title="Название репозитория"
-                                    validators={[requiredValidate, noBusyNameValidator]}
+                                    validators={[requiredValidate, entityNameValidator, noBusyNameValidator]}
                                     isDisable={fetchStatus === FetchStatus.loading}
-                                    onBlur={handleRepositoryNameBlur}
+                                    onBlur={(e) => handleRepositoryNameBlur(!!errors?.title, e)}
+                                    isInstantlyValidate
                                 />
                                 <div
                                     className={cn(
@@ -113,7 +114,7 @@ export const CreateRepositoryForm: FC = () => {
                         </div>
                         <div className={styles.buttonWrapper}>
                             <div className={styles.button}>
-                                <Button text={'Создать'} type={'submit'} isDisable={isSubmitDisable} />
+                                <Button text={'создать'} type={'submit'} isDisable={isSubmitDisable} />
                             </div>
                         </div>
                         <div className={cn(styles.spinner, fetchStatus === FetchStatus.loading && styles.loading)}>

@@ -5,10 +5,10 @@ import cn from 'classnames';
 import {
     clearSearchedUsers,
     getUsersByFilters,
-    getUsersWithRepositoryRWrwaAccess,
-    addRepositoryAccess,
-    changeRepositoryAccess,
-} from 'actions/repository-settings-page';
+    getUsersWithMapAccess,
+    addMapAccess,
+    changeMapAccess,
+} from 'actions/map-settings-page';
 import { noop } from 'utils/noop';
 import { useSelector } from 'store';
 import { SelectField, TextField } from 'components/fields';
@@ -18,7 +18,7 @@ import { Button } from 'components/button';
 import { useBooleanState } from 'hooks';
 import CrossIcon from 'assets/cross.svg';
 
-import { options } from '../repository-settings-page.constants';
+import { options } from '../map-settings-page.constants';
 
 import styles from './style.scss';
 
@@ -41,7 +41,7 @@ const AddUserFormContent: FC<AddUserFormContentProps> = ({
     handleAddedUserCrossClick,
     handleSubmit,
 }) => {
-    const { searchedUsers } = useSelector((root) => root.repositorySettingsPage);
+    const { searchedUsers } = useSelector((root) => root.mapSettingsPage);
     const isSearchingSuccess = searchedUsers.fetchStatus === FetchStatus.successed;
     const isSearching = searchedUsers.fetchStatus === FetchStatus.loading;
     const [isInputFocus, , , toggleIsInputFocus] = useBooleanState(false);
@@ -131,7 +131,7 @@ type AccessUserFormProps = {
 };
 
 const AccessUserForm: FC<AccessUserFormProps> = ({ userAccess, accesFieldValue, index }) => {
-    const { rwRwaUsers } = useSelector((root) => root.repositorySettingsPage);
+    const { rwRwaUsers } = useSelector((root) => root.mapSettingsPage);
     const accessField = useField('access');
 
     const handleAccessChange = useCallback(
@@ -139,7 +139,7 @@ const AccessUserForm: FC<AccessUserFormProps> = ({ userAccess, accesFieldValue, 
             const oldAccess = accesFieldValue;
 
             if (userAccess !== value) {
-                changeRepositoryAccess(value, rwRwaUsers.users[index]).then((result) => {
+                changeMapAccess(value, rwRwaUsers.users[index]).then((result) => {
                     if (!result) {
                         accessField.input.onChange(oldAccess);
                     }
@@ -164,9 +164,7 @@ const AccessUserForm: FC<AccessUserFormProps> = ({ userAccess, accesFieldValue, 
 };
 
 export const AccessSettings: FC = () => {
-    const { repository, rwRwaUsers, changeAccessStatus, addAccessFetchStatus } = useSelector(
-        (root) => root.repositorySettingsPage,
-    );
+    const { map, rwRwaUsers, changeAccessStatus, addAccessFetchStatus } = useSelector((root) => root.mapSettingsPage);
     const { userId } = useSelector((root) => root.user);
     const [isShowAddUserForm, , , toggleShowUserForm] = useBooleanState(true);
     const isLoadingUsers = rwRwaUsers.fetchStatus === FetchStatus.loading;
@@ -181,7 +179,7 @@ export const AccessSettings: FC = () => {
 
     const handleAddUsersFormSubmit = useCallback(
         (access: RWA) => {
-            addRepositoryAccess(access, usersForAdd).then(() => toggleShowUserForm());
+            addMapAccess(access, usersForAdd).then(() => toggleShowUserForm());
         },
         [usersForAdd],
     );
@@ -221,10 +219,10 @@ export const AccessSettings: FC = () => {
     }, []);
 
     useEffect(() => {
-        if (repository?.id) {
-            getUsersWithRepositoryRWrwaAccess();
+        if (map?.id) {
+            getUsersWithMapAccess();
         }
-    }, [repository?.id]);
+    }, [map?.id]);
 
     return (
         <div className={styles.accessSettings}>

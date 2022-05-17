@@ -1,5 +1,5 @@
-import { useQueryParams } from 'use-query-params';
 import React, { useEffect, useMemo, FC, useCallback, useRef, useContext } from 'react';
+import { useQueryParams } from 'use-query-params';
 import { useParams } from 'react-router-dom';
 
 import { PageWrapper } from 'pages/page-wrapper';

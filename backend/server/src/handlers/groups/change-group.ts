@@ -3,18 +3,18 @@ import { IsString, IsNumber, validate, IsBoolean } from 'class-validator';
 import { ResponseCallback, Empty, Code } from '../../types';
 import { getOkResponse, getServerErrorResponse } from '../../utils/server-utils';
 import { ServerError, errorNames } from '../../utils/server-error';
-import { RepositoryFns } from '../../models';
+import { GroupFns } from '../../models/group';
 import { isCorrectName } from '../../utils/paths';
 
-type ChangeRepositoryD = {
+type ChangeGroupD = {
     newTitle: string;
     newPrivate: boolean;
-    repositoryId: number;
+    groupId: number;
 };
 
-class ChangeRepositoryNameDValidator {
+class ChangeGroupDValidator {
     @IsNumber()
-    repositoryId: number;
+    groupId: number;
 
     @IsString()
     newTitle: string;
@@ -22,14 +22,14 @@ class ChangeRepositoryNameDValidator {
     @IsBoolean()
     newPrivate: boolean;
 
-    constructor({ repositoryId, newTitle, newPrivate }: ChangeRepositoryD) {
-        this.repositoryId = Number(repositoryId);
+    constructor({ groupId, newTitle, newPrivate }: ChangeGroupD) {
+        this.groupId = Number(groupId);
         this.newTitle = newTitle;
         this.newPrivate = newPrivate;
     }
 }
 
-export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = async ({ response, userId, data }) => {
+export const changeGroup: ResponseCallback<ChangeGroupD, Empty> = async ({ response, userId, data }) => {
     if (!userId) {
         return getServerErrorResponse(
             response,
@@ -44,7 +44,7 @@ export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = asyn
         );
     }
 
-    const dataSanitize = new ChangeRepositoryNameDValidator(data);
+    const dataSanitize = new ChangeGroupDValidator(data);
     const errors = await validate(dataSanitize);
 
     if (errors.length) {
@@ -70,7 +70,7 @@ export const changeRepository: ResponseCallback<ChangeRepositoryD, Empty> = asyn
     }
 
     try {
-        await RepositoryFns.changeRepository(userId, dataSanitize.repositoryId, dataSanitize.newTitle, dataSanitize.newPrivate);
+        await GroupFns.changeGroup(userId, dataSanitize.groupId, dataSanitize.newTitle, dataSanitize.newPrivate);
         getOkResponse<Empty>(response);
     } catch (error) {
         if (error instanceof ServerError) {

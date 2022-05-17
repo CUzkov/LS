@@ -15,7 +15,7 @@ import {
 } from 'actions/repository-page';
 import { MovablePopupManagerContext } from 'components/movable-popup-manager';
 import { textInputPopup } from 'constants/popups';
-import { repositoryVersionValidator } from 'utils/final-forms';
+import { entityNameValidator, repositoryVersionValidator, requiredValidate } from 'utils/final-forms';
 import { getRepositorySettings } from 'constants/routers';
 import { RWA } from 'types';
 
@@ -36,7 +36,7 @@ type RepositoryPageHeaderProps = {
 };
 
 export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing, inputRef, toggleEditing }) => {
-    const { repository } = useSelector((root) => root.repositoryPage);
+    const { repository, dirs } = useSelector((root) => root.repositoryPage);
     const { username } = useSelector((root) => root.user);
     const [, setQuery] = useQueryParams(queryParamConfig);
     const context = useContext(MovablePopupManagerContext);
@@ -60,17 +60,35 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
         inputRef.current.click();
     }, [inputRef]);
 
-    const handleAddDir = useCallback(async (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
+    const handleAddDir = useCallback(
+        async (e: React.MouseEvent<HTMLDivElement>) => {
+            e.stopPropagation();
 
-        const newDirName = await textInputPopup(context, 'Введите имя папки', '', true);
+            const newDirName = await textInputPopup(
+                context,
+                'Введите имя папки',
+                '',
+                true,
+                [
+                    requiredValidate,
+                    entityNameValidator,
+                    // @FIXME добавить проверку на беке
+                    (value: string) =>
+                        dirs.map((dir) => dir.name).includes(value)
+                            ? 'папка с таким названием уже существует'
+                            : undefined,
+                ],
+                true,
+            );
 
-        if (!newDirName) {
-            return;
-        }
+            if (!newDirName) {
+                return;
+            }
 
-        addDirToRepository(newDirName);
-    }, []);
+            addDirToRepository(newDirName);
+        },
+        [dirs],
+    );
 
     const handleSaveVersion = useCallback(async (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -150,7 +168,7 @@ export const RepositoryPageHeader: FC<RepositoryPageHeaderProps> = ({ isEditing,
                             </div>
                             {isCanGiveAccess && (
                                 <Link
-                                    className={cn(styles.editIcon, isEditing && styles.editing)}
+                                    className={cn(styles.editIcon, isEditing && styles.hide)}
                                     to={getRepositorySettings(username, repository.id)}
                                 >
                                     <SettingsIcon />

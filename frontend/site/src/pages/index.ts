@@ -7,3 +7,4 @@ export { RepositoriesListPage } from './repositories-list-page';
 export { RepositoryPage } from './repository-page';
 export { MapPage } from './map-page';
 export { RepositorySettingsPage } from './repository-settings-page';
+export { MapSettingsPage } from './map-settings-page';

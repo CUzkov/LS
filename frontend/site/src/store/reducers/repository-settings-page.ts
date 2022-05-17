@@ -1,5 +1,11 @@
 import { FetchStatus, Repository, RWA, User } from '../../types';
 
+export enum RepositoryNameStatus {
+    free,
+    notChecked,
+    busy,
+}
+
 export type RepositorySettingsPageEvents =
     | { type: 'repository-settings-page/repository/success'; data: { repository: Repository; version: string } }
     | { type: 'repository-settings-page/repository/loading' }
@@ -11,6 +17,9 @@ export type RepositorySettingsPageEvents =
     | { type: 'repository-settings-page/new-title/success'; data: string }
     | { type: 'repository-settings-page/new-title/loading' }
     | { type: 'repository-settings-page/new-title/error' }
+    | { type: 'repository-settings-page/new-private/success'; data: boolean }
+    | { type: 'repository-settings-page/new-private/loading' }
+    | { type: 'repository-settings-page/new-private/error' }
     | { type: 'repository-settings-page/rw-rwa-users/success'; data: Array<User & { access: RWA }> }
     | { type: 'repository-settings-page/rw-rwa-users/loading' }
     | { type: 'repository-settings-page/rw-rwa-users/error' }
@@ -24,7 +33,11 @@ export type RepositorySettingsPageEvents =
     | { type: 'repository-settings-page/add-access/success' }
     | { type: 'repository-settings-page/add-access/loading' }
     | { type: 'repository-settings-page/add-access/error' }
-    | { type: 'repository-settings-page/clear' };
+    | { type: 'repository-settings-page/clear' }
+    | { type: 'repository-settings-page/is-repository-name-free/error' }
+    | { type: 'repository-settings-page/is-repository-name-free/loading' }
+    | { type: 'repository-settings-page/is-repository-name-free/not-checked' }
+    | { type: 'repository-settings-page/is-repository-name-free/status'; data: { isFree: boolean } };
 
 export type RepositorySettingsPageStore = {
     repository?: Repository;
@@ -33,6 +46,7 @@ export type RepositorySettingsPageStore = {
     versions: string[];
     versionsFetchStatus: FetchStatus;
     newTitleFetchStatus: FetchStatus;
+    newPrivateFetchStatus: FetchStatus;
     rwRwaUsers: {
         users: Array<User & { access: RWA }>;
         fetchStatus: FetchStatus;
@@ -46,6 +60,10 @@ export type RepositorySettingsPageStore = {
         userId: number;
     }[];
     addAccessFetchStatus: FetchStatus;
+    repositoryNameStatus: {
+        status: RepositoryNameStatus;
+        fetchStatus: FetchStatus;
+    };
 };
 
 const initialState: RepositorySettingsPageStore = {
@@ -54,6 +72,7 @@ const initialState: RepositorySettingsPageStore = {
     versions: [],
     versionsFetchStatus: FetchStatus.none,
     newTitleFetchStatus: FetchStatus.none,
+    newPrivateFetchStatus: FetchStatus.none,
     rwRwaUsers: {
         users: [],
         fetchStatus: FetchStatus.none,
@@ -64,6 +83,10 @@ const initialState: RepositorySettingsPageStore = {
     },
     changeAccessStatus: [],
     addAccessFetchStatus: FetchStatus.none,
+    repositoryNameStatus: {
+        status: RepositoryNameStatus.notChecked,
+        fetchStatus: FetchStatus.none,
+    },
 };
 
 export const repositorySettingsPageReducer = (
@@ -125,6 +148,22 @@ export const repositorySettingsPageReducer = (
 
     if (event.type === 'repository-settings-page/new-title/error') {
         result.newTitleFetchStatus = FetchStatus.error;
+    }
+
+    if (event.type === 'repository-settings-page/new-private/success') {
+        result.newPrivateFetchStatus = FetchStatus.successed;
+
+        if (result.repository) {
+            result.repository.isPrivate = event.data;
+        }
+    }
+
+    if (event.type === 'repository-settings-page/new-private/loading') {
+        result.newPrivateFetchStatus = FetchStatus.loading;
+    }
+
+    if (event.type === 'repository-settings-page/new-private/error') {
+        result.newPrivateFetchStatus = FetchStatus.error;
     }
 
     if (event.type === 'repository-settings-page/rw-rwa-users/success') {
@@ -192,6 +231,24 @@ export const repositorySettingsPageReducer = (
 
     if (event.type === 'repository-settings-page/add-access/error') {
         result.addAccessFetchStatus = FetchStatus.error;
+    }
+
+    if (event.type === 'repository-settings-page/is-repository-name-free/loading') {
+        result.repositoryNameStatus.fetchStatus = FetchStatus.loading;
+        result.repositoryNameStatus.status = RepositoryNameStatus.notChecked;
+    }
+
+    if (event.type === 'repository-settings-page/is-repository-name-free/error') {
+        result.repositoryNameStatus.fetchStatus = FetchStatus.error;
+    }
+
+    if (event.type === 'repository-settings-page/is-repository-name-free/status') {
+        result.repositoryNameStatus.fetchStatus = FetchStatus.successed;
+        result.repositoryNameStatus.status = event.data.isFree ? RepositoryNameStatus.free : RepositoryNameStatus.busy;
+    }
+
+    if (event.type === 'repository-settings-page/is-repository-name-free/not-checked') {
+        result.repositoryNameStatus.status = RepositoryNameStatus.notChecked;
     }
 
     return result;

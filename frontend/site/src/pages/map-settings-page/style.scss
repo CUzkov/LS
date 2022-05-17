@@ -1,0 +1,31 @@
+@import '../../index.scss';
+
+.mapSettingsPage {
+    width: calc(100% - 65px);
+    box-sizing: border-box;
+    border-top: 1px solid $default-dark-border;
+    margin: 5px 10px 0 55px;
+
+    .settingsBlocks {
+        display: flex;
+
+        .mainSettings {
+            margin-right: 15px;
+            width: 50%;
+        }
+
+        .accessSettings {
+            width: 50%;
+        }
+    }
+}
+
+.breadcrumbsSpinner {
+    height: 15px;
+    width: 15px;
+
+    svg {
+        height: 15px;
+        width: 15px;
+    }
+}

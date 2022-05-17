@@ -6,32 +6,32 @@ import Spinner from 'assets/spinner.svg';
 import { useSelector } from 'store';
 import { PageTitle } from 'components/page-title';
 import { FetchStatus } from 'types';
-import { getRepositoryById, clearRepositorySettingsPage } from 'actions/repository-settings-page';
+import { getMapById, clearMapSettingsPage } from 'actions/map-settings-page';
 
-import { getPaths } from './repository-settings-page.constants';
-import { MainSettings } from './repository-settings-page.main-settings';
-import { AccessSettings } from './repository-settings-page.access-settings';
+import { getPaths } from './map-settings-page.constants';
+import { MainSettings } from './map-settings-page.main-settings';
+import { AccessSettings } from './map-settings-page.access-settings';
 
 import styles from './style.scss';
 
-export const RepositorySettingsPage: FC = () => {
+export const MapSettingsPage: FC = () => {
     const { username } = useSelector((root) => root.user);
-    const { repository, repositoryFetchStatus } = useSelector((root) => root.repositorySettingsPage);
+    const { map, mapFetchStatus } = useSelector((root) => root.mapSettingsPage);
     const { id } = useParams();
-    const isRepositoryLoading = repositoryFetchStatus === FetchStatus.loading;
+    const isMapLoading = mapFetchStatus === FetchStatus.loading;
 
     useEffect(() => {
         if (id) {
-            getRepositoryById(Number(id));
+            getMapById(Number(id));
         }
 
-        return () => clearRepositorySettingsPage();
+        return () => clearMapSettingsPage();
     }, [id]);
 
     const paths = useMemo(() => {
-        const basePaths = getPaths(username, repository?.title, repository?.id ?? -1);
+        const basePaths = getPaths(username, map?.title, map?.id ?? -1);
 
-        if (isRepositoryLoading) {
+        if (isMapLoading) {
             [1, 2].map((numb) => {
                 basePaths[basePaths.length - numb] = {
                     title: (
@@ -45,11 +45,11 @@ export const RepositorySettingsPage: FC = () => {
         }
 
         return basePaths;
-    }, [username, isRepositoryLoading, repository?.title]);
+    }, [username, isMapLoading, map?.title]);
 
     const content = (
-        <div className={styles.repositorySettingsPage}>
-            <PageTitle title={repository?.title} />
+        <div className={styles.mapSettingsPage}>
+            <PageTitle title={map?.title} />
             <div style={{ pointerEvents: 'all' }} className={styles.settingsBlocks}>
                 <div className={styles.mainSettings}>
                     <MainSettings />

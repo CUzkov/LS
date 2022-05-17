@@ -7,6 +7,7 @@ const CHANGE_REPOSITORY = '/api/repository/change';
 const GET_USERS_WITH_REPOSITORY_RW_RWA_ACCESS = '/api/repository/get-rw-rwa-users';
 const GET_USERS_BY_FILTERS = '/api/user/get-by-filters';
 const CHANGE_REPOSITORY_ACCESS = '/api/repository/change/access';
+const CHECK_IS_REPOSIROTY_NAME_FREE_URL = '/api/repository/free';
 
 type GetRepositoryByIdQP = {
     id: number;
@@ -59,30 +60,49 @@ export const clearRepositorySettingsPage = () => {
 
 type ChangeRepositoryD = {
     newTitle: string;
+    newPrivate: boolean;
     repositoryId: number;
 };
 
-export const changeRepository = async (newTitle: string) => {
+export const changeRepository = async (changes: { newTitle?: string; newPrivate?: boolean }) => {
     const dispath: Dispatch = store.dispatch;
 
     const {
         repositorySettingsPage: { repository },
     } = store.getState();
 
-    dispath({ type: 'repository-settings-page/new-title/loading' });
+    if (!repository) {
+        return;
+    }
+
+    if (changes.newTitle) {
+        dispath({ type: 'repository-settings-page/new-title/loading' });
+    }
+
+    if (changes.newPrivate !== undefined) {
+        dispath({ type: 'repository-settings-page/new-private/loading' });
+    }
 
     try {
         await ajax.post<ChangeRepositoryD, Empty, Empty>({
             url: CHANGE_REPOSITORY,
             data: {
-                newTitle,
-                repositoryId: repository?.id ?? -1,
+                newTitle: changes.newTitle ? changes.newTitle : repository.title,
+                newPrivate: changes.newPrivate !== undefined ? changes.newPrivate : repository.isPrivate,
+                repositoryId: repository.id,
             },
         });
     } catch (error) {
         const e = error as IServerError;
 
-        dispath({ type: 'repository-settings-page/new-title/error' });
+        if (changes.newTitle) {
+            dispath({ type: 'repository-settings-page/new-title/error' });
+        }
+
+        if (changes.newPrivate !== undefined) {
+            dispath({ type: 'repository-settings-page/new-private/error' });
+        }
+
         dispath({
             type: 'logger/add-log',
             data: { type: 'error', title: e.name, description: e.description },
@@ -90,11 +110,21 @@ export const changeRepository = async (newTitle: string) => {
         return;
     }
 
-    dispath({ type: 'repository-settings-page/new-title/success', data: newTitle });
-    dispath({
-        type: 'logger/add-log',
-        data: { type: 'success', title: 'Успешно!', description: 'Название репозитория успешно изменено' },
-    });
+    if (changes.newTitle) {
+        dispath({ type: 'repository-settings-page/new-title/success', data: changes.newTitle });
+        dispath({
+            type: 'logger/add-log',
+            data: { type: 'success', title: 'Успешно!', description: 'Название репозитория успешно изменено' },
+        });
+    }
+
+    if (changes.newPrivate !== undefined) {
+        dispath({ type: 'repository-settings-page/new-private/success', data: changes.newPrivate });
+        dispath({
+            type: 'logger/add-log',
+            data: { type: 'success', title: 'Успешно!', description: 'Приватность репозитория успешно изменена' },
+        });
+    }
 };
 
 type GetUsersWithRepositoryRWrwaAccessQP = {
@@ -263,4 +293,48 @@ export const changeRepositoryAccess = async (access: RWA, user: User): Promise<b
     dispath({ type: 'repository-settings-page/change-access/success', data: { ...user, access } });
 
     return true;
+};
+
+type CheckIsRepositoryNameFreeD = {
+    title: string;
+};
+
+type CheckIsRepositoryNameFreeRD = {
+    isFree: boolean;
+};
+
+export const checkIsRepositoryNameFree = async (props: { title: string }) => {
+    const dispath: Dispatch = store.dispatch;
+
+    dispath({ type: 'repository-settings-page/is-repository-name-free/loading' });
+
+    let response: CheckIsRepositoryNameFreeRD | undefined;
+
+    try {
+        response = await ajax.post<CheckIsRepositoryNameFreeD, CheckIsRepositoryNameFreeRD, Empty>({
+            url: CHECK_IS_REPOSIROTY_NAME_FREE_URL,
+            data: props,
+        });
+
+        if (!response) {
+            return;
+        }
+    } catch (error) {
+        const e = error as IServerError;
+
+        dispath({ type: 'repository-settings-page/is-repository-name-free/error' });
+
+        if (e?.name) {
+            dispath({
+                type: 'logger/add-log',
+                data: { title: e.name, description: e.description, type: 'error' },
+            });
+            return;
+        }
+
+        dispath({ type: 'logger/add-log', data: { type: 'error', title: 'Ошибка сети :(', description: '' } });
+        return;
+    }
+
+    dispath({ type: 'repository-settings-page/is-repository-name-free/status', data: { isFree: response.isFree } });
 };

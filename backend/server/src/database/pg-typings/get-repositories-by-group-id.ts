@@ -4,6 +4,7 @@ export type GetRepositoriesByGroupIdR = {
     user_id: number;
     access: string;
     is_private: boolean;
+    username: string;
 };
 
 export type GetRepositoriesByGroupIdQP = [number, number];

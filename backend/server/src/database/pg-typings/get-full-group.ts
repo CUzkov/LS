@@ -8,6 +8,7 @@ export type GetFullGroupByIdR = {
     user_id: number;
     access: string;
     is_private: boolean;
+    username: string;
 };
 
 export type GetFullGroupByIdQP = [number, number];

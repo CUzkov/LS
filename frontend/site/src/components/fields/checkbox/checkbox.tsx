@@ -13,18 +13,22 @@ import styles from './style.scss';
 interface TextFieldProps {
     name: string;
     title: string;
+    defaultValue?: boolean;
     validators?: ((value) => undefined | string)[];
     isDisable?: boolean;
+    isNoNeedErroText?: boolean;
 }
 
 export const CheckboxField: FC<TextFieldProps> = ({
     name,
     title,
+    defaultValue = false,
     validators = [],
     isDisable = false,
+    isNoNeedErroText = false,
 }: TextFieldProps): ReactElement => {
     return (
-        <Field name={name} validate={composeValidators(...validators)} type="checkbox" defaultValue={false}>
+        <Field name={name} validate={composeValidators(...validators)} type="checkbox" defaultValue={defaultValue}>
             {({ input, meta }: FieldProps<string>): ReactElement => (
                 <div className={cn(styles.checkboxField, input.checked && styles.checked)}>
                     <div className={cn(styles.input, isDisable && styles.disable)}>
@@ -35,7 +39,11 @@ export const CheckboxField: FC<TextFieldProps> = ({
                         </label>
                     </div>
 
-                    <div className={styles.errorText}>{!!meta.touched || !!meta.submitSucceeded ? meta.error : ''}</div>
+                    {!isNoNeedErroText && (
+                        <div className={styles.errorText}>
+                            {!!meta.touched || !!meta.submitSucceeded ? meta.error : ''}
+                        </div>
+                    )}
                 </div>
             )}
         </Field>

@@ -89,7 +89,9 @@ export const TextField: FC<TextFieldProps> = ({
 
                     {!isNoNeedErrors && (
                         <div className={styles.errorText}>
-                            {isInstantlyValidate || (meta.touched ?? false) || (meta.submitSucceeded ?? false)
+                            {(isInstantlyValidate && input.value) ||
+                            (meta.touched ?? false) ||
+                            (meta.submitSucceeded ?? false)
                                 ? meta.error
                                 : ''}
                         </div>

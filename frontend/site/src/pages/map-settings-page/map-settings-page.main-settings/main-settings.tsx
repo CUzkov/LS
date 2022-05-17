@@ -11,104 +11,104 @@ import { Button } from 'components/button';
 import { deleteExtraSpaces, entityNameValidator, requiredValidate } from 'utils/final-forms';
 import { useBooleanState } from 'hooks';
 import { noop } from 'utils/noop';
-import { changeRepository } from 'actions/repository-settings-page';
-import { RepositoryNameStatus } from 'store/reducers/repository-settings-page';
-import { checkIsRepositoryNameFree } from 'actions/repository-settings-page';
+import { changeGroup } from 'actions/map-settings-page';
+import { MapNameStatus } from 'store/reducers/map-settings-page';
+import { checkIsMapNameFree } from 'actions/map-settings-page';
 
 import styles from './style.scss';
 
 export const MainSettings: FC = () => {
-    const { repository, repositoryFetchStatus, newTitleFetchStatus, newPrivateFetchStatus, repositoryNameStatus } =
-        useSelector((root) => root.repositorySettingsPage);
+    const { map, mapFetchStatus, newTitleFetchStatus, newPrivateFetchStatus, mapNameStatus } = useSelector(
+        (root) => root.mapSettingsPage,
+    );
     const { userId } = useSelector((root) => root.user);
     const [busyNameError, setBuzyNameErrorTrue, setBuzyNameErrorFalse] = useBooleanState(false);
-    const [lastRepositoryName, setLastRepositoryName] = useState('');
-    const isLoadingRepository = repositoryFetchStatus === FetchStatus.loading;
-    const isNoneRepository = repositoryFetchStatus === FetchStatus.none;
+    const [lastMapName, setLastMapName] = useState('');
+    const isLoadingMap = mapFetchStatus === FetchStatus.loading;
+    const isNoneMap = mapFetchStatus === FetchStatus.none;
     const isLoadingNewTitle = newTitleFetchStatus === FetchStatus.loading;
     const isLoadingNewPrivate = newPrivateFetchStatus === FetchStatus.loading;
     const isSubmitNewTitleDisable =
-        repositoryNameStatus.status === RepositoryNameStatus.notChecked ||
-        repositoryNameStatus.status === RepositoryNameStatus.busy;
+        mapNameStatus.status === MapNameStatus.notChecked || mapNameStatus.status === MapNameStatus.busy;
 
     const badges = useMemo(
         () =>
             [
                 {
-                    title: `by ${repository?.userId === userId ? 'you' : repository?.username}`,
+                    title: `by ${map?.userId === userId ? 'you' : map?.username}`,
                     color: BadgeColors.white,
                 },
                 {
-                    title: (repository?.access == RWA.none ? 'no access' : repository?.access) ?? '',
-                    color: RWAtobadgeColor(repository?.access ?? RWA.none),
+                    title: (map?.access == RWA.none ? 'no access' : map?.access) ?? '',
+                    color: RWAtobadgeColor(map?.access ?? RWA.none),
                 },
-                repository?.isPrivate
+                map?.isPrivate
                     ? {
                           title: 'приватный',
                           color: BadgeColors.red,
                       }
                     : undefined,
             ].filter(Boolean),
-        [repository?.userId, repository?.username, repository?.access, repository?.isPrivate, userId],
+        [map?.userId, map?.username, map?.access, map?.isPrivate, userId],
     );
 
     const noBusyNameValidator = useCallback(
         (value: string) => {
-            if (repositoryNameStatus.status === RepositoryNameStatus.busy && lastRepositoryName === value) {
+            if (mapNameStatus.status === MapNameStatus.busy && lastMapName === value) {
                 return 'репозиторий с таким названием уже существует';
             }
 
             return undefined;
         },
-        [lastRepositoryName, repositoryNameStatus],
+        [lastMapName, mapNameStatus],
     );
 
-    const handleRepositoryNameBlur = useCallback(
+    const handleMapNameBlur = useCallback(
         (isError: boolean, event: React.FocusEvent<HTMLInputElement, Element>) => {
-            if (!isError && event.target.value !== lastRepositoryName && event.target.value !== repository?.title) {
-                checkIsRepositoryNameFree({ title: event.target.value });
-                setLastRepositoryName(event.target.value);
+            if (!isError && event.target.value !== lastMapName && event.target.value !== map?.title) {
+                checkIsMapNameFree({ title: event.target.value });
+                setLastMapName(event.target.value);
             }
         },
-        [lastRepositoryName, repository?.title],
+        [lastMapName, map?.title],
     );
 
     const handleFormSubmit = useCallback(({ title }: { title: string }) => {
-        changeRepository({ newTitle: title });
+        changeGroup({ newTitle: title });
     }, []);
 
     const handlePrivateChange = useCallback((isPrivate: boolean) => {
-        changeRepository({ newPrivate: isPrivate });
+        changeGroup({ newPrivate: isPrivate });
     }, []);
 
     useEffect(() => {
-        if (repositoryNameStatus.status === RepositoryNameStatus.busy) {
+        if (mapNameStatus.status === MapNameStatus.busy) {
             setBuzyNameErrorTrue();
         } else {
             setBuzyNameErrorFalse();
         }
-    }, [repositoryNameStatus.status]);
+    }, [mapNameStatus.status]);
 
     return (
         <div className={styles.mainSettings}>
-            <div className={cn(styles.content, !isLoadingRepository && !isNoneRepository && styles.show)}>
-                {repository && (
+            <div className={cn(styles.content, !isLoadingMap && !isNoneMap && styles.show)}>
+                {map && (
                     <Form onSubmit={handleFormSubmit}>
                         {({ values, errors, handleSubmit }) => (
                             <div className={cn(styles.title, isLoadingNewTitle && styles.disable)}>
                                 <TextField
                                     name="title"
                                     type="text"
-                                    defaultValue={repository?.title}
+                                    defaultValue={map?.title}
                                     title={'Название репозитория'}
                                     validators={[requiredValidate, entityNameValidator, noBusyNameValidator]}
                                     isInstantlyValidate
-                                    onBlur={(e) => handleRepositoryNameBlur(!!errors?.title, e)}
+                                    onBlur={(e) => handleMapNameBlur(!!errors?.title, e)}
                                 />
                                 <div
                                     className={cn(
-                                        styles.repositoryNameSpinner,
-                                        repositoryNameStatus.fetchStatus === FetchStatus.loading && styles.loading,
+                                        styles.mapNameSpinner,
+                                        mapNameStatus.fetchStatus === FetchStatus.loading && styles.loading,
                                     )}
                                 >
                                     <SpinnerIcon />
@@ -117,7 +117,7 @@ export const MainSettings: FC = () => {
                                     <Button
                                         text="применить"
                                         isDisable={
-                                            repository.title === deleteExtraSpaces(values.title ?? '') ||
+                                            map.title === deleteExtraSpaces(values.title ?? '') ||
                                             errors?.title ||
                                             isLoadingNewTitle ||
                                             isSubmitNewTitleDisable
@@ -132,7 +132,7 @@ export const MainSettings: FC = () => {
                         )}
                     </Form>
                 )}
-                {repository && (
+                {map && (
                     <Form onSubmit={noop}>
                         {() => (
                             <>
@@ -140,7 +140,7 @@ export const MainSettings: FC = () => {
                                     <CheckboxField
                                         name="private"
                                         title="приватный"
-                                        defaultValue={repository.isPrivate}
+                                        defaultValue={map.isPrivate}
                                         isNoNeedErroText
                                     />
                                     <div className={cn(styles.spinner, isLoadingNewPrivate && styles.show)}>
@@ -150,7 +150,7 @@ export const MainSettings: FC = () => {
                                 <FormSpy
                                     subscription={{ values: true }}
                                     onChange={({ values }) => {
-                                        if (repository.isPrivate !== values.private) {
+                                        if (map.isPrivate !== values.private) {
                                             handlePrivateChange(values.private);
                                         }
                                     }}
@@ -163,7 +163,7 @@ export const MainSettings: FC = () => {
                 )}
                 <div className={styles.badges}>{badges.map((badge, i) => badge && <Badge {...badge} key={i} />)}</div>
             </div>
-            <div className={cn(styles.spinner, (isLoadingRepository || isNoneRepository) && styles.show)}>
+            <div className={cn(styles.spinner, (isLoadingMap || isNoneMap) && styles.show)}>
                 <SpinnerIcon />
             </div>
         </div>

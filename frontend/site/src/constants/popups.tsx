@@ -18,7 +18,7 @@ export const yesNoPopup = (context: MovablePopupManagerContext, title: string, t
             id,
             content: (
                 <div>
-                    {text}
+                    <div className={styles.searchPopupTitle}>{text}</div>
                     <div className={styles.buttons}>
                         <div className={styles.button}>
                             <Button
@@ -55,6 +55,7 @@ export const textInputPopup = (
     defaultValue: string,
     isRequired = true,
     validators?: Validator[],
+    isInstantlyValidate?: boolean,
 ) => {
     const id = String(++ids);
     const fieldName = 'field';
@@ -81,6 +82,7 @@ export const textInputPopup = (
                                         name={fieldName}
                                         defaultValue={defaultValue}
                                         theme="outlined"
+                                        isInstantlyValidate={isInstantlyValidate}
                                     />
                                     <div className={styles.buttons}>
                                         <div className={styles.button}>

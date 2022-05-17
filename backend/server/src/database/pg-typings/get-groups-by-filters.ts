@@ -9,6 +9,7 @@ export type GetGroupsByFiltersR = {
     rows_count: number;
     access: RWA;
     is_private: boolean;
+    username: string;
 };
 
 export type GetGroupsByFiltersQP = [number, number, string, GroupType, boolean, boolean, number, number, number[]];

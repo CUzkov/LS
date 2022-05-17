@@ -14,6 +14,7 @@ import {
     getLoginPage,
     getMapTemplate,
     getRepositorySettingsTemplate,
+    getMapSettingsTemplate,
 } from 'constants/routers';
 import { Logger } from 'components/logger';
 import { MovablePopupManager } from 'components/movable-popup-manager';
@@ -29,6 +30,7 @@ import {
     RepositoryPage,
     MapPage,
     RepositorySettingsPage,
+    MapSettingsPage,
 } from 'pages';
 
 import styles from './style.scss';
@@ -76,6 +78,7 @@ export const App: FC = () => {
                         path={getRepositorySettingsTemplate(userStore.username)}
                         element={<RepositorySettingsPage />}
                     />
+                    <Route path={getMapSettingsTemplate(userStore.username)} element={<MapSettingsPage />} />
                 </Routes>
                 <div className={styles.loggerWrapper}>
                     <Logger />

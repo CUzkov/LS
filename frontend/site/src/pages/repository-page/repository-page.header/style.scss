@@ -21,6 +21,11 @@
     &.editing {
         background-color: $default-hover-color;
     }
+
+    &.hide {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 .actionIcon {
