@@ -68,7 +68,7 @@ export const loginUser: ResponseCallback<LoginUserD, Empty> = async ({ response,
     const newTime = String(new Date().getTime() + UNIX_MOUNTH);
     const userId = user.id;
 
-    redis.set(String(userId), newTime);
+    await redis.set(String(userId), newTime);
     cookies?.set('user_id', String(userId));
     cookies?.set('expired', newTime);
 
