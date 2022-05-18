@@ -192,7 +192,7 @@ export const AccessSettings: FC = () => {
                     rwRwaUsers.users
                         .map((user) => user.id)
                         .concat(usersForAdd.map((user) => user.id))
-                        .concat([userId]),
+                        .concat([userId, map?.userId ?? -1]),
                 );
             } else {
                 clearSearchedUsers();
@@ -229,6 +229,40 @@ export const AccessSettings: FC = () => {
             <div className={cn(styles.content, !isLoadingUsers && !isNoneUsers && styles.show)}>
                 <div className={styles.title}>Пользователи с доступом к карте</div>
                 <div className={styles.userList}>
+                    {isShowAddUserForm ? (
+                        <div className={styles.addUser} onClick={toggleShowUserForm}>
+                            {'+ добавить пользователей'}
+                        </div>
+                    ) : (
+                        <div
+                            className={cn(
+                                styles.addUserForm,
+                                addAccessFetchStatus === FetchStatus.loading && styles.disable,
+                            )}
+                        >
+                            <Form onSubmit={noop}>
+                                {({ values }) => (
+                                    <AddUserFormContent
+                                        searchedUsername={searchedUsername}
+                                        usersForAdd={usersForAdd}
+                                        setSearchedUsername={setSearchedUsername}
+                                        setUsersForAdd={setUsersForAdd}
+                                        toggleShowUserForm={toggleShowUserForm}
+                                        handleAddedUserCrossClick={handleAddedUserCrossClick}
+                                        handleSubmit={() => handleAddUsersFormSubmit(values.access)}
+                                    />
+                                )}
+                            </Form>
+                            <div
+                                className={cn(
+                                    styles.spinner,
+                                    addAccessFetchStatus === FetchStatus.loading && styles.show,
+                                )}
+                            >
+                                <SpinnerIcon />
+                            </div>
+                        </div>
+                    )}
                     {!!rwRwaUsers.users.length &&
                         !isLoadingUsers &&
                         rwRwaUsers.users.map((user, i) => (
@@ -268,40 +302,6 @@ export const AccessSettings: FC = () => {
                                 </div>
                             </div>
                         ))}
-                    {isShowAddUserForm ? (
-                        <div className={styles.addUser} onClick={toggleShowUserForm}>
-                            {'+ добавить пользователя'}
-                        </div>
-                    ) : (
-                        <div
-                            className={cn(
-                                styles.addUserForm,
-                                addAccessFetchStatus === FetchStatus.loading && styles.disable,
-                            )}
-                        >
-                            <Form onSubmit={noop}>
-                                {({ values }) => (
-                                    <AddUserFormContent
-                                        searchedUsername={searchedUsername}
-                                        usersForAdd={usersForAdd}
-                                        setSearchedUsername={setSearchedUsername}
-                                        setUsersForAdd={setUsersForAdd}
-                                        toggleShowUserForm={toggleShowUserForm}
-                                        handleAddedUserCrossClick={handleAddedUserCrossClick}
-                                        handleSubmit={() => handleAddUsersFormSubmit(values.access)}
-                                    />
-                                )}
-                            </Form>
-                            <div
-                                className={cn(
-                                    styles.spinner,
-                                    addAccessFetchStatus === FetchStatus.loading && styles.show,
-                                )}
-                            >
-                                <SpinnerIcon />
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
             <div className={cn(styles.spinner, (isLoadingUsers || isNoneUsers) && styles.show)}>

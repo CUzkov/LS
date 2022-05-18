@@ -1,15 +1,15 @@
 import React, { FC, useCallback } from 'react';
 import { useQueryParams } from 'use-query-params';
-import { Form, FormSpy } from 'react-final-form';
+import { Form } from 'react-final-form';
 
-import { TextField, SelectField } from 'components/fields';
+import { TextField } from 'components/fields';
 import { Button } from 'components/button';
 import { getMapsByFilters } from 'actions/maps-list-page';
 import { noop } from 'utils/noop';
-import { getRwaFromFlags } from 'utils/rwa';
-import { RWA } from 'types';
+// import { getRwaFromFlags } from 'utils/rwa';
+// import { RWA } from 'types';
 
-import { queryParams, options } from '../maps-list-page.constants';
+import { queryParams } from '../maps-list-page.constants';
 
 import styles from './style.scss';
 
@@ -31,28 +31,28 @@ export const MapsPageFilters: FC = () => {
         [query],
     );
 
-    const handleRwaChange = useCallback(
-        (value: RWA) => {
-            const isRw = value === RWA.rw;
-            const isRwa = value === RWA.rwa;
+    // const handleRwaChange = useCallback(
+    //     (value: RWA) => {
+    //         const isRw = value === RWA.rw;
+    //         const isRwa = value === RWA.rwa;
 
-            getMapsByFilters({
-                by_user: -1,
-                is_rw: isRw,
-                is_rwa: isRwa,
-                title: query.title || '',
-                page: 1,
-            });
+    //         getMapsByFilters({
+    //             by_user: -1,
+    //             is_rw: isRw,
+    //             is_rwa: isRwa,
+    //             title: query.title || '',
+    //             page: 1,
+    //         });
 
-            setQuery({
-                ...{ is_rw: undefined, is_rwa: undefined },
-                ...(isRw ? { is_rw: isRw } : {}),
-                ...(isRwa ? { is_rwa: isRwa } : {}),
-                page: undefined,
-            });
-        },
-        [query],
-    );
+    //         setQuery({
+    //             ...{ is_rw: undefined, is_rwa: undefined },
+    //             ...(isRw ? { is_rw: isRw } : {}),
+    //             ...(isRwa ? { is_rwa: isRwa } : {}),
+    //             page: undefined,
+    //         });
+    //     },
+    //     [query],
+    // );
 
     return (
         <div className={styles.mapsPageFilters}>
@@ -61,13 +61,14 @@ export const MapsPageFilters: FC = () => {
                 render={() => (
                     <form className={styles.rwaForm}>
                         <div className={styles.rwaField}>
-                            <SelectField
+                            {/* FIXME баг на беке в get_groups_by_filter */}
+                            {/* <SelectField
                                 name="rwa"
                                 options={options}
                                 defaultValue={getRwaFromFlags(!!query.is_rw, !!query.is_rwa)}
-                            />
+                            /> */}
                         </div>
-                        <FormSpy
+                        {/* <FormSpy
                             render={() => <></>}
                             subscription={{ values: true }}
                             onChange={(form) => {
@@ -75,7 +76,7 @@ export const MapsPageFilters: FC = () => {
                                     handleRwaChange(form.values.rwa);
                                 }
                             }}
-                        />
+                        /> */}
                     </form>
                 )}
             />

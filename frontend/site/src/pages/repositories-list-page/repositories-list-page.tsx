@@ -41,14 +41,21 @@ export const RepositoriesListPage: FC = () => {
             <div className={styles.repositoriesListPage}>
                 <PageTitle title={'Репозитории'} rightChild={<RepositoriesPageFilters />} />
                 <div className={styles.repositories}>
-                    {fetchStatus === FetchStatus.successed &&
+                    {fetchStatus === FetchStatus.successed && repositories.length !== 0 ? (
                         repositories.map(({ repository }, index) => (
                             <ItemCard
                                 title={repository.title}
                                 key={index}
                                 link={getRepository(username, repository.id)}
+                                access={repository.access}
+                                byUsername={repository.username}
+                                isPrivate={repository.isPrivate}
+                                byUserId={repository.userId}
                             />
-                        ))}
+                        ))
+                    ) : (
+                        <div className={styles.nothingFind}>{'ничего не найдено'}</div>
+                    )}
                     {fetchStatus === FetchStatus.loading && (
                         <div className={styles.spinner}>
                             <SpinnerIcon />

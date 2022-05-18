@@ -74,6 +74,7 @@ export const TextField: FC<TextFieldProps> = ({
                             type={type === 'password' ? (isVisible ? '' : 'password') : ''}
                             onBlur={handleBlur(input.onBlur, meta)}
                             onFocus={onFocus}
+                            autoComplete="off"
                         />
                         {type === 'password' && (
                             <div className={styles.passwordIcon} onClick={toggleVisible}>

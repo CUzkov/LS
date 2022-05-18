@@ -12,9 +12,17 @@
 	.title {
 		cursor: pointer;
 		transition: .3s color;
+		white-space: pre;
+		width: min-content;
 
 		&:hover {
 			color: $default-text-hover-color;
 		}
+	}
+
+	.badges {
+		display: flex;
+		align-items: center;
+		margin-top: 15px;
 	}
 }

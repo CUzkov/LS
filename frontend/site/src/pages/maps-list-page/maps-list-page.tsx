@@ -16,7 +16,7 @@ import { TokensInput } from 'components/tokens-input';
 
 import { MapsPageFilters } from './maps-list-page.filters';
 import { getPaths, queryParams } from './maps-list-page.constants';
-import ToggleFiltersIcon from './maps-list-page.assets/toggle-filters.svg';
+// import ToggleFiltersIcon from './maps-list-page.assets/toggle-filters.svg';
 
 import styles from './styles.scss';
 
@@ -24,7 +24,7 @@ export const MapsListPage: FC = () => {
     const { username } = useSelector((root) => root.user);
     const { groups, groupsFetchStatus, groupsCount } = useSelector((root) => root.mapsListPage);
     const [query, setQuery] = useQueryParams(queryParams);
-    const [isShowExtendedFilter, , , toggleShowExtendedFilter] = useBooleanState(false);
+    const [isShowExtendedFilter] = useBooleanState(false);
 
     const handlePageChange = useCallback((value: number) => {
         setQuery({ page: value === 1 ? undefined : value });
@@ -48,17 +48,29 @@ export const MapsListPage: FC = () => {
                 rightChild={
                     <div className={styles.filters}>
                         {isShowExtendedFilter ? <TokensInput /> : <MapsPageFilters />}
-                        <div className={styles.toggleFiltersButton} onClick={toggleShowExtendedFilter}>
+                        {/* FIXME на беке не реализовано */}
+                        {/* <div className={styles.toggleFiltersButton} onClick={toggleShowExtendedFilter}>
                             <ToggleFiltersIcon />
-                        </div>
+                        </div> */}
                     </div>
                 }
             />
             <div className={styles.maps}>
-                {groupsFetchStatus === FetchStatus.successed &&
+                {groupsFetchStatus === FetchStatus.successed && groups.length !== 0 ? (
                     groups.map((map, index) => (
-                        <ItemCard title={map.title} key={index} link={getMap(username, map.id)} />
-                    ))}
+                        <ItemCard
+                            title={map.title}
+                            key={index}
+                            link={getMap(username, map.id)}
+                            access={map.access}
+                            byUserId={map.userId}
+                            byUsername={map.username}
+                            isPrivate={map.isPrivate}
+                        />
+                    ))
+                ) : (
+                    <div className={styles.nothingFind}>{'ничего не найдено'}</div>
+                )}
                 {groupsFetchStatus === FetchStatus.loading && (
                     <div className={styles.spinner}>
                         <SpinnerIcon />

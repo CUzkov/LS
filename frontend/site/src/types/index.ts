@@ -79,7 +79,7 @@ export type Group = {
 
 export type FullGroup = {
     childrenGroups: Group[];
-    childrenRepositories: { title: string; id: number; access: RWA }[];
+    childrenRepositories: Repository[];
 } & Group;
 
 export type User = {

@@ -21,7 +21,7 @@ export const Graph: FC<GraphProps> = ({ map }) => {
     const graphWrapperRef = useRef<HTMLDivElement>(null);
     const nodeTypes = useMemo(() => ({ customNode: NodeComponent }), []);
     const { tree } = useSelector((root) => root.mapPage);
-    const { username } = useSelector((root) => root.user);
+    const { username, userId } = useSelector((root) => root.user);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => applyNodeChanges(changes, tree.nodes), [tree.nodes]);
     const onEdgesChange = useCallback((changes: EdgeChange[]) => applyEdgeChanges(changes, tree.edges), [tree.edges]);
@@ -45,7 +45,15 @@ export const Graph: FC<GraphProps> = ({ map }) => {
             liknTo: '',
             badges: [
                 { title: 'карта знаний', color: BadgeColors.white },
-                { title: map.access === RWA.none ? 'no access' : map.access, color: RWAtobadgeColor(map.access) },
+                {
+                    title: (map.access == RWA.none ? 'no access' : map.access) ?? '',
+                    color: RWAtobadgeColor(map.access ?? RWA.none),
+                },
+                {
+                    title: `by ${map.userId === userId ? 'you' : map.username}`,
+                    color: BadgeColors.white,
+                },
+                ...(map.isPrivate ? [{ title: 'приватная', color: BadgeColors.red }] : []),
             ],
         };
 
@@ -76,7 +84,15 @@ export const Graph: FC<GraphProps> = ({ map }) => {
                 liknTo: getMap(username, map.id),
                 badges: [
                     { title: 'карта знаний', color: BadgeColors.white },
-                    { title: map.access === RWA.none ? 'no access' : map.access, color: RWAtobadgeColor(map.access) },
+                    {
+                        title: (map.access == RWA.none ? 'no access' : map.access) ?? '',
+                        color: RWAtobadgeColor(map.access ?? RWA.none),
+                    },
+                    {
+                        title: `by ${map.userId === userId ? 'you' : map.username}`,
+                        color: BadgeColors.white,
+                    },
+                    ...(map.isPrivate ? [{ title: 'приватная', color: BadgeColors.red }] : []),
                 ],
             };
 
@@ -109,9 +125,14 @@ export const Graph: FC<GraphProps> = ({ map }) => {
                 badges: [
                     { title: 'репозиторий', color: BadgeColors.white },
                     {
-                        title: repository.access === RWA.none ? 'no access' : repository.access,
-                        color: RWAtobadgeColor(repository.access),
+                        title: (repository.access == RWA.none ? 'no access' : repository.access) ?? '',
+                        color: RWAtobadgeColor(repository.access ?? RWA.none),
                     },
+                    {
+                        title: `by ${repository.userId === userId ? 'you' : repository.username}`,
+                        color: BadgeColors.white,
+                    },
+                    ...(repository.isPrivate ? [{ title: 'приватный', color: BadgeColors.red }] : []),
                 ],
             };
 

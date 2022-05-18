@@ -391,7 +391,7 @@ export const GroupFns = {
         userIdsToChange: number[],
         access: RWA,
     ): Promise<void> => {
-        const group = await GroupFns.getFullGroupById(groupId, userId);
+        const group = await GroupFns.getFullGroupById(userId, groupId);
 
         if (group.access !== RWA.rwa) {
             throw new ServerError({ name: errorNames.mapNotFoundOrPermissionDenied, code: Code.badRequest });

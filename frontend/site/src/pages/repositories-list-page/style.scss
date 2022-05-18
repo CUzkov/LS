@@ -22,4 +22,14 @@
     .paginator {
         margin-top: 30px;
     }
+
+    .nothingFind {
+        width: 100%;
+        background-color: $cards-color;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid $default-border-color;
+        padding: 10px;
+        box-sizing: border-box;
+    }
 }

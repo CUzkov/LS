@@ -1,15 +1,15 @@
 import React, { FC, useCallback } from 'react';
 import { useQueryParams } from 'use-query-params';
-import { Form, FormSpy } from 'react-final-form';
+import { Form } from 'react-final-form';
 
-import { TextField, SelectField } from 'components/fields';
+import { TextField } from 'components/fields';
 import { Button } from 'components/button';
 import { getPageRepositoriesByFilters } from 'actions/repositories-list-page';
 import { noop } from 'utils/noop';
-import { RWA } from 'types';
-import { getRwaFromFlags } from 'utils/rwa';
+// import { RWA } from 'types';
+// import { getRwaFromFlags } from 'utils/rwa';
 
-import { filtersOptions, queryParams } from '../repositories-list-page.constants';
+import { queryParams } from '../repositories-list-page.constants';
 
 import styles from './style.scss';
 
@@ -31,28 +31,28 @@ export const RepositoriesPageFilters: FC = () => {
         [query],
     );
 
-    const handleRwaChange = useCallback(
-        (value: RWA) => {
-            const isRw = value === RWA.rw;
-            const isRwa = value === RWA.rwa;
+    // const handleRwaChange = useCallback(
+    //     (value: RWA) => {
+    //         const isRw = value === RWA.rw;
+    //         const isRwa = value === RWA.rwa;
 
-            getPageRepositoriesByFilters({
-                by_user: -1,
-                is_rw: isRw,
-                is_rwa: isRwa,
-                title: query.title || '',
-                page: 1,
-            });
+    //         getPageRepositoriesByFilters({
+    //             by_user: -1,
+    //             is_rw: isRw,
+    //             is_rwa: isRwa,
+    //             title: query.title || '',
+    //             page: 1,
+    //         });
 
-            setQuery({
-                ...{ is_rw: undefined, is_rwa: undefined },
-                ...(isRw ? { is_rw: isRw } : {}),
-                ...(isRwa ? { is_rwa: isRwa } : {}),
-                page: undefined,
-            });
-        },
-        [query],
-    );
+    //         setQuery({
+    //             ...{ is_rw: undefined, is_rwa: undefined },
+    //             ...(isRw ? { is_rw: isRw } : {}),
+    //             ...(isRwa ? { is_rwa: isRwa } : {}),
+    //             page: undefined,
+    //         });
+    //     },
+    //     [query],
+    // );
 
     return (
         <div className={styles.repositoriesPageFilters}>
@@ -61,13 +61,14 @@ export const RepositoriesPageFilters: FC = () => {
                 render={() => (
                     <form className={styles.rwaForm}>
                         <div className={styles.rwaField}>
-                            <SelectField
+                            {/* FIXME баг на беке в get_groups_by_filter */}
+                            {/* <SelectField
                                 name="rwa"
                                 options={filtersOptions}
                                 defaultValue={getRwaFromFlags(!!query.is_rw, !!query.is_rwa)}
-                            />
+                            /> */}
                         </div>
-                        <FormSpy
+                        {/* <FormSpy
                             render={() => <></>}
                             subscription={{ values: true }}
                             onChange={(form) => {
@@ -75,7 +76,7 @@ export const RepositoriesPageFilters: FC = () => {
                                     handleRwaChange(form.values.rwa);
                                 }
                             }}
-                        />
+                        /> */}
                     </form>
                 )}
             />
